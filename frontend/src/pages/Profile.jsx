@@ -1,12 +1,11 @@
+// src/pages/Profile.jsx
 import { useState } from 'react'
 import { useAuthContext } from '../hooks/Authentication hooks/useAuthContext'
-import { useTheme } from '../context/ThemeContext'
 import Button from '../components/Button'
 import Input from '../components/Input'
 
 const Profile = () => {
   const { user } = useAuthContext()
-  const { darkMode } = useTheme()
   const [activeTab, setActiveTab] = useState('profile')
   const [showDeleteAccount, setShowDeleteAccount] = useState(false)
 
@@ -45,7 +44,7 @@ const Profile = () => {
   const titleStyle = {
     fontSize: '2.5rem',
     fontWeight: '700',
-    color: darkMode ? '#f8fafc' : '#1e293b',
+    color: '#1e293b',
     marginBottom: '0.5rem',
     display: 'flex',
     alignItems: 'center',
@@ -53,19 +52,19 @@ const Profile = () => {
   }
   const subtitleStyle = {
     fontSize: '1.125rem',
-    color: darkMode ? '#94a3b8' : '#64748b'
+    color: '#64748b'
   }
   const tabsStyle = {
     display: 'flex',
     gap: '0.5rem',
     marginBottom: '2rem',
-    borderBottom: `1px solid ${darkMode ? '#374151' : '#e2e8f0'}`,
+    borderBottom: '1px solid #e2e8f0',
     overflowX: 'auto'
   }
   const tabStyle = (isActive) => ({
     padding: '1rem 1.5rem',
-    backgroundColor: isActive ? (darkMode ? '#374151' : '#f8fafc') : 'transparent',
-    color: isActive ? (darkMode ? '#f8fafc' : '#1e293b') : (darkMode ? '#9ca3af' : '#6b7280'),
+    backgroundColor: isActive ? '#f8fafc' : 'transparent',
+    color: isActive ? '#1e293b' : '#6b7280',
     border: 'none',
     borderRadius: '0.5rem 0.5rem 0 0',
     cursor: 'pointer',
@@ -73,14 +72,14 @@ const Profile = () => {
     fontSize: '0.875rem',
     transition: 'all 0.2s ease',
     whiteSpace: 'nowrap',
-    borderBottom: isActive ? `2px solid #3b82f6` : 'none'
+    borderBottom: isActive ? '2px solid #3b82f6' : 'none'
   })
   const contentStyle = {
-    backgroundColor: darkMode ? '#1e293b' : '#ffffff',
+    backgroundColor: '#ffffff',
     borderRadius: '1rem',
     padding: '2rem',
-    border: darkMode ? '1px solid #374151' : '1px solid #e2e8f0',
-    boxShadow: darkMode ? '0 4px 6px rgba(0,0,0,0.3)' : '0 4px 6px rgba(0,0,0,0.07)'
+    border: '1px solid #e2e8f0',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.07)'
   }
 
   const tabs = [
@@ -128,7 +127,7 @@ const Profile = () => {
               <h3 style={{
                 fontSize: '1.5rem',
                 fontWeight: '600',
-                color: darkMode ? '#f8fafc' : '#1e293b'
+                color: '#1e293b'
               }}>
                 Personal Information
               </h3>
@@ -175,7 +174,7 @@ const Profile = () => {
             <h3 style={{
               fontSize: '1.5rem',
               fontWeight: '600',
-              color: darkMode ? '#f8fafc' : '#1e293b',
+              color: '#1e293b',
               marginBottom: '2rem'
             }}>
               Income & Expenditures
@@ -218,7 +217,7 @@ const Profile = () => {
             <h3 style={{
               fontSize: '1.5rem',
               fontWeight: '600',
-              color: darkMode ? '#f8fafc' : '#1e293b',
+              color: '#1e293b',
               marginBottom: '2rem'
             }}>
               Security Settings
@@ -274,7 +273,7 @@ const Profile = () => {
             <h3 style={{
               fontSize: '1.5rem',
               fontWeight: '600',
-              color: darkMode ? '#f8fafc' : '#1e293b',
+              color: '#1e293b',
               marginBottom: '2rem'
             }}>
               Notification Settings
@@ -299,7 +298,7 @@ const Profile = () => {
                     onChange={(e) => setNotifications(prev => ({ ...prev, [key]: e.target.checked }))}
                     style={{ cursor: 'pointer' }}
                   />
-                  <span style={{ color: darkMode ? '#f8fafc' : '#1e293b' }}>{label}</span>
+                  <span style={{ color: '#1e293b' }}>{label}</span>
                 </label>
               ))}
             </div>
@@ -312,7 +311,7 @@ const Profile = () => {
             <h3 style={{
               fontSize: '1.5rem',
               fontWeight: '600',
-              color: darkMode ? '#f8fafc' : '#1e293b',
+              color: '#1e293b',
               marginBottom: '1rem'
             }}>
               Account Settings
@@ -321,15 +320,15 @@ const Profile = () => {
             {/* Account Overview */}
             <div style={{
               padding: '1.5rem',
-              backgroundColor: darkMode ? '#374151' : '#f8fafc',
+              backgroundColor: '#f8fafc',
               borderRadius: '0.75rem',
               marginBottom: '2rem',
-              border: darkMode ? '1px solid #4b5563' : '1px solid #e2e8f0'
+              border: '1px solid #e2e8f0'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
                 <div style={{
                   width: '60px', height: '60px',
-                  backgroundColor: darkMode ? '#4b5563' : '#e2e8f0',
+                  backgroundColor: '#e2e8f0',
                   borderRadius: '50%',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '1.5rem'
@@ -337,10 +336,10 @@ const Profile = () => {
                   👤
                 </div>
                 <div>
-                  <h4 style={{ fontSize: '1.25rem', fontWeight: '600', color: darkMode ? '#f8fafc' : '#1e293b', marginBottom: '0.25rem' }}>
-                    {user?.name || 'User Name'}
+                  <h4 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b', marginBottom: '0.25rem' }}>
+                    {user?.name || `${formData.firstName} ${formData.lastName}`.trim() || 'User Name'}
                   </h4>
-                  <p style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '0.875rem' }}>
+                  <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
                     {user?.email || 'user@example.com'}
                   </p>
                 </div>

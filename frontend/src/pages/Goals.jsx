@@ -1,6 +1,6 @@
+// src/pages/Goals.jsx
 import { useState } from 'react'
 import { useGoalsContext } from '../hooks/Data Management Hooks/useGoalsContext'
-import { useTheme } from '../context/ThemeContext'
 import Button from '../components/Button'
 import GoalsList from '../components/Goals Components/GoalsList'
 import GoalForm from '../components/Goals Components/GoalForm'
@@ -8,7 +8,6 @@ import ChatbotModal from '../components/chatbot/ChatbotModal'
 
 const Goals = () => {
   const { goals } = useGoalsContext()
-  const { darkMode } = useTheme()
   const [showAddGoal, setShowAddGoal] = useState(false)
   const [showChatbot, setShowChatbot] = useState(false)
   const [selectedGoal, setSelectedGoal] = useState(null)
@@ -84,7 +83,7 @@ const Goals = () => {
   const titleStyle = {
     fontSize: '2.5rem',
     fontWeight: '700',
-    color: darkMode ? '#f8fafc' : '#1e293b',
+    color: '#1e293b',
     marginBottom: '0.5rem',
     display: 'flex',
     alignItems: 'center',
@@ -93,7 +92,7 @@ const Goals = () => {
 
   const subtitleStyle = {
     fontSize: '1.125rem',
-    color: darkMode ? '#94a3b8' : '#64748b',
+    color: '#64748b',
     marginBottom: '1rem'
   }
 
@@ -104,11 +103,11 @@ const Goals = () => {
   }
 
   const mainContentStyle = {
-    backgroundColor: darkMode ? '#1e293b' : '#ffffff',
+    backgroundColor: '#ffffff',
     borderRadius: '1rem',
     padding: '1.5rem',
-    border: darkMode ? '1px solid #374151' : '1px solid #e2e8f0',
-    boxShadow: darkMode ? '0 4px 6px rgba(0,0,0,0.3)' : '0 4px 6px rgba(0,0,0,0.07)'
+    border: '1px solid #e2e8f0',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.07)'
   }
 
   return (
@@ -156,7 +155,7 @@ const Goals = () => {
           <h2 style={{
             fontSize: '1.5rem',
             fontWeight: '600',
-            color: darkMode ? '#f8fafc' : '#1e293b'
+            color: '#1e293b'
           }}>
             Your Goals
           </h2>

@@ -1,42 +1,69 @@
+// Updated GoalForm component for spending reduction goals
 import { useState } from 'react'
 import { useTheme } from '../../context/ThemeContext'
-import { useGoalsContext } from '../../hooks/Data Management Hooks/useGoalsContext'
+import { authService } from '../../services/authService'
 import Button from '../Button'
 import Input from '../Input'
 
-const GoalForm = ({ onClose, goal = null }) => {
+const GoalForm = ({ onClose, goal }) => {
   const { darkMode } = useTheme()
-  const { dispatch } = useGoalsContext()
-  const isEditing = !!goal
-
   const [formData, setFormData] = useState({
     title: goal?.title || '',
-    description: goal?.description || '',
-    targetAmount: goal?.targetAmount || '',
-    currentAmount: goal?.currentAmount || 0,
-    deadline: goal?.deadline ? new Date(goal.deadline).toISOString().split('T')[0] : '',
-    category: goal?.category || 'savings',
-    priority: goal?.priority || 'medium'
+    amount: goal?.targetAmount || '',
+    targetDate: goal?.deadline ? goal.deadline.toISOString().split('T')[0] : ''
   })
-
-  const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
 
-  const categories = [
-    { value: 'savings', label: '💰 Emergency Fund', emoji: '💰' },
-    { value: 'travel', label: '✈️ Travel & Vacation', emoji: '✈️' },
-    { value: 'house', label: '🏠 Home & Property', emoji: '🏠' },
-    { value: 'car', label: '🚗 Vehicle', emoji: '🚗' },
-    { value: 'education', label: '🎓 Education', emoji: '🎓' },
-    { value: 'investment', label: '📈 Investment', emoji: '📈' },
-    { value: 'other', label: '🎯 Other', emoji: '🎯' }
-  ]
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    
+    if (!formData.title || !formData.amount || !formData.targetDate) {
+      setError('Please fill in all required fields')
+      return
+    }
 
-  const priorities = [
-    { value: 'low', label: 'Low Priority', color: '#10b981' },
-    { value: 'medium', label: 'Medium Priority', color: '#f59e0b' },
-    { value: 'high', label: 'High Priority', color: '#ef4444' }
-  ]
+    if (parseFloat(formData.amount) <= 0) {
+      setError('Amount must be greater than 0')
+      return
+    }
+
+    // Check if date is at least 3 months away
+    const selectedDate = new Date(formData.targetDate)
+    const threeMonthsFromNow = new Date()
+    threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3)
+    
+    if (selectedDate <= threeMonthsFromNow) {
+      setError('Target date must be at least 3 months from today for a realistic spending reduction goal')
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      // Create the goal object
+      const goalData = {
+        title: formData.title,
+        saved: parseFloat(formData.amount),
+        endDate: formData.targetDate,
+      }
+
+      const result = await authService.createGoal(goalData)
+      console.log('Goal created:', result)
+      
+      // Store goal data in localStorage if needed
+      const existingGoals = JSON.parse(localStorage.getItem('userGoals') || '[]')
+      const updatedGoals = [...existingGoals, result]
+      localStorage.setItem('userGoals', JSON.stringify(updatedGoals))
+      
+      onClose()
+    } catch (err) {
+      setError(err.message || 'Failed to create goal')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   const modalStyle = {
     position: 'fixed',
@@ -44,7 +71,7 @@ const GoalForm = ({ onClose, goal = null }) => {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -56,45 +83,17 @@ const GoalForm = ({ onClose, goal = null }) => {
     backgroundColor: darkMode ? '#1e293b' : '#ffffff',
     borderRadius: '1rem',
     padding: '2rem',
+    maxWidth: '500px',
     width: '100%',
-    maxWidth: '600px',
-    maxHeight: '90vh',
-    overflowY: 'auto',
     border: darkMode ? '1px solid #374151' : '1px solid #e2e8f0',
-    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)'
   }
 
   const titleStyle = {
     fontSize: '1.5rem',
-    fontWeight: '700',
+    fontWeight: '600',
     color: darkMode ? '#f8fafc' : '#1e293b',
-    marginBottom: '0.5rem',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem'
-  }
-
-  const subtitleStyle = {
-    fontSize: '0.875rem',
-    color: darkMode ? '#9ca3af' : '#6b7280',
-    marginBottom: '2rem'
-  }
-
-  const formRowStyle = {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '1rem',
-    marginBottom: '1rem'
-  }
-
-  const selectStyle = {
-    width: '100%',
-    padding: '0.75rem',
-    border: `1px solid ${darkMode ? '#374151' : '#e2e8f0'}`,
-    borderRadius: '0.5rem',
-    backgroundColor: darkMode ? '#374151' : '#ffffff',
-    color: darkMode ? '#f8fafc' : '#1e293b',
-    fontSize: '1rem'
+    marginBottom: '1.5rem'
   }
 
   const labelStyle = {
@@ -105,270 +104,155 @@ const GoalForm = ({ onClose, goal = null }) => {
     fontSize: '0.875rem'
   }
 
-  const priorityButtonStyle = (priority, isSelected) => ({
-    flex: 1,
+  const dateInputStyle = {
+    width: '100%',
     padding: '0.75rem',
-    border: `2px solid ${isSelected ? priorities.find(p => p.value === priority)?.color : (darkMode ? '#374151' : '#e2e8f0')}`,
+    border: `1px solid ${darkMode ? '#374151' : '#e2e8f0'}`,
     borderRadius: '0.5rem',
-    backgroundColor: isSelected ? (priorities.find(p => p.value === priority)?.color + '20') : 'transparent',
-    color: isSelected ? priorities.find(p => p.value === priority)?.color : (darkMode ? '#f8fafc' : '#1e293b'),
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
+    backgroundColor: darkMode ? '#374151' : '#ffffff',
+    color: darkMode ? '#f8fafc' : '#1e293b',
+    fontSize: '1rem'
+  }
+
+  const errorStyle = {
+    backgroundColor: '#fef2f2',
+    color: '#dc2626',
+    padding: '0.75rem',
+    borderRadius: '0.5rem',
+    border: '1px solid #fecaca',
     fontSize: '0.875rem',
-    fontWeight: '500'
-  })
-
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: null }))
-    }
+    marginBottom: '1rem'
   }
 
-  const validateForm = () => {
-    const newErrors = {}
-
-    if (!formData.title.trim()) {
-      newErrors.title = 'Goal title is required'
-    }
-
-    if (!formData.targetAmount || formData.targetAmount <= 0) {
-      newErrors.targetAmount = 'Target amount must be greater than 0'
-    }
-
-    if (!formData.deadline) {
-      newErrors.deadline = 'Deadline is required'
-    } else {
-      const deadlineDate = new Date(formData.deadline)
-      const today = new Date()
-      if (deadlineDate <= today) {
-        newErrors.deadline = 'Deadline must be in the future'
-      }
-    }
-
-    if (formData.currentAmount < 0) {
-      newErrors.currentAmount = 'Current amount cannot be negative'
-    }
-
-    if (formData.currentAmount > formData.targetAmount) {
-      newErrors.currentAmount = 'Current amount cannot exceed target amount'
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+  const descriptionStyle = {
+    fontSize: '0.875rem',
+    color: darkMode ? '#9ca3af' : '#6b7280',
+    marginBottom: '1.5rem',
+    padding: '1rem',
+    backgroundColor: darkMode ? '#374151' : '#f8fafc',
+    borderRadius: '0.5rem',
+    border: darkMode ? '1px solid #4b5563' : '1px solid #e2e8f0'
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-    if (!validateForm()) {
-      return
-    }
-
-    setIsSubmitting(true)
-
-    try {
-      const goalData = {
-        ...formData,
-        targetAmount: parseFloat(formData.targetAmount),
-        currentAmount: parseFloat(formData.currentAmount || 0),
-        deadline: new Date(formData.deadline),
-        id: isEditing ? goal.id : Date.now(),
-        createdAt: isEditing ? goal.createdAt : new Date()
-      }
-
-      if (isEditing) {
-        dispatch({ type: 'UPDATE_GOAL', payload: { ...goalData, _id: goal.id } })
-      } else {
-        dispatch({ type: 'CREATE_GOAL', payload: goalData })
-      }
-
-      onClose()
-    } catch (error) {
-      console.error('Error saving goal:', error)
-    } finally {
-      setIsSubmitting(false)
-    }
+  const getMinDate = () => {
+    const threeMonthsFromNow = new Date()
+    threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3)
+    return threeMonthsFromNow.toISOString().split('T')[0]
   }
-
-  const progress = formData.targetAmount > 0 ? (formData.currentAmount / formData.targetAmount) * 100 : 0
 
   return (
     <div style={modalStyle} onClick={onClose}>
       <div style={formContainerStyle} onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div>
-          <h2 style={titleStyle}>
-            🎯 {isEditing ? 'Edit Goal' : 'Create New Goal'}
-          </h2>
-          <p style={subtitleStyle}>
-            {isEditing ? 'Update your financial goal' : 'Set a new financial target to work towards'}
-          </p>
+        <h3 style={titleStyle}>
+          Create Spending Reduction Goal
+        </h3>
+
+        <div style={descriptionStyle}>
+          💡 Set a goal to reduce your spending and build better financial habits. 
+          Choose a realistic timeframe of at least 3 months to see meaningful results.
         </div>
+        
+        {error && (
+          <div style={errorStyle}>
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
-          {/* Goal Title */}
-          <div style={{ marginBottom: '1rem' }}>
+          <div style={{ marginBottom: '1.5rem' }}>
             <Input
               label="Goal Title"
-              placeholder="e.g., Emergency Fund, Dream Vacation"
+              placeholder="e.g., Reduce Dining Out Expenses"
               value={formData.title}
-              onChange={(e) => handleInputChange('title', e.target.value)}
-              error={errors.title}
+              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
               required
             />
           </div>
 
-          {/* Description */}
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={labelStyle}>Description</label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder="Describe your goal and why it's important to you..."
-              style={{
-                ...selectStyle,
-                minHeight: '80px',
-                resize: 'vertical',
-                fontFamily: 'inherit'
-              }}
-            />
-          </div>
-
-          {/* Amount Fields */}
-          <div style={formRowStyle}>
-            <Input
-              label="Target Amount"
-              type="number"
-              placeholder="0.00"
-              value={formData.targetAmount}
-              onChange={(e) => handleInputChange('targetAmount', e.target.value)}
-              error={errors.targetAmount}
-              icon="💰"
-              required
-            />
-            
-            <Input
-              label="Current Amount"
-              type="number"
-              placeholder="0.00"
-              value={formData.currentAmount}
-              onChange={(e) => handleInputChange('currentAmount', e.target.value)}
-              error={errors.currentAmount}
-              icon="💵"
-            />
-          </div>
-
-          {/* Progress Preview */}
-          {formData.targetAmount > 0 && (
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={labelStyle}>I want to reduce my total spending by</label>
             <div style={{
-              marginBottom: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              flexWrap: 'wrap'
+            }}>
+              <span style={{ color: darkMode ? '#f8fafc' : '#1e293b' }}>$</span>
+              <input
+                type="number"
+                step="0.01"
+                min="1"
+                placeholder="500"
+                value={formData.amount}
+                onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
+                style={{
+                  ...dateInputStyle,
+                  width: '120px',
+                  display: 'inline-block'
+                }}
+                required
+              />
+              <span style={{ color: darkMode ? '#f8fafc' : '#1e293b' }}>by</span>
+              <input
+                type="date"
+                value={formData.targetDate}
+                onChange={(e) => setFormData(prev => ({ ...prev, targetDate: e.target.value }))}
+                style={{
+                  ...dateInputStyle,
+                  width: '150px',
+                  display: 'inline-block'
+                }}
+                min={getMinDate()}
+                required
+              />
+            </div>
+            <div style={{
+              fontSize: '0.75rem',
+              color: darkMode ? '#9ca3af' : '#6b7280',
+              marginTop: '0.5rem'
+            }}>
+              Target date must be at least 3 months from today
+            </div>
+          </div>
+
+          {formData.amount && formData.targetDate && (
+            <div style={{
               padding: '1rem',
-              backgroundColor: darkMode ? '#374151' : '#f8fafc',
+              backgroundColor: darkMode ? '#065f46' : '#f0fdf4',
               borderRadius: '0.5rem',
-              border: darkMode ? '1px solid #4b5563' : '1px solid #e2e8f0'
+              border: darkMode ? '1px solid #047857' : '1px solid #bbf7d0',
+              marginBottom: '1.5rem'
             }}>
               <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginBottom: '0.5rem',
                 fontSize: '0.875rem',
-                color: darkMode ? '#f8fafc' : '#1e293b'
+                color: darkMode ? '#34d399' : '#166534',
+                fontWeight: '500'
               }}>
-                <span>Progress Preview</span>
-                <span>{progress.toFixed(1)}%</span>
-              </div>
-              <div style={{
-                width: '100%',
-                height: '8px',
-                backgroundColor: darkMode ? '#1e293b' : '#e2e8f0',
-                borderRadius: '4px',
-                overflow: 'hidden'
-              }}>
-                <div style={{
-                  height: '100%',
-                  backgroundColor: '#10b981',
-                  borderRadius: '4px',
-                  width: `${Math.min(progress, 100)}%`,
-                  transition: 'width 0.3s ease'
-                }}></div>
+                Goal Preview: Reduce spending by ${parseFloat(formData.amount || 0).toFixed(2)} 
+                by {formData.targetDate ? new Date(formData.targetDate).toLocaleDateString() : 'selected date'}
               </div>
             </div>
           )}
-
-          {/* Deadline and Category */}
-          <div style={formRowStyle}>
-            <div>
-              <label style={labelStyle}>Deadline</label>
-              <input
-                type="date"
-                value={formData.deadline}
-                onChange={(e) => handleInputChange('deadline', e.target.value)}
-                style={selectStyle}
-                min={new Date().toISOString().split('T')[0]}
-              />
-              {errors.deadline && (
-                <div style={{ color: '#ef4444', fontSize: '0.875rem', marginTop: '0.25rem' }}>
-                  {errors.deadline}
-                </div>
-              )}
-            </div>
-
-            <div>
-              <label style={labelStyle}>Category</label>
-              <select
-                value={formData.category}
-                onChange={(e) => handleInputChange('category', e.target.value)}
-                style={selectStyle}
-              >
-                {categories.map(cat => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Priority */}
-          <div style={{ marginBottom: '2rem' }}>
-            <label style={labelStyle}>Priority Level</label>
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              {priorities.map(priority => (
-                <button
-                  key={priority.value}
-                  type="button"
-                  onClick={() => handleInputChange('priority', priority.value)}
-                  style={priorityButtonStyle(priority.value, formData.priority === priority.value)}
-                >
-                  {priority.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Action Buttons */}
+          
           <div style={{
             display: 'flex',
             gap: '1rem',
             justifyContent: 'flex-end'
           }}>
-            <Button
-              variant="secondary"
+            <Button 
+              type="button"
+              variant="secondary" 
               onClick={onClose}
               disabled={isSubmitting}
             >
               Cancel
             </Button>
-            <Button
+            <Button 
               type="submit"
               variant="primary"
               disabled={isSubmitting}
             >
-              {isSubmitting 
-                ? (isEditing ? '⏳ Updating...' : '⏳ Creating...') 
-                : (isEditing ? '✅ Update Goal' : '🚀 Create Goal')
-              }
+              {isSubmitting ? 'Creating Goal...' : 'Create Goal'}
             </Button>
           </div>
         </form>

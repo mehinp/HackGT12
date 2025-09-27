@@ -1,12 +1,10 @@
-// hooks/useSignup.js
+// src/hooks/Authentication hooks/useSignup.js
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuthContext } from './useAuthContext'
 
 export const useSignup = () => {
   const [error, setError] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
-  const { dispatch } = useAuthContext()
   const navigate = useNavigate()
 
   const signup = async (firstName, lastName, email, password, confirmPassword, income, expenditures) => {
@@ -39,7 +37,6 @@ export const useSignup = () => {
       return false
     }
 
-    // Validate income and expenditures
     const incomeNum = parseFloat(income)
     const expendituresNum = parseFloat(expenditures)
 
@@ -55,25 +52,17 @@ export const useSignup = () => {
       return false
     }
 
-    // Optional: Check if expenditures exceed income (warning, not error)
-    if (expendituresNum > incomeNum) {
-      setError('Warning: Your expenditures exceed your income. Please verify these amounts.')
-      setIsLoading(false)
-      return false
-    }
-
     try {
-      // Prepare the request body to match your backend User model
       const requestBody = {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         email: email.trim().toLowerCase(),
         password: password,
+        confirmPassword: confirmPassword,
         income: incomeNum,
         expenditures: expendituresNum
       }
 
-      // Make API call to your backend
       const response = await fetch('http://143.215.104.239:8080/user/register', {
         method: 'POST',
         headers: {
@@ -82,11 +71,9 @@ export const useSignup = () => {
         body: JSON.stringify(requestBody)
       })
 
-      // Parse the response
       const data = await response.json()
 
       if (!response.ok) {
-        // Handle different error scenarios
         if (response.status === 400) {
           setError(data.message || 'Invalid input data. Please check your information.')
         } else if (response.status === 409) {
@@ -100,14 +87,12 @@ export const useSignup = () => {
         return false
       }
 
-      // Registration successful
       setIsLoading(false)
       
-      // Navigate to login page with success message
       navigate('/login', { 
         state: { 
           message: 'Account created successfully! Please log in with your credentials.',
-          email: requestBody.email // Pre-fill email on login page
+          email: requestBody.email
         } 
       })
       
@@ -116,11 +101,8 @@ export const useSignup = () => {
     } catch (err) {
       setIsLoading(false)
       
-      // Handle network errors or other exceptions
       if (err.name === 'TypeError' && err.message.includes('fetch')) {
         setError('Unable to connect to server. Please check your internet connection.')
-      } else if (err.name === 'SyntaxError') {
-        setError('Server response error. Please try again.')
       } else {
         setError('An unexpected error occurred. Please try again.')
       }

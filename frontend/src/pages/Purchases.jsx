@@ -1,104 +1,84 @@
-import { useState } from 'react'
-import { usePurchasesContext } from '../hooks/Data Management Hooks/usePurchasesContext'
+// src/pages/Purchases.jsx
+import { useState, useEffect } from 'react'
 import { useTheme } from '../context/ThemeContext'
 import Button from '../components/Button'
 import Input from '../components/Input'
-import PurchasesList from '../components/Purchases Components/PurchasesList'
-import PurchaseFilter from '../components/Purchases Components/PurchaseFilter'
-import PurchaseStats from '../components/Purchases Components/PurchaseStats'
+import PurchaseForm from '../components/Purchases Components/PurchaseForm'
 
 const Purchases = () => {
-  const { purchases } = usePurchasesContext()
   const { darkMode } = useTheme()
   const [showAddPurchase, setShowAddPurchase] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
+  const [purchases, setPurchases] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [showNotification, setShowNotification] = useState(false)
 
-  // Mock data if no purchases
-  const mockPurchases = [
-    {
-      id: 1,
-      merchant: 'Whole Foods Market',
-      amount: 87.45,
-      category: 'food',
-      date: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      description: 'Weekly grocery shopping',
-      scoreImpact: -4,
-      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000)
-    },
-    {
-      id: 2,
-      merchant: 'Netflix',
-      amount: 15.99,
-      category: 'entertainment',
-      date: new Date(Date.now() - 24 * 60 * 60 * 1000),
-      description: 'Monthly subscription',
-      scoreImpact: -2,
-      createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000)
-    },
-    {
-      id: 3,
-      merchant: 'Robinhood',
-      amount: 500.00,
-      category: 'investment',
-      date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-      description: 'Monthly investment contribution',
-      scoreImpact: +15,
-      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
-    },
-    {
-      id: 4,
-      merchant: 'Shell Gas Station',
-      amount: 52.30,
-      category: 'transportation',
-      date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
-      description: 'Gas fill-up',
-      scoreImpact: -3,
-      createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000)
-    },
-    {
-      id: 5,
-      merchant: 'Amazon',
-      amount: 124.99,
-      category: 'shopping',
-      date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-      description: 'Bluetooth headphones',
-      scoreImpact: -8,
-      createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
-    },
-    {
-      id: 6,
-      merchant: 'Electric Company',
-      amount: 145.67,
-      category: 'bills',
-      date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-      description: 'Monthly electricity bill',
-      scoreImpact: 0,
-      createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-    },
-    {
-      id: 7,
-      merchant: 'Starbucks',
-      amount: 6.75,
-      category: 'food',
-      date: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
-      description: 'Morning coffee',
-      scoreImpact: -1,
-      createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000)
-    },
-    {
-      id: 8,
-      merchant: 'Movie Theater',
-      amount: 28.50,
-      category: 'entertainment',
-      date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
-      description: 'Movie tickets for two',
-      scoreImpact: -3,
-      createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)
+  // Fetch purchases from backend
+  useEffect(() => {
+    fetchPurchases()
+  }, [])
+
+  const fetchPurchases = async () => {
+    try {
+      setLoading(true)
+      const userId = localStorage.getItem('userId')
+      
+      if (!userId) {
+        setError('User not authenticated. Please log in again.')
+        return
+      }
+
+      const response = await fetch('http://143.215.104.239:8080/purchase/my-purchases', {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-Id': userId
+        }
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch purchases')
+      }
+
+      const data = await response.json()
+      
+      // Transform backend data to match frontend format
+      const transformedPurchases = data.purchases.map(purchase => ({
+        id: purchase.id,
+        merchant: purchase.merchant,
+        amount: parseFloat(purchase.amount),
+        category: purchase.category,
+        date: new Date(purchase.purchaseTime),
+        description: `Purchase at ${purchase.merchant}`,
+        scoreImpact: calculateScoreImpact(purchase.amount, purchase.category),
+        createdAt: new Date(purchase.purchaseTime)
+      }))
+
+      setPurchases(transformedPurchases)
+    } catch (err) {
+      setError(err.message)
+      console.error('Error fetching purchases:', err)
+    } finally {
+      setLoading(false)
     }
-  ]
+  }
 
-  const currentPurchases = purchases || mockPurchases
+  const calculateScoreImpact = (amount, category) => {
+    // Simple score calculation logic
+    if (category === 'investment') return Math.floor(amount / 10)
+    if (category === 'bills') return 0
+    return -Math.floor(amount / 20)
+  }
+
+  const handlePurchaseSuccess = (newPurchase) => {
+    // Refresh purchases after adding new one
+    fetchPurchases()
+    // Show success notification
+    setShowNotification(true)
+    setTimeout(() => setShowNotification(false), 3000)
+  }
 
   const pageStyle = {
     padding: '1rem 0'
@@ -153,30 +133,12 @@ const Purchases = () => {
     boxShadow: darkMode ? '0 2px 4px rgba(0,0,0,0.3)' : '0 2px 4px rgba(0,0,0,0.07)'
   }
 
-  const contentGridStyle = {
-    display: 'grid',
-    gridTemplateColumns: '1fr 300px',
-    gap: '2rem',
-    '@media (max-width: 1024px)': {
-      gridTemplateColumns: '1fr'
-    }
-  }
-
   const mainContentStyle = {
     backgroundColor: darkMode ? '#1e293b' : '#ffffff',
     borderRadius: '1rem',
     padding: '1.5rem',
     border: darkMode ? '1px solid #374151' : '1px solid #e2e8f0',
     boxShadow: darkMode ? '0 4px 6px rgba(0,0,0,0.3)' : '0 4px 6px rgba(0,0,0,0.07)'
-  }
-
-  const sidebarStyle = {
-    backgroundColor: darkMode ? '#1e293b' : '#ffffff',
-    borderRadius: '1rem',
-    padding: '1.5rem',
-    border: darkMode ? '1px solid #374151' : '1px solid #e2e8f0',
-    boxShadow: darkMode ? '0 4px 6px rgba(0,0,0,0.3)' : '0 4px 6px rgba(0,0,0,0.07)',
-    height: 'fit-content'
   }
 
   const selectStyle = {
@@ -189,8 +151,53 @@ const Purchases = () => {
     minWidth: '120px'
   }
 
-  // Filter purchases based on current filters
-  const filteredPurchases = currentPurchases.filter(purchase => {
+  const purchaseItemStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '1rem',
+    backgroundColor: darkMode ? '#374151' : '#f8fafc',
+    borderRadius: '0.5rem',
+    border: darkMode ? '1px solid #4b5563' : '1px solid #e2e8f0',
+    marginBottom: '0.75rem',
+    transition: 'all 0.2s ease'
+  }
+
+  const notificationStyle = {
+    position: 'fixed',
+    bottom: '1rem',
+    left: '1rem',
+    backgroundColor: '#10b981',
+    color: 'white',
+    padding: '1rem 1.5rem',
+    borderRadius: '0.75rem',
+    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+    zIndex: 1000,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.875rem',
+    fontWeight: '500',
+    transform: showNotification ? 'translateY(0)' : 'translateY(100px)',
+    opacity: showNotification ? 1 : 0,
+    transition: 'all 0.3s ease'
+  }
+
+  const getCategoryEmoji = (category) => {
+    const emojis = {
+      'food': '🍽️',
+      'entertainment': '🎬',
+      'transportation': '🚗',
+      'shopping': '🛒',
+      'bills': '💳',
+      'investment': '📈',
+      'other': '💰'
+    }
+    return emojis[category] || emojis.other
+  }
+
+  // Filter purchases
+  const filteredPurchases = purchases.filter(purchase => {
     const matchesSearch = purchase.merchant.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          purchase.description?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesCategory = selectedCategory === 'all' || purchase.category === selectedCategory
@@ -198,10 +205,26 @@ const Purchases = () => {
     return matchesSearch && matchesCategory
   })
 
-  // Sort purchases by date (newest first) by default
   const sortedPurchases = [...filteredPurchases].sort((a, b) => {
     return new Date(b.date) - new Date(a.date)
   })
+
+  if (loading) {
+    return (
+      <div style={pageStyle}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '200px',
+          fontSize: '1.125rem',
+          color: darkMode ? '#9ca3af' : '#6b7280'
+        }}>
+          Loading purchases...
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div style={pageStyle}>
@@ -224,20 +247,22 @@ const Purchases = () => {
           >
             Add Purchase
           </Button>
-          <Button 
-            variant="secondary" 
-            icon="📊"
-          >
-            Export Data
-          </Button>
-          <Button 
-            variant="outline" 
-            icon="📈"
-          >
-            View Analytics
-          </Button>
         </div>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <div style={{
+          backgroundColor: '#fef2f2',
+          color: '#dc2626',
+          padding: '1rem',
+          borderRadius: '0.5rem',
+          marginBottom: '1rem',
+          border: '1px solid #fecaca'
+        }}>
+          {error}
+        </div>
+      )}
 
       {/* Filters Row */}
       <div style={filtersRowStyle}>
@@ -267,122 +292,120 @@ const Purchases = () => {
       </div>
 
       {/* Main Content */}
-      <div style={contentGridStyle}>
-        {/* Purchases List */}
-        <div style={mainContentStyle}>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '1.5rem'
+      <div style={mainContentStyle}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1.5rem'
+        }}>
+          <h2 style={{
+            fontSize: '1.5rem',
+            fontWeight: '600',
+            color: darkMode ? '#f8fafc' : '#1e293b'
           }}>
-            <h2 style={{
-              fontSize: '1.5rem',
-              fontWeight: '600',
+            Recent Transactions
+          </h2>
+          <div style={{
+            fontSize: '0.875rem',
+            color: darkMode ? '#9ca3af' : '#6b7280'
+          }}>
+            {sortedPurchases.length} purchases found
+          </div>
+        </div>
+        
+        {/* Purchases List */}
+        {sortedPurchases.length === 0 ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '3rem 1rem',
+            color: darkMode ? '#9ca3af' : '#6b7280'
+          }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛒</div>
+            <h3 style={{ 
+              fontSize: '1.25rem', 
+              fontWeight: '600', 
+              marginBottom: '0.5rem',
               color: darkMode ? '#f8fafc' : '#1e293b'
             }}>
-              Recent Transactions
-            </h2>
-            <div style={{
-              fontSize: '0.875rem',
-              color: darkMode ? '#9ca3af' : '#6b7280'
-            }}>
-              {sortedPurchases.length} purchases found
-            </div>
+              {purchases.length === 0 ? 'No purchases yet' : 'No purchases match your filters'}
+            </h3>
+            <p style={{ marginBottom: '1.5rem' }}>
+              {purchases.length === 0 
+                ? 'Start by adding your first purchase to track your spending.'
+                : 'Try adjusting your search or category filter.'
+              }
+            </p>
           </div>
-          
-          <PurchasesList purchases={sortedPurchases} />
-        </div>
+        ) : (
+          sortedPurchases.map((purchase) => (
+            <div 
+              key={purchase.id}
+              style={purchaseItemStyle}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = darkMode ? '#475569' : '#f1f5f9'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#f8fafc'
+              }}
+            >
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem'
+              }}>
+                <span style={{ fontSize: '1.25rem' }}>
+                  {getCategoryEmoji(purchase.category)}
+                </span>
+                <div>
+                  <div style={{
+                    fontWeight: '500',
+                    color: darkMode ? '#f8fafc' : '#1e293b',
+                    fontSize: '0.875rem'
+                  }}>
+                    {purchase.merchant}
+                  </div>
+                  <div style={{
+                    fontSize: '0.75rem',
+                    color: darkMode ? '#9ca3af' : '#6b7280'
+                  }}>
+                    {purchase.date.toLocaleDateString()} • {purchase.category}
+                  </div>
+                </div>
+              </div>
 
-        {/* Sidebar with Stats */}
-        <div style={sidebarStyle}>
-          <h3 style={{
-            fontSize: '1.25rem',
-            fontWeight: '600',
-            color: darkMode ? '#f8fafc' : '#1e293b',
-            marginBottom: '1rem'
-          }}>
-            📊 Purchase Analytics
-          </h3>
-          
-          <PurchaseStats purchases={currentPurchases} />
-        </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{
+                  fontWeight: '600',
+                  color: darkMode ? '#f8fafc' : '#1e293b',
+                  fontSize: '1rem'
+                }}>
+                  ${purchase.amount.toFixed(2)}
+                </div>
+                <div style={{
+                  fontSize: '0.75rem',
+                  fontWeight: '500',
+                  color: purchase.scoreImpact > 0 ? '#10b981' : purchase.scoreImpact < 0 ? '#ef4444' : '#6b7280'
+                }}>
+                  {purchase.scoreImpact > 0 ? '+' : ''}{purchase.scoreImpact} pts
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Success Notification */}
+      <div style={notificationStyle}>
+        ✅ Purchase recorded successfully
       </div>
 
       {/* Add Purchase Modal */}
       {showAddPurchase && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '1rem'
-        }}>
-          <div style={{
-            backgroundColor: darkMode ? '#1e293b' : '#ffffff',
-            borderRadius: '1rem',
-            padding: '2rem',
-            maxWidth: '500px',
-            width: '100%',
-            border: darkMode ? '1px solid #374151' : '1px solid #e2e8f0',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)'
-          }}>
-            <h3 style={{
-              fontSize: '1.5rem',
-              fontWeight: '600',
-              color: darkMode ? '#f8fafc' : '#1e293b',
-              marginBottom: '1.5rem'
-            }}>
-              Add New Purchase
-            </h3>
-            
-            {/* Add Purchase Form would go here */}
-            <div style={{ marginBottom: '1rem' }}>
-              <Input label="Merchant" placeholder="Enter merchant name" />
-            </div>
-            <div style={{ marginBottom: '1rem' }}>
-              <Input label="Amount" type="number" placeholder="0.00" />
-            </div>
-            <div style={{ marginBottom: '1rem' }}>
-              <select style={{
-                ...selectStyle,
-                width: '100%',
-                padding: '0.75rem'
-              }}>
-                <option>Select Category</option>
-                <option value="food">Food & Dining</option>
-                <option value="entertainment">Entertainment</option>
-                <option value="transportation">Transportation</option>
-                <option value="shopping">Shopping</option>
-                <option value="bills">Bills & Utilities</option>
-                <option value="investment">Investment</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            
-            <div style={{
-              display: 'flex',
-              gap: '1rem',
-              justifyContent: 'flex-end'
-            }}>
-              <Button 
-                variant="secondary" 
-                onClick={() => setShowAddPurchase(false)}
-              >
-                Cancel
-              </Button>
-              <Button variant="primary">
-                Add Purchase
-              </Button>
-            </div>
-          </div>
-        </div>
+        <PurchaseForm 
+          onClose={() => setShowAddPurchase(false)}
+          onSuccess={handlePurchaseSuccess}
+        />
       )}
     </div>
   )

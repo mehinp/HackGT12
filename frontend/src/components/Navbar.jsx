@@ -1,31 +1,39 @@
+// src/components/Navbar.jsx
 import { Link, useLocation } from 'react-router-dom'
-import { useTheme } from '../context/ThemeContext'
 import { useAuthContext } from '../hooks/Authentication hooks/useAuthContext'
+import { useLogout } from '../hooks/Authentication hooks/useLogout'
 import { useScoreContext } from '../hooks/Data Management Hooks/useScoreContext'
 import Button from './Button'
 
 const Navbar = () => {
-  const { darkMode, toggleDarkMode } = useTheme()
-  const { user, dispatch } = useAuthContext()
+  const { user } = useAuthContext()
+  const { logout } = useLogout()
   const { currentScore } = useScoreContext()
   const location = useLocation()
 
-  // Add the missing getScoreColor function
   const getScoreColor = (score) => {
-    if (score >= 700) return '#10b981' // green
-    if (score >= 600) return '#f59e0b' // yellow/orange
-    if (score >= 500) return '#ef4444' // red
-    return '#6b7280' // gray for no score
+    if (score >= 700) return '#10b981'
+    if (score >= 600) return '#f59e0b'
+    if (score >= 500) return '#ef4444'
+    return '#6b7280'
   }
 
-  const handleLogout = () => {
-    localStorage.removeItem('user')
-    dispatch({ type: 'LOGOUT' })
+  const handleLogout = async () => {
+    await logout()
+  }
+
+  const getUserDisplayName = () => {
+    if (user?.firstName && user?.lastName) {
+      return `${user.firstName} ${user.lastName}`
+    }
+    if (user?.firstName) return user.firstName
+    if (user?.email) return user.email.split('@')[0]
+    return 'Profile'
   }
 
   const navStyle = {
-    backgroundColor: darkMode ? '#1e293b' : '#ffffff',
-    borderBottom: `1px solid ${darkMode ? '#374151' : '#e2e8f0'}`,
+    backgroundColor: '#ffffff',
+    borderBottom: '1px solid #e2e8f0',
     padding: '1rem 0',
     position: 'sticky',
     top: 0,
@@ -60,7 +68,7 @@ const Navbar = () => {
   }
 
   const linkStyle = (path) => ({
-    color: location.pathname === path ? '#3b82f6' : darkMode ? '#cbd5e1' : '#64748b',
+    color: location.pathname === path ? '#3b82f6' : '#64748b',
     textDecoration: 'none',
     fontWeight: location.pathname === path ? '600' : '500',
     padding: '0.5rem 1rem',
@@ -74,9 +82,9 @@ const Navbar = () => {
     alignItems: 'center',
     gap: '0.5rem',
     padding: '0.5rem 1rem',
-    backgroundColor: darkMode ? '#374151' : '#f8fafc',
+    backgroundColor: '#f8fafc',
     borderRadius: '2rem',
-    border: `1px solid ${darkMode ? '#4b5563' : '#e2e8f0'}`
+    border: '1px solid #e2e8f0'
   }
 
   const userMenuStyle = {
@@ -85,19 +93,12 @@ const Navbar = () => {
     gap: '1rem'
   }
 
-  const themeToggleStyle = {
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '1.25rem',
-    padding: '0.5rem',
-    borderRadius: '0.5rem',
-    transition: 'all 0.2s ease',
-    color: darkMode ? '#f8fafc' : '#374151'
-  }
-
-  const mobileMenuStyle = {
-    display: 'none'
+  const userLinkStyle = {
+    ...linkStyle('/profile'),
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.875rem' // Smaller font size for user name
   }
 
   return (
@@ -115,7 +116,7 @@ const Navbar = () => {
             style={linkStyle('/')}
             onMouseEnter={(e) => {
               if (location.pathname !== '/') {
-                e.target.style.backgroundColor = darkMode ? '#374151' : '#f8fafc'
+                e.target.style.backgroundColor = '#f8fafc'
               }
             }}
             onMouseLeave={(e) => {
@@ -132,7 +133,7 @@ const Navbar = () => {
             style={linkStyle('/goals')}
             onMouseEnter={(e) => {
               if (location.pathname !== '/goals') {
-                e.target.style.backgroundColor = darkMode ? '#374151' : '#f8fafc'
+                e.target.style.backgroundColor = '#f8fafc'
               }
             }}
             onMouseLeave={(e) => {
@@ -149,7 +150,7 @@ const Navbar = () => {
             style={linkStyle('/purchases')}
             onMouseEnter={(e) => {
               if (location.pathname !== '/purchases') {
-                e.target.style.backgroundColor = darkMode ? '#374151' : '#f8fafc'
+                e.target.style.backgroundColor = '#f8fafc'
               }
             }}
             onMouseLeave={(e) => {
@@ -166,7 +167,7 @@ const Navbar = () => {
             style={linkStyle('/social')}
             onMouseEnter={(e) => {
               if (location.pathname !== '/social') {
-                e.target.style.backgroundColor = darkMode ? '#374151' : '#f8fafc'
+                e.target.style.backgroundColor = '#f8fafc'
               }
             }}
             onMouseLeave={(e) => {
@@ -183,7 +184,7 @@ const Navbar = () => {
         <div style={userMenuStyle}>
           {/* Score Display */}
           <div style={scoreDisplayStyle}>
-            <span style={{ fontSize: '0.875rem', color: darkMode ? '#cbd5e1' : '#64748b' }}>
+            <span style={{ fontSize: '0.875rem', color: '#64748b' }}>
               Score:
             </span>
             <span style={{ 
@@ -195,31 +196,9 @@ const Navbar = () => {
             </span>
           </div>
 
-          {/* Theme Toggle */}
-          <button 
-            onClick={toggleDarkMode}
-            style={themeToggleStyle}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = darkMode ? '#374151' : '#f8fafc'
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'transparent'
-            }}
-          >
-            {darkMode ? '☀️' : '🌙'}
-          </button>
-
           {/* User Profile */}
-          <Link 
-            to="/profile" 
-            style={{
-              ...linkStyle('/profile'),
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
-          >
-            👤 {user?.name || user?.email?.split('@')[0] || 'Profile'}
+          <Link to="/profile" style={userLinkStyle}>
+            👤 {getUserDisplayName()}
           </Link>
 
           {/* Logout Button */}
@@ -232,11 +211,6 @@ const Navbar = () => {
             Logout
           </Button>
         </div>
-      </div>
-
-      {/* Mobile menu toggle - for future implementation */}
-      <div style={mobileMenuStyle}>
-        <button>☰</button>
       </div>
     </nav>
   )

@@ -3,7 +3,6 @@ import { useTheme } from '../../context/ThemeContext'
 import Button from '../Button'
 
 const FriendManagement = ({ friends }) => {
-  const { darkMode } = useTheme()
   const [selectedFriend, setSelectedFriend] = useState(null)
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false)
 

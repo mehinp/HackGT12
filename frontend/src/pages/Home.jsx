@@ -1,15 +1,21 @@
+// src/pages/Home.jsx
+import { useState } from 'react'
 import { useAuthContext } from '../hooks/Authentication hooks/useAuthContext'
-import { useTheme } from '../context/ThemeContext'
 import ScoreWidget from '../components/Dashboard Widgets/ScoreWidget'
 import QuickStatsWidget from '../components/Dashboard Widgets/QuickStatsWidget'
 import Button from '../components/Button'
+import PurchaseForm from '../components/Purchases Components/PurchaseForm'
 
 const Home = () => {
   const { user } = useAuthContext()
-  const { darkMode } = useTheme()
+  const [showAddPurchase, setShowAddPurchase] = useState(false)
+  const [showNotification, setShowNotification] = useState(false)
 
   const getUserName = () => {
-    if (user?.name) return user.name
+    if (user?.firstName && user?.lastName) {
+      return `${user.firstName} ${user.lastName}`
+    }
+    if (user?.firstName) return user.firstName
     if (user?.email) return user.email.split('@')[0]
     return 'User'
   }
@@ -25,7 +31,7 @@ const Home = () => {
   const welcomeStyle = {
     fontSize: '2.5rem',
     fontWeight: '700',
-    color: darkMode ? '#f8fafc' : '#1e293b',
+    color: '#1e293b',
     marginBottom: '0.5rem',
     display: 'flex',
     alignItems: 'center',
@@ -34,7 +40,7 @@ const Home = () => {
 
   const subtitleStyle = {
     fontSize: '1.125rem',
-    color: darkMode ? '#94a3b8' : '#64748b',
+    color: '#64748b',
     marginBottom: '1rem'
   }
 
@@ -53,14 +59,32 @@ const Home = () => {
   }
 
   const widgetContainerStyle = {
-    backgroundColor: darkMode ? '#1e293b' : '#ffffff',
+    backgroundColor: '#ffffff',
     borderRadius: '1rem',
     padding: '1.5rem',
-    boxShadow: darkMode 
-      ? '0 4px 6px rgba(0, 0, 0, 0.3)' 
-      : '0 4px 6px rgba(0, 0, 0, 0.07)',
-    border: darkMode ? '1px solid #374151' : '1px solid #e2e8f0',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07)',
+    border: '1px solid #e2e8f0',
     transition: 'all 0.2s ease'
+  }
+
+  const notificationStyle = {
+    position: 'fixed',
+    bottom: '1rem',
+    left: '1rem',
+    backgroundColor: '#10b981',
+    color: 'white',
+    padding: '1rem 1.5rem',
+    borderRadius: '0.75rem',
+    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+    zIndex: 1000,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.875rem',
+    fontWeight: '500',
+    transform: showNotification ? 'translateY(0)' : 'translateY(100px)',
+    opacity: showNotification ? 1 : 0,
+    transition: 'all 0.3s ease'
   }
 
   const getCurrentTimeGreeting = () => {
@@ -68,6 +92,11 @@ const Home = () => {
     if (hour < 12) return 'Good morning'
     if (hour < 17) return 'Good afternoon'
     return 'Good evening'
+  }
+
+  const handlePurchaseSuccess = () => {
+    setShowNotification(true)
+    setTimeout(() => setShowNotification(false), 3000)
   }
 
   return (
@@ -83,7 +112,11 @@ const Home = () => {
 
         {/* Quick Actions */}
         <div style={quickActionsStyle}>
-          <Button variant="primary" icon="➕">
+          <Button 
+            variant="primary" 
+            icon="➕"
+            onClick={() => setShowAddPurchase(true)}
+          >
             Add Purchase
           </Button>
         </div>
@@ -104,18 +137,16 @@ const Home = () => {
 
       {/* Additional Insights Section */}
       <div style={{
-        backgroundColor: darkMode ? '#1e293b' : '#ffffff',
+        backgroundColor: '#ffffff',
         borderRadius: '1rem',
         padding: '2rem',
-        boxShadow: darkMode 
-          ? '0 4px 6px rgba(0, 0, 0, 0.3)' 
-          : '0 4px 6px rgba(0, 0, 0, 0.07)',
-        border: darkMode ? '1px solid #374151' : '1px solid #e2e8f0'
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07)',
+        border: '1px solid #e2e8f0'
       }}>
         <h2 style={{
           fontSize: '1.5rem',
           fontWeight: '600',
-          color: darkMode ? '#f8fafc' : '#1e293b',
+          color: '#1e293b',
           marginBottom: '1rem',
           display: 'flex',
           alignItems: 'center',
@@ -131,9 +162,9 @@ const Home = () => {
         }}>
           <div style={{
             padding: '1rem',
-            backgroundColor: darkMode ? '#374151' : '#f8fafc',
+            backgroundColor: '#f8fafc',
             borderRadius: '0.5rem',
-            border: darkMode ? '1px solid #4b5563' : '1px solid #e2e8f0'
+            border: '1px solid #e2e8f0'
           }}>
             <h3 style={{
               fontSize: '1rem',
@@ -145,7 +176,7 @@ const Home = () => {
             </h3>
             <p style={{
               fontSize: '0.875rem',
-              color: darkMode ? '#cbd5e1' : '#64748b',
+              color: '#64748b',
               lineHeight: '1.5'
             }}>
               Consider setting up automatic transfers to your savings account to build wealth consistently.
@@ -154,9 +185,9 @@ const Home = () => {
 
           <div style={{
             padding: '1rem',
-            backgroundColor: darkMode ? '#374151' : '#f8fafc',
+            backgroundColor: '#f8fafc',
             borderRadius: '0.5rem',
-            border: darkMode ? '1px solid #4b5563' : '1px solid #e2e8f0'
+            border: '1px solid #e2e8f0'
           }}>
             <h3 style={{
               fontSize: '1rem',
@@ -168,37 +199,27 @@ const Home = () => {
             </h3>
             <p style={{
               fontSize: '0.875rem',
-              color: darkMode ? '#cbd5e1' : '#64748b',
+              color: '#64748b',
               lineHeight: '1.5'
             }}>
-              You're spending 15% less than last month. Keep up the great work!
-            </p>
-          </div>
-
-          <div style={{
-            padding: '1rem',
-            backgroundColor: darkMode ? '#374151' : '#f8fafc',
-            borderRadius: '0.5rem',
-            border: darkMode ? '1px solid #4b5563' : '1px solid #e2e8f0'
-          }}>
-            <h3 style={{
-              fontSize: '1rem',
-              fontWeight: '600',
-              color: '#f59e0b',
-              marginBottom: '0.5rem'
-            }}>
-            ⚠️ Watch Out
-            </h3>
-            <p style={{
-              fontSize: '0.875rem',
-              color: darkMode ? '#cbd5e1' : '#64748b',
-              lineHeight: '1.5'
-            }}>
-              Entertainment spending is 20% above your budget this month.
+              Track your spending with our new purchase tracker. Add purchases as you go!
             </p>
           </div>
         </div>
       </div>
+
+      {/* Success Notification */}
+      <div style={notificationStyle}>
+        ✅ Purchase recorded successfully
+      </div>
+
+      {/* Add Purchase Modal */}
+      {showAddPurchase && (
+        <PurchaseForm 
+          onClose={() => setShowAddPurchase(false)}
+          onSuccess={handlePurchaseSuccess}
+        />
+      )}
     </div>
   )
 }

@@ -11,8 +11,6 @@ const QuickStatsWidget = () => {
   
   const mockStats = {
     monthlySpending: 1250.75,
-    budgetRemaining: 749.25,
-    savingsRate: 23,
     topCategory: 'Food & Dining'
   }
 
@@ -53,14 +51,10 @@ const QuickStatsWidget = () => {
     letterSpacing: '0.05em'
   }
 
-  const getStatColor = (type, value) => {
+  const getStatColor = (type) => {
     switch (type) {
       case 'spending':
         return '#3b82f6'
-      case 'budget':
-        return value > 0 ? '#10b981' : '#ef4444'
-      case 'savings':
-        return value >= 20 ? '#10b981' : value >= 10 ? '#f59e0b' : '#ef4444'
       case 'category':
         return '#8b5cf6'
       default:
@@ -101,46 +95,6 @@ const QuickStatsWidget = () => {
             marginTop: '0.25rem'
           }}>
             💳 Spent
-          </div>
-        </div>
-
-        {/* Budget Remaining */}
-        <div style={statItemStyle}>
-          <div style={{
-            ...statValueStyle,
-            color: getStatColor('budget', mockStats.budgetRemaining)
-          }}>
-            {formatCurrency(mockStats.budgetRemaining)}
-          </div>
-          <div style={statLabelStyle}>
-            Budget Left
-          </div>
-          <div style={{
-            fontSize: '0.75rem',
-            color: darkMode ? '#cbd5e1' : '#64748b',
-            marginTop: '0.25rem'
-          }}>
-            💰 Remaining
-          </div>
-        </div>
-
-        {/* Savings Rate */}
-        <div style={statItemStyle}>
-          <div style={{
-            ...statValueStyle,
-            color: getStatColor('savings', mockStats.savingsRate)
-          }}>
-            {mockStats.savingsRate}%
-          </div>
-          <div style={statLabelStyle}>
-            Savings Rate
-          </div>
-          <div style={{
-            fontSize: '0.75rem',
-            color: darkMode ? '#cbd5e1' : '#64748b',
-            marginTop: '0.25rem'
-          }}>
-            📊 Monthly
           </div>
         </div>
 

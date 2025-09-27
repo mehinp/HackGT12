@@ -1,6 +1,7 @@
-// hooks/useLogin.js
+// src/hooks/Authentication hooks/useLogin.js
 import { useState } from 'react'
 import { useAuthContext } from './useAuthContext'
+import { authService } from '../../services/authService'
 
 export const useLogin = () => {
   const [error, setError] = useState(null)
@@ -12,26 +13,9 @@ export const useLogin = () => {
     setError(null)
 
     try {
-      const response = await fetch('http://143.215.104.239:8080/user/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          email: email.trim().toLowerCase(), 
-          password,
-          rememberMe 
-        })
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Login failed')
-      }
-
-      const userData = await response.json()
+      const userData = await authService.login(email.trim().toLowerCase(), password)
       
-      // Store user data
+      // Store user data in localStorage and context
       localStorage.setItem('user', JSON.stringify(userData))
       
       dispatch({ 

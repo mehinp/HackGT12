@@ -7,11 +7,10 @@ import Button from '../components/Button'
 import Input from '../components/Input'
 
 const Login = () => {
-  const location = useLocation()
   const [email, setEmail] = useState(location.state?.email || '')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
-  const [debug, setDebug] = useState(null) // shows extra error info if available
+  const [debug, setDebug] = useState(null)
 
   const navigate = useNavigate()
   const { darkMode, toggleDarkMode } = useTheme()

@@ -1,13 +1,10 @@
 import { useScoreContext } from '../../hooks/Data Management Hooks/useScoreContext'
-import { useTheme } from '../../context/ThemeContext'
 import { useState, useEffect } from 'react'
 
 const ScoreWidget = () => {
   const { currentScore } = useScoreContext()
-  const { darkMode } = useTheme()
   const [animatedScore, setAnimatedScore] = useState(0)
 
-  // Add missing functions locally
   const getScoreColor = (score) => {
     if (score >= 700) return '#10b981' // green
     if (score >= 600) return '#f59e0b' // yellow/orange
@@ -49,7 +46,7 @@ const ScoreWidget = () => {
   const titleStyle = {
     fontSize: '1.25rem',
     fontWeight: '600',
-    color: darkMode ? '#f8fafc' : '#1e293b',
+    color: '#1e293b',
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem'
@@ -81,17 +78,18 @@ const ScoreWidget = () => {
   const progressBarStyle = {
     width: '100%',
     height: '8px',
-    backgroundColor: darkMode ? '#374151' : '#e2e8f0',
+    backgroundColor: '#e2e8f0',
     borderRadius: '4px',
     overflow: 'hidden',
     marginBottom: '1rem'
   }
 
+  // Fixed progress bar calculation - scale from 300 to 850
   const progressFillStyle = {
     height: '100%',
     backgroundColor: scoreColor,
     borderRadius: '4px',
-    width: `${(displayScore / 850) * 100}%`,
+    width: `${Math.max(0, Math.min(100, ((displayScore - 300) / (850 - 300)) * 100))}%`,
     transition: 'width 0.5s ease'
   }
 
@@ -99,7 +97,7 @@ const ScoreWidget = () => {
     display: 'flex',
     justifyContent: 'space-between',
     fontSize: '0.75rem',
-    color: darkMode ? '#9ca3af' : '#6b7280',
+    color: '#6b7280',
     marginBottom: '1.5rem'
   }
 
@@ -109,9 +107,9 @@ const ScoreWidget = () => {
     justifyContent: 'center',
     gap: '0.5rem',
     padding: '0.75rem',
-    backgroundColor: darkMode ? '#374151' : '#f8fafc',
+    backgroundColor: '#f8fafc',
     borderRadius: '0.5rem',
-    border: darkMode ? '1px solid #4b5563' : '1px solid #e2e8f0'
+    border: '1px solid #e2e8f0'
   }
 
   const getScoreEmoji = (score) => {
@@ -132,7 +130,7 @@ const ScoreWidget = () => {
     <div>
       <div style={headerStyle}>
         <h3 style={titleStyle}>
-          📊 Financial Score
+          🎯 Goal Score
         </h3>
         <span style={{ fontSize: '1.5rem' }}>
           {getScoreEmoji(displayScore)}
@@ -160,7 +158,7 @@ const ScoreWidget = () => {
       </div>
 
       <div style={improvementStyle}>
-        <span style={{ fontSize: '0.875rem', textAlign: 'center', color: darkMode ? '#cbd5e1' : '#64748b' }}>
+        <span style={{ fontSize: '0.875rem', textAlign: 'center', color: '#64748b' }}>
           {getImprovementTip(displayScore)}
         </span>
       </div>

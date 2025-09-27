@@ -1,21 +1,65 @@
-import { usePurchasesContext } from '../../hooks/Data Management Hooks/usePurchasesContext'
+// src/components/Dashboard Widgets/RecentPurchasesWidget.jsx
+import { useState, useEffect } from 'react'
 import { useTheme } from '../../context/ThemeContext'
 import { Link } from 'react-router-dom'
 import Button from '../Button'
 import formatDistanceToNow from 'date-fns/formatDistanceToNow'
 
 const RecentPurchasesWidget = () => {
-  const { purchases } = usePurchasesContext()
   const { darkMode } = useTheme()
+  const [purchases, setPurchases] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  // Mock data if no purchases
+  useEffect(() => {
+    fetchRecentPurchases()
+  }, [])
+
+  const fetchRecentPurchases = async () => {
+    try {
+      const response = await fetch('http://143.215.104.239:8080/purchase/my-purchases')
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch purchases')
+      }
+
+      const data = await response.json()
+      
+      // Transform and limit to recent 5 purchases
+      const transformedPurchases = data.purchases.slice(0, 5).map(purchase => ({
+        id: purchase.id,
+        merchant: purchase.merchant,
+        amount: parseFloat(purchase.amount),
+        category: purchase.category,
+        date: new Date(purchase.purchaseTime),
+        scoreImpact: calculateScoreImpact(purchase.amount, purchase.category)
+      }))
+
+      setPurchases(transformedPurchases)
+    } catch (err) {
+      console.error('Error fetching purchases:', err)
+      setError(err.message)
+      // Fall back to mock data for demo
+      setPurchases(mockPurchases)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const calculateScoreImpact = (amount, category) => {
+    if (category === 'investment') return Math.floor(amount / 10)
+    if (category === 'bills') return 0
+    return -Math.floor(amount / 20)
+  }
+
+  // Mock data fallback
   const mockPurchases = [
     {
       id: 1,
       merchant: 'Starbucks',
       amount: 4.75,
       category: 'food',
-      date: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+      date: new Date(Date.now() - 2 * 60 * 60 * 1000),
       scoreImpact: -2
     },
     {
@@ -23,7 +67,7 @@ const RecentPurchasesWidget = () => {
       merchant: 'Amazon',
       amount: 29.99,
       category: 'shopping',
-      date: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
+      date: new Date(Date.now() - 5 * 60 * 60 * 1000),
       scoreImpact: -5
     },
     {
@@ -31,20 +75,10 @@ const RecentPurchasesWidget = () => {
       merchant: 'Investment App',
       amount: 100.00,
       category: 'investment',
-      date: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
+      date: new Date(Date.now() - 24 * 60 * 60 * 1000),
       scoreImpact: +8
-    },
-    {
-      id: 4,
-      merchant: 'Gas Station',
-      amount: 45.20,
-      category: 'transportation',
-      date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-      scoreImpact: -3
     }
   ]
-
-  const recentPurchases = purchases?.slice(0, 5) || mockPurchases
 
   const headerStyle = {
     display: 'flex',
@@ -143,6 +177,39 @@ const RecentPurchasesWidget = () => {
     return emojis[category] || emojis.other
   }
 
+  if (loading) {
+    return (
+      <div>
+        <div style={headerStyle}>
+          <h3 style={titleStyle}>🛒 Recent Purchases</h3>
+        </div>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100px',
+          color: darkMode ? '#9ca3af' : '#6b7280'
+        }}>
+          Loading...
+        </div>
+      </div>
+    )
+  }
+
+  if (error && purchases.length === 0) {
+    return (
+      <div>
+        <div style={headerStyle}>
+          <h3 style={titleStyle}>🛒 Recent Purchases</h3>
+        </div>
+        <div style={emptyStateStyle}>
+          <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>⚠️</div>
+          <p>Unable to load purchases</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div>
       <div style={headerStyle}>
@@ -156,9 +223,9 @@ const RecentPurchasesWidget = () => {
         </Link>
       </div>
 
-      {recentPurchases.length > 0 ? (
+      {purchases.length > 0 ? (
         <div>
-          {recentPurchases.map((purchase) => (
+          {purchases.map((purchase) => (
             <div 
               key={purchase.id}
               style={purchaseItemStyle}
@@ -196,24 +263,14 @@ const RecentPurchasesWidget = () => {
               </div>
             </div>
           ))}
-
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            marginTop: '1rem'
-          }}>
-            <Button variant="secondary" size="sm">
-              ➕ Add New Purchase
-            </Button>
-          </div>
         </div>
       ) : (
         <div style={emptyStateStyle}>
           <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🛒</div>
           <p>No purchases yet</p>
-          <Button variant="primary" size="sm" style={{ marginTop: '1rem' }}>
-            Add Your First Purchase
-          </Button>
+          <p style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
+            Add your first purchase to get started!
+          </p>
         </div>
       )}
     </div>

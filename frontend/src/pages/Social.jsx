@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useSocialContext } from '../hooks/Data Management Hooks/useSocialContext'
 import { useAuthContext } from '../hooks/Authentication hooks/useAuthContext'
-import { useTheme } from '../context/ThemeContext'
 import Button from '../components/Button'
 import Input from '../components/Input'
 import Leaderboard from '../components/Social Components/Leaderboard'
@@ -9,9 +8,8 @@ import Leaderboard from '../components/Social Components/Leaderboard'
 const Social = () => {
   const { friends } = useSocialContext()
   const { user } = useAuthContext()
-  const { darkMode } = useTheme()
   const [showAddFriend, setShowAddFriend] = useState(false)
-  const [friendEmail, setFriendEmail] = useState('')
+  const [friendName, setFriendName] = useState('')
 
   // Mock data for friends and leaderboard
   const mockFriends = [
@@ -99,7 +97,7 @@ const Social = () => {
   const titleStyle = {
     fontSize: '2.5rem',
     fontWeight: '700',
-    color: darkMode ? '#f8fafc' : '#1e293b',
+    color: '#1e293b',
     marginBottom: '0.5rem',
     display: 'flex',
     alignItems: 'center',
@@ -108,7 +106,7 @@ const Social = () => {
 
   const subtitleStyle = {
     fontSize: '1.125rem',
-    color: darkMode ? '#94a3b8' : '#64748b',
+    color: '#64748b',
     marginBottom: '1rem'
   }
 
@@ -119,11 +117,11 @@ const Social = () => {
   }
 
   const mainContentStyle = {
-    backgroundColor: darkMode ? '#1e293b' : '#ffffff',
+    backgroundColor: '#ffffff',
     borderRadius: '1rem',
     padding: '1.5rem',
-    border: darkMode ? '1px solid #374151' : '1px solid #e2e8f0',
-    boxShadow: darkMode ? '0 4px 6px rgba(0,0,0,0.3)' : '0 4px 6px rgba(0,0,0,0.07)'
+    border: '1px solid #e2e8f0',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.07)'
   }
 
   const userRank = leaderboardData.findIndex(f => f.email === user?.email) + 1
@@ -154,15 +152,13 @@ const Social = () => {
 
       {/* User Rank Card */}
       <div style={{
-        backgroundColor: darkMode ? '#1e293b' : '#ffffff',
+        backgroundColor: '#ffffff',
         borderRadius: '1rem',
         padding: '1.5rem',
         marginBottom: '2rem',
-        border: darkMode ? '1px solid #374151' : '1px solid #e2e8f0',
-        boxShadow: darkMode ? '0 4px 6px rgba(0,0,0,0.3)' : '0 4px 6px rgba(0,0,0,0.07)',
-        background: darkMode 
-          ? 'linear-gradient(135deg, #1e293b 0%, #374151 100%)'
-          : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)'
+        border: '1px solid #e2e8f0',
+        boxShadow: '0 4px 6px rgba(0,0,0,0.07)',
+        background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)'
       }}>
         <div style={{
           display: 'flex',
@@ -174,14 +170,14 @@ const Social = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <div style={{
               fontSize: '3rem',
-              backgroundColor: darkMode ? '#374151' : '#f8fafc',
+              backgroundColor: '#f8fafc',
               borderRadius: '50%',
               width: '80px',
               height: '80px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              border: darkMode ? '2px solid #4b5563' : '2px solid #e2e8f0'
+              border: '2px solid #e2e8f0'
             }}>
               {currentUser.avatar}
             </div>
@@ -189,14 +185,14 @@ const Social = () => {
               <h2 style={{
                 fontSize: '1.5rem',
                 fontWeight: '700',
-                color: darkMode ? '#f8fafc' : '#1e293b',
+                color: '#1e293b',
                 marginBottom: '0.25rem'
               }}>
                 {currentUser.name}
               </h2>
               <div style={{
                 fontSize: '1rem',
-                color: darkMode ? '#9ca3af' : '#6b7280',
+                color: '#6b7280',
                 marginBottom: '0.5rem'
               }}>
                 Rank #{userRank} • Score: {currentUser.score}
@@ -210,9 +206,9 @@ const Social = () => {
                   <span key={index} style={{
                     fontSize: '0.75rem',
                     padding: '0.25rem 0.5rem',
-                    backgroundColor: darkMode ? '#4b5563' : '#e2e8f0',
+                    backgroundColor: '#e2e8f0',
                     borderRadius: '1rem',
-                    color: darkMode ? '#f8fafc' : '#1e293b'
+                    color: '#1e293b'
                   }}>
                     {achievement}
                   </span>
@@ -237,7 +233,7 @@ const Social = () => {
               </div>
               <div style={{
                 fontSize: '0.75rem',
-                color: darkMode ? '#9ca3af' : '#6b7280',
+                color: '#6b7280',
                 textTransform: 'uppercase'
               }}>
                 Day Streak
@@ -253,7 +249,7 @@ const Social = () => {
               </div>
               <div style={{
                 fontSize: '0.75rem',
-                color: darkMode ? '#9ca3af' : '#6b7280',
+                color: '#6b7280',
                 textTransform: 'uppercase'
               }}>
                 This Month
@@ -269,7 +265,7 @@ const Social = () => {
               </div>
               <div style={{
                 fontSize: '0.75rem',
-                color: darkMode ? '#9ca3af' : '#6b7280',
+                color: '#6b7280',
                 textTransform: 'uppercase'
               }}>
                 Friends
@@ -287,7 +283,7 @@ const Social = () => {
           <h2 style={{
             fontSize: '1.5rem',
             fontWeight: '600',
-            color: darkMode ? '#f8fafc' : '#1e293b'
+            color: '#1e293b'
           }}>
             🏆 Leaderboard
           </h2>
@@ -312,18 +308,18 @@ const Social = () => {
           padding: '1rem'
         }}>
           <div style={{
-            backgroundColor: darkMode ? '#1e293b' : '#ffffff',
+            backgroundColor: '#ffffff',
             borderRadius: '1rem',
             padding: '2rem',
             maxWidth: '400px',
             width: '100%',
-            border: darkMode ? '1px solid #374151' : '1px solid #e2e8f0',
+            border: '1px solid #e2e8f0',
             boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)'
           }}>
             <h3 style={{
               fontSize: '1.5rem',
               fontWeight: '600',
-              color: darkMode ? '#f8fafc' : '#1e293b',
+              color: '#1e293b',
               marginBottom: '1rem'
             }}>
               Add Friend
@@ -331,20 +327,20 @@ const Social = () => {
             
             <p style={{
               fontSize: '0.875rem',
-              color: darkMode ? '#9ca3af' : '#6b7280',
+              color: '#6b7280',
               marginBottom: '1.5rem'
             }}>
-              Invite friends to join your financial journey and compete on the leaderboard!
+              Add friends to join your financial journey and compete on the leaderboard!
             </p>
             
             <div style={{ marginBottom: '1.5rem' }}>
               <Input 
-                label="Friend's Email"
-                type="email"
-                placeholder="Enter email address"
-                value={friendEmail}
-                onChange={(e) => setFriendEmail(e.target.value)}
-                icon="📧"
+                label="Friend's Name"
+                type="text"
+                placeholder="Enter friend's name"
+                value={friendName}
+                onChange={(e) => setFriendName(e.target.value)}
+                icon="👤"
               />
             </div>
             
@@ -357,16 +353,16 @@ const Social = () => {
                 variant="secondary" 
                 onClick={() => {
                   setShowAddFriend(false)
-                  setFriendEmail('')
+                  setFriendName('')
                 }}
               >
                 Cancel
               </Button>
               <Button 
                 variant="primary"
-                disabled={!friendEmail}
+                disabled={!friendName}
               >
-                Send Invite
+                Add Friend
               </Button>
             </div>
           </div>
