@@ -6,6 +6,8 @@ import com.finance.hackathon.service.PurchaseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class PurchaseServiceImpl implements PurchaseService {
@@ -19,5 +21,10 @@ public class PurchaseServiceImpl implements PurchaseService {
     @Override
     public Purchase getPurchaseById(Long id) {
         return purchaseRepository.getPurchaseById(id);
+    }
+
+    @Override
+    public List<Purchase> getAllPurchasesByUserId(Long userId) {
+        return purchaseRepository.getAllPurchasesByUserId(userId);
     }
 }

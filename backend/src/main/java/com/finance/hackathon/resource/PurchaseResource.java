@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -44,6 +45,43 @@ public class PurchaseResource {
         }
 
         return ResponseEntity.ok(purchase);
+    }
+
+    @GetMapping("/my-purchases")
+    public ResponseEntity<?> getMyPurchases(HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("User not logged in");
+        }
+
+        try {
+            List<Purchase> purchases = purchaseService.getAllPurchasesByUserId(userId);
+            return ResponseEntity.ok(Map.of(
+                    "userId", userId,
+                    "purchaseCount", purchases.size(),
+                    "purchases", purchases
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error fetching purchases");
+        }
+    }
+
+    @GetMapping("/admin/user/{userId}")
+    public ResponseEntity<?> getAllPurchasesByUserIdAdmin(@PathVariable("userId") Long userId) {
+        try {
+            List<Purchase> purchases = purchaseService.getAllPurchasesByUserId(userId);
+            return ResponseEntity.ok(Map.of(
+                    "userId", userId,
+                    "purchaseCount", purchases.size(),
+                    "purchases", purchases
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error fetching purchases for user " + userId);
+        }
     }
 
 

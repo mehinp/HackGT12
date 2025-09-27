@@ -9,10 +9,10 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
-import static com.finance.hackathon.queries.PurchaseQuery.INSERT_PURCHASE_QUERY;
-import static com.finance.hackathon.queries.PurchaseQuery.SELECT_PURCHASE_BY_ID_QUERY;
+import static com.finance.hackathon.queries.PurchaseQuery.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -46,14 +46,27 @@ public class PurchaseRepositoryImpl implements PurchaseRepository {
         }
     }
 
+    @Override
+    public List<Purchase> getAllPurchasesByUserId(Long userId) {
+        try {
+            return jdbc.query(SELECT_ALL_PURCHASES_BY_USER_ID_QUERY,
+                    Map.of("userId", userId), this::mapRowToPurchase);
+        } catch (Exception e) {
+            log.error("Error fetching purchases for user {}: {}", userId, e.getMessage());
+            throw new RuntimeException("Error fetching purchases: " + e.getMessage());
+        }
+    }
+
     private Purchase mapRowToPurchase(ResultSet rs, int rowNum) throws SQLException {
         return new Purchase(
-                rs.getString("id"),  // Assuming you keep String id in domain
+                rs.getString("id"),
                 rs.getLong("user_id"),
                 rs.getBigDecimal("amount"),
                 rs.getString("category"),
-                rs.getString("merchant")
+                rs.getString("merchant"),
+                rs.getTimestamp("purchase_time").toLocalDateTime()
         );
     }
+
 
 }

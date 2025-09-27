@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
@@ -18,5 +19,5 @@ public class Purchase {
     private BigDecimal amount;
     private String category;
     private String merchant;
-    // purchase time will automatically be populated by DB as current time when request is made
+    private LocalDateTime purchaseTime;
 }
