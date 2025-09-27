@@ -21,6 +21,9 @@ public class UserRepositoryImpl implements UserRepository<User> {
 
     @Override
     public User createUser(User user) {
+        if (!user.getPassword().equals(user.getConfirmPassword())) {
+            throw new RuntimeException("Passwords don't match. Please try again.");
+        }
         try {
             jdbc.update(INSERT_USER_QUERY, Map.of(
                     "firstName", user.getFirstName(),

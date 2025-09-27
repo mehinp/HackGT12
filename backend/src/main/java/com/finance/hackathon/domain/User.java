@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
@@ -17,6 +18,7 @@ public class User {
     private String lastName;
     private String email;
     private String password;
+    private String confirmPassword;
     private BigDecimal income;
     private BigDecimal expenditures;
 }
