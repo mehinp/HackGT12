@@ -9,72 +9,72 @@ const Social = () => {
   const { friends } = useSocialContext()
   const { user } = useAuthContext()
   const [showAddFriend, setShowAddFriend] = useState(false)
-  const [friendName, setFriendName] = useState('')
+  const [friendEmail, setFriendEmail] = useState('')
+  const [isAddingFriend, setIsAddingFriend] = useState(false)
+  const [addFriendError, setAddFriendError] = useState('')
 
-  // Mock data for friends and leaderboard
-  const mockFriends = [
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      email: 'sarah@example.com',
-      score: 785,
-      avatar: '👩‍💼',
-      streak: 12,
-      achievements: ['💰 Savings Master', '🎯 Goal Crusher'],
-      lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      monthlyImprovement: +25
-    },
-    {
-      id: 2,
-      name: 'Mike Chen',
-      email: 'mike@example.com',
-      score: 742,
-      avatar: '👨‍💻',
-      streak: 8,
-      achievements: ['📈 Investor', '🔥 Hot Streak'],
-      lastActive: new Date(Date.now() - 5 * 60 * 60 * 1000),
-      monthlyImprovement: +15
-    },
-    {
-      id: 3,
-      name: 'Emily Davis',
-      email: 'emily@example.com',
-      score: 698,
-      avatar: '👩‍🎓',
-      streak: 15,
-      achievements: ['🎓 Smart Spender', '⭐ Rising Star'],
-      lastActive: new Date(Date.now() - 24 * 60 * 60 * 1000),
-      monthlyImprovement: +35
-    },
-    {
-      id: 4,
-      name: 'Alex Rodriguez',
-      email: 'alex@example.com',
-      score: 750, // Current user
-      avatar: '👤',
-      streak: 10,
-      achievements: ['🚀 Getting Started', '💪 Consistent'],
-      lastActive: new Date(),
-      monthlyImprovement: +20
-    },
-    {
-      id: 5,
-      name: 'Lisa Wang',
-      email: 'lisa@example.com',
-      score: 721,
-      avatar: '👩‍🔬',
-      streak: 6,
-      achievements: ['🔬 Analyzer', '💡 Smart Choices'],
-      lastActive: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-      monthlyImprovement: +10
-    }
-  ]
-
-  const currentFriends = friends || mockFriends.filter(f => f.email !== user?.email)
-  const currentUser = mockFriends.find(f => f.email === user?.email) || mockFriends[3]
+  const currentFriends = friends || []
+  
+  // Current user data (simplified without streak/online features)
+  const currentUser = {
+    id: user?.id,
+    name: user?.name || `${user?.firstName} ${user?.lastName}`.trim() || 'User',
+    email: user?.email,
+    score: 750, // This would come from score context
+    avatar: '👤',
+    achievements: ['🚀 Getting Started', '💪 Consistent']
+  }
 
   // Create leaderboard with current user
   const leaderboardData = [...currentFriends, currentUser].sort((a, b) => b.score - a.score)
+
+  const handleAddFriend = async () => {
+    if (!friendEmail.trim()) {
+      setAddFriendError('Please enter an email address')
+      return
+    }
+
+    if (friendEmail === user?.email) {
+      setAddFriendError('You cannot add yourself as a friend')
+      return
+    }
+
+    setIsAddingFriend(true)
+    setAddFriendError('')
+
+    try {
+      // API call to add friend by email
+      const response = await fetch('http://143.215.104.239:8080/social/add-friend', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-Id': localStorage.getItem('userId')
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          friendEmail: friendEmail.trim().toLowerCase()
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'Failed to add friend')
+      }
+
+      const newFriend = await response.json()
+      
+      // Update friends list (this would typically be handled by context)
+      // dispatch({ type: 'ADD_FRIEND', payload: newFriend })
+      
+      setShowAddFriend(false)
+      setFriendEmail('')
+      
+    } catch (err) {
+      setAddFriendError(err.message)
+    } finally {
+      setIsAddingFriend(false)
+    }
+  }
 
   const pageStyle = {
     padding: '1rem 0'
@@ -219,7 +219,7 @@ const Social = () => {
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
+            gridTemplateColumns: 'repeat(2, 1fr)',
             gap: '1rem',
             textAlign: 'center'
           }}>
@@ -229,30 +229,14 @@ const Social = () => {
                 fontWeight: '700',
                 color: '#3b82f6'
               }}>
-                {currentUser.streak}
+                {currentUser.score}
               </div>
               <div style={{
                 fontSize: '0.75rem',
                 color: '#6b7280',
                 textTransform: 'uppercase'
               }}>
-                Day Streak
-              </div>
-            </div>
-            <div>
-              <div style={{
-                fontSize: '1.5rem',
-                fontWeight: '700',
-                color: '#10b981'
-              }}>
-                +{currentUser.monthlyImprovement}
-              </div>
-              <div style={{
-                fontSize: '0.75rem',
-                color: '#6b7280',
-                textTransform: 'uppercase'
-              }}>
-                This Month
+                Current Score
               </div>
             </div>
             <div>
@@ -330,17 +314,31 @@ const Social = () => {
               color: '#6b7280',
               marginBottom: '1.5rem'
             }}>
-              Add friends to join your financial journey and compete on the leaderboard!
+              Enter your friend's email address to add them to your network!
             </p>
+
+            {addFriendError && (
+              <div style={{
+                backgroundColor: '#fef2f2',
+                color: '#dc2626',
+                padding: '0.75rem',
+                borderRadius: '0.5rem',
+                border: '1px solid #fecaca',
+                fontSize: '0.875rem',
+                marginBottom: '1rem'
+              }}>
+                {addFriendError}
+              </div>
+            )}
             
             <div style={{ marginBottom: '1.5rem' }}>
               <Input 
-                label="Friend's Name"
-                type="text"
-                placeholder="Enter friend's name"
-                value={friendName}
-                onChange={(e) => setFriendName(e.target.value)}
-                icon="👤"
+                label="Friend's Email"
+                type="email"
+                placeholder="Enter email address"
+                value={friendEmail}
+                onChange={(e) => setFriendEmail(e.target.value)}
+                icon="📧"
               />
             </div>
             
@@ -353,16 +351,19 @@ const Social = () => {
                 variant="secondary" 
                 onClick={() => {
                   setShowAddFriend(false)
-                  setFriendName('')
+                  setFriendEmail('')
+                  setAddFriendError('')
                 }}
+                disabled={isAddingFriend}
               >
                 Cancel
               </Button>
               <Button 
                 variant="primary"
-                disabled={!friendName}
+                onClick={handleAddFriend}
+                disabled={!friendEmail.trim() || isAddingFriend}
               >
-                Add Friend
+                {isAddingFriend ? 'Adding...' : 'Add Friend'}
               </Button>
             </div>
           </div>

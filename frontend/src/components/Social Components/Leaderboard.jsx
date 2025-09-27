@@ -80,13 +80,6 @@ const Leaderboard = ({ data, currentUser, showDeleteButton = false }) => {
     marginBottom: '0.25rem'
   })
 
-  const statsStyle = {
-    fontSize: '0.75rem',
-    color: darkMode ? '#9ca3af' : '#6b7280',
-    display: 'flex',
-    gap: '1rem'
-  }
-
   const scoreStyle = (isCurrentUser) => ({
     fontSize: '1.25rem',
     fontWeight: '700',
@@ -94,12 +87,6 @@ const Leaderboard = ({ data, currentUser, showDeleteButton = false }) => {
       ? (darkMode ? '#ffffff' : '#1e40af')
       : '#10b981',
     textAlign: 'right'
-  })
-
-  const improvementStyle = (improvement) => ({
-    fontSize: '0.75rem',
-    color: improvement > 0 ? '#10b981' : improvement < 0 ? '#ef4444' : '#6b7280',
-    fontWeight: '500'
   })
 
   const reactionsStyle = {
@@ -145,17 +132,6 @@ const Leaderboard = ({ data, currentUser, showDeleteButton = false }) => {
     console.log(`Reacted to ${friendId} with ${reaction}`)
     setSelectedReaction({ friendId, reaction })
     setTimeout(() => setSelectedReaction(null), 1000)
-  }
-
-  const formatLastActive = (lastActive) => {
-    const now = new Date()
-    const diff = now - lastActive
-    const hours = Math.floor(diff / (1000 * 60 * 60))
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-    
-    if (days > 0) return `${days}d ago`
-    if (hours > 0) return `${hours}h ago`
-    return 'Online'
   }
 
   return (
@@ -215,11 +191,6 @@ const Leaderboard = ({ data, currentUser, showDeleteButton = false }) => {
                 {friend.name}
                 {isCurrentUser && ' (You)'}
               </div>
-              
-              <div style={statsStyle}>
-                <span>🔥 {friend.streak} days</span>
-                <span>📅 {formatLastActive(friend.lastActive)}</span>
-              </div>
 
               {/* Achievements */}
               <div style={{ marginTop: '0.5rem' }}>
@@ -256,9 +227,6 @@ const Leaderboard = ({ data, currentUser, showDeleteButton = false }) => {
             <div style={{ textAlign: 'right' }}>
               <div style={scoreStyle(isCurrentUser)}>
                 {friend.score}
-              </div>
-              <div style={improvementStyle(friend.monthlyImprovement)}>
-                {friend.monthlyImprovement > 0 ? '+' : ''}{friend.monthlyImprovement} this month
               </div>
             </div>
 

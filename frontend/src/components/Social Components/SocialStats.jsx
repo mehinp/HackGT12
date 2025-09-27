@@ -9,7 +9,6 @@ const SocialStats = ({ friends, currentUser }) => {
   const myRank = allUsers.sort((a, b) => b.score - a.score).findIndex(user => user.id === currentUser.id) + 1
   const scoreAboveAverage = currentUser.score - averageScore
   const topPerformer = allUsers.reduce((top, user) => user.score > top.score ? user : top)
-  const mostImproved = allUsers.reduce((best, user) => user.monthlyImprovement > best.monthlyImprovement ? user : best)
 
   const statItemStyle = {
     padding: '1rem',
@@ -65,12 +64,6 @@ const SocialStats = ({ friends, currentUser }) => {
     fontWeight: '500',
     color: darkMode ? '#f8fafc' : '#1e293b'
   }
-
-  const valueStyle = (isPositive) => ({
-    fontSize: '0.875rem',
-    fontWeight: '600',
-    color: isPositive ? '#10b981' : '#ef4444'
-  })
 
   const progressBarStyle = {
     width: '100%',
@@ -159,7 +152,7 @@ const SocialStats = ({ friends, currentUser }) => {
                 fontSize: '0.75rem',
                 color: darkMode ? '#9ca3af' : '#6b7280'
               }}>
-                🔥 {topPerformer.streak} day streak
+                Leading the board
               </div>
             </div>
           </div>
@@ -170,45 +163,6 @@ const SocialStats = ({ friends, currentUser }) => {
               color: '#f59e0b'
             }}>
               {topPerformer.score}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Most Improved */}
-      <div style={{
-        marginBottom: '1rem'
-      }}>
-        <h4 style={{
-          fontSize: '1rem',
-          fontWeight: '600',
-          color: darkMode ? '#f8fafc' : '#1e293b',
-          marginBottom: '0.75rem'
-        }}>
-          📈 Most Improved
-        </h4>
-        
-        <div style={comparisonItemStyle}>
-          <div style={userInfoStyle}>
-            <div style={avatarStyle}>
-              {mostImproved.avatar}
-            </div>
-            <div>
-              <div style={nameStyle}>
-                {mostImproved.name}
-                {mostImproved.id === currentUser.id && ' (You)'}
-              </div>
-              <div style={{
-                fontSize: '0.75rem',
-                color: darkMode ? '#9ca3af' : '#6b7280'
-              }}>
-                This month
-              </div>
-            </div>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={valueStyle(mostImproved.monthlyImprovement > 0)}>
-              +{mostImproved.monthlyImprovement}
             </div>
           </div>
         </div>
@@ -258,45 +212,13 @@ const SocialStats = ({ friends, currentUser }) => {
               fontWeight: '700',
               color: '#f59e0b'
             }}>
-              {Math.round(allUsers.reduce((sum, user) => sum + user.streak, 0) / allUsers.length)}
+              {allUsers.length}
             </div>
             <div style={{
               fontSize: '0.75rem',
               color: darkMode ? '#9ca3af' : '#6b7280'
             }}>
-              Avg Streak
-            </div>
-          </div>
-          
-          <div>
-            <div style={{
-              fontSize: '1rem',
-              fontWeight: '700',
-              color: '#10b981'
-            }}>
-              {Math.round(allUsers.reduce((sum, user) => sum + user.monthlyImprovement, 0) / allUsers.length)}
-            </div>
-            <div style={{
-              fontSize: '0.75rem',
-              color: darkMode ? '#9ca3af' : '#6b7280'
-            }}>
-              Avg Growth
-            </div>
-          </div>
-          
-          <div>
-            <div style={{
-              fontSize: '1rem',
-              fontWeight: '700',
-              color: '#06b6d4'
-            }}>
-              {allUsers.filter(user => user.monthlyImprovement > 0).length}
-            </div>
-            <div style={{
-              fontSize: '0.75rem',
-              color: darkMode ? '#9ca3af' : '#6b7280'
-            }}>
-              Improving
+              Total Members
             </div>
           </div>
         </div>

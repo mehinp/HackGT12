@@ -1,12 +1,12 @@
-// Updated GoalForm component for spending reduction goals
+// src/components/Goals Components/GoalForm.jsx
 import { useState } from 'react'
-import { useTheme } from '../../context/ThemeContext'
-import { authService } from '../../services/authService'
+import { goalService } from '../../services/goalService'
+import { useGoalsContext } from '../../hooks/Data Management Hooks/useGoalsContext'
 import Button from '../Button'
 import Input from '../Input'
 
-const GoalForm = ({ onClose, goal }) => {
-  const { darkMode } = useTheme()
+const GoalForm = ({ onClose, goal, onSuccess }) => {
+  const { dispatch } = useGoalsContext()
   const [formData, setFormData] = useState({
     title: goal?.title || '',
     amount: goal?.targetAmount || '',
@@ -42,23 +42,26 @@ const GoalForm = ({ onClose, goal }) => {
     setIsSubmitting(true)
 
     try {
-      // Create the goal object
       const goalData = {
         title: formData.title,
         saved: parseFloat(formData.amount),
-        endDate: formData.targetDate,
+        endDate: formData.targetDate
       }
 
-      const result = await authService.createGoal(goalData)
+      const result = await goalService.createGoal(goalData)
       console.log('Goal created:', result)
       
-      // Store goal data in localStorage if needed
-      const existingGoals = JSON.parse(localStorage.getItem('userGoals') || '[]')
-      const updatedGoals = [...existingGoals, result]
-      localStorage.setItem('userGoals', JSON.stringify(updatedGoals))
+      // Add the goal to context
+      dispatch({ type: 'ADD_GOAL', payload: result })
+      
+      // Call onSuccess callback with the new goal
+      if (onSuccess) {
+        onSuccess(result)
+      }
       
       onClose()
     } catch (err) {
+      console.error('Goal creation error:', err)
       setError(err.message || 'Failed to create goal')
     } finally {
       setIsSubmitting(false)
@@ -80,19 +83,19 @@ const GoalForm = ({ onClose, goal }) => {
   }
 
   const formContainerStyle = {
-    backgroundColor: darkMode ? '#1e293b' : '#ffffff',
+    backgroundColor: '#ffffff',
     borderRadius: '1rem',
     padding: '2rem',
     maxWidth: '500px',
     width: '100%',
-    border: darkMode ? '1px solid #374151' : '1px solid #e2e8f0',
+    border: '1px solid #e2e8f0',
     boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)'
   }
 
   const titleStyle = {
     fontSize: '1.5rem',
     fontWeight: '600',
-    color: darkMode ? '#f8fafc' : '#1e293b',
+    color: '#1e293b',
     marginBottom: '1.5rem'
   }
 
@@ -100,17 +103,17 @@ const GoalForm = ({ onClose, goal }) => {
     display: 'block',
     marginBottom: '0.5rem',
     fontWeight: '500',
-    color: darkMode ? '#f8fafc' : '#374151',
+    color: '#374151',
     fontSize: '0.875rem'
   }
 
   const dateInputStyle = {
     width: '100%',
     padding: '0.75rem',
-    border: `1px solid ${darkMode ? '#374151' : '#e2e8f0'}`,
+    border: '1px solid #e2e8f0',
     borderRadius: '0.5rem',
-    backgroundColor: darkMode ? '#374151' : '#ffffff',
-    color: darkMode ? '#f8fafc' : '#1e293b',
+    backgroundColor: '#ffffff',
+    color: '#1e293b',
     fontSize: '1rem'
   }
 
@@ -126,12 +129,12 @@ const GoalForm = ({ onClose, goal }) => {
 
   const descriptionStyle = {
     fontSize: '0.875rem',
-    color: darkMode ? '#9ca3af' : '#6b7280',
+    color: '#6b7280',
     marginBottom: '1.5rem',
     padding: '1rem',
-    backgroundColor: darkMode ? '#374151' : '#f8fafc',
+    backgroundColor: '#f8fafc',
     borderRadius: '0.5rem',
-    border: darkMode ? '1px solid #4b5563' : '1px solid #e2e8f0'
+    border: '1px solid #e2e8f0'
   }
 
   const getMinDate = () => {
@@ -148,7 +151,7 @@ const GoalForm = ({ onClose, goal }) => {
         </h3>
 
         <div style={descriptionStyle}>
-          💡 Set a goal to reduce your spending and build better financial habits. 
+          Set a goal to reduce your spending and build better financial habits. 
           Choose a realistic timeframe of at least 3 months to see meaningful results.
         </div>
         
@@ -177,7 +180,7 @@ const GoalForm = ({ onClose, goal }) => {
               gap: '0.5rem',
               flexWrap: 'wrap'
             }}>
-              <span style={{ color: darkMode ? '#f8fafc' : '#1e293b' }}>$</span>
+              <span style={{ color: '#1e293b' }}>$</span>
               <input
                 type="number"
                 step="0.01"
@@ -192,7 +195,7 @@ const GoalForm = ({ onClose, goal }) => {
                 }}
                 required
               />
-              <span style={{ color: darkMode ? '#f8fafc' : '#1e293b' }}>by</span>
+              <span style={{ color: '#1e293b' }}>by</span>
               <input
                 type="date"
                 value={formData.targetDate}
@@ -208,7 +211,7 @@ const GoalForm = ({ onClose, goal }) => {
             </div>
             <div style={{
               fontSize: '0.75rem',
-              color: darkMode ? '#9ca3af' : '#6b7280',
+              color: '#6b7280',
               marginTop: '0.5rem'
             }}>
               Target date must be at least 3 months from today
@@ -218,14 +221,14 @@ const GoalForm = ({ onClose, goal }) => {
           {formData.amount && formData.targetDate && (
             <div style={{
               padding: '1rem',
-              backgroundColor: darkMode ? '#065f46' : '#f0fdf4',
+              backgroundColor: '#f0fdf4',
               borderRadius: '0.5rem',
-              border: darkMode ? '1px solid #047857' : '1px solid #bbf7d0',
+              border: '1px solid #bbf7d0',
               marginBottom: '1.5rem'
             }}>
               <div style={{
                 fontSize: '0.875rem',
-                color: darkMode ? '#34d399' : '#166534',
+                color: '#166534',
                 fontWeight: '500'
               }}>
                 Goal Preview: Reduce spending by ${parseFloat(formData.amount || 0).toFixed(2)} 

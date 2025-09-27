@@ -1,5 +1,6 @@
-// src/context/PurchasesContext.jsx - Updated with authentication
+// src/context/PurchasesContext.jsx - Updated to use purchaseService
 import React, { createContext, useContext, useMemo, useReducer } from 'react'
+import { purchaseService } from '../services/purchaseService'
 
 export const PurchasesContext = createContext(null)
 
@@ -18,62 +19,6 @@ function reducer(state, action) {
   }
 }
 
-// Helper function to get authenticated headers
-const getAuthHeaders = () => {
-  const userId = localStorage.getItem('userId')
-  if (!userId) {
-    throw new Error('User not authenticated')
-  }
-  return {
-    'Content-Type': 'application/json',
-    'X-User-Id': userId
-  }
-}
-
-// API functions with authentication
-const purchasesAPI = {
-  async fetchPurchases() {
-    const response = await fetch('http://143.215.104.239:8080/purchase/my-purchases', {
-      credentials: 'include',
-      headers: getAuthHeaders()
-    })
-    if (!response.ok) throw new Error('Failed to fetch purchases')
-    return response.json()
-  },
-
-  async createPurchase(purchaseData) {
-    const response = await fetch('http://143.215.104.239:8080/purchase/record', {
-      method: 'POST',
-      credentials: 'include',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(purchaseData)
-    })
-    if (!response.ok) throw new Error('Failed to create purchase')
-    return response.json()
-  },
-
-  async updatePurchase(id, purchaseData) {
-    const response = await fetch(`http://143.215.104.239:8080/purchase/${id}`, {
-      method: 'PUT',
-      credentials: 'include',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(purchaseData)
-    })
-    if (!response.ok) throw new Error('Failed to update purchase')
-    return response.json()
-  },
-
-  async deletePurchase(id) {
-    const response = await fetch(`http://143.215.104.239:8080/purchase/${id}`, {
-      method: 'DELETE',
-      credentials: 'include',
-      headers: getAuthHeaders()
-    })
-    if (!response.ok) throw new Error('Failed to delete purchase')
-    return response.json()
-  }
-}
-
 export function PurchasesContextProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState)
   
@@ -86,11 +31,11 @@ export function PurchasesContextProvider({ children }) {
     removePurchase: (id) => dispatch({ type: 'REMOVE_PURCHASE', payload: id }),
     updatePurchase: (row) => dispatch({ type: 'UPDATE_PURCHASE', payload: row }),
     
-    // API methods with authentication
+    // API methods now use purchaseService
     async fetchPurchases() {
       try {
         dispatch({ type: 'SET_LOADING', payload: true })
-        const data = await purchasesAPI.fetchPurchases()
+        const data = await purchaseService.getUserPurchases()
         dispatch({ type: 'SET_PURCHASES', payload: data.purchases || [] })
       } catch (error) {
         dispatch({ type: 'SET_ERROR', payload: error.message })
@@ -101,7 +46,7 @@ export function PurchasesContextProvider({ children }) {
 
     async createPurchase(purchaseData) {
       try {
-        const newPurchase = await purchasesAPI.createPurchase(purchaseData)
+        const newPurchase = await purchaseService.createPurchase(purchaseData)
         dispatch({ type: 'ADD_PURCHASE', payload: newPurchase })
         return newPurchase
       } catch (error) {
@@ -112,7 +57,7 @@ export function PurchasesContextProvider({ children }) {
 
     async updatePurchaseById(id, purchaseData) {
       try {
-        const updated = await purchasesAPI.updatePurchase(id, purchaseData)
+        const updated = await purchaseService.updatePurchase(id, purchaseData)
         dispatch({ type: 'UPDATE_PURCHASE', payload: updated })
         return updated
       } catch (error) {
@@ -123,7 +68,7 @@ export function PurchasesContextProvider({ children }) {
 
     async deletePurchaseById(id) {
       try {
-        await purchasesAPI.deletePurchase(id)
+        await purchaseService.deletePurchase(id)
         dispatch({ type: 'REMOVE_PURCHASE', payload: id })
       } catch (error) {
         dispatch({ type: 'SET_ERROR', payload: error.message })

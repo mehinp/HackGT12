@@ -65,7 +65,7 @@ export const authService = {
   async getUser(id) {
     const response = await fetch(`${BASE}/user/${id}`, {
       headers: {
-        'User-ID': id || localStorage.getItem('userId') // Add User-ID header
+        'X-User-Id': id || localStorage.getItem('userId') // Add User-ID header
       },
       credentials: 'include'
     })
@@ -82,7 +82,7 @@ export const authService = {
     const userId = localStorage.getItem('userId')
     return {
       'Content-Type': 'application/json',
-      'User-ID': userId
+      'X-User-Id': userId
     }
   },
 
@@ -98,7 +98,7 @@ export const authService = {
       ...options,
       headers: {
         'Content-Type': 'application/json',
-        'User-ID': userId,
+        'X-User-Id': userId,
         ...options.headers
       },
       credentials: 'include'
@@ -116,62 +116,4 @@ export const authService = {
 
     return response
   },
-
-  // Goals API methods
-  async createGoal(goalData) {
-    const userId = localStorage.getItem('userId')
-    
-    if (!userId) {
-      throw new Error('User not authenticated')
-    }
-
-    const response = await fetch(`${BASE}/goals/new`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-User-Id': userId
-      },
-      credentials: 'include',
-      body: JSON.stringify(goalData)
-    })
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        localStorage.removeItem('userId')
-        localStorage.removeItem('user')
-        throw new Error('Session expired. Please log in again.')
-      }
-      const errorData = await response.json().catch(() => ({}))
-      throw new Error(errorData.message || 'Failed to create goal')
-    }
-
-    return response.json()
-  },
-
-  async getUserGoals() {
-    const userId = localStorage.getItem('userId')
-    
-    if (!userId) {
-      throw new Error('User not authenticated')
-    }
-
-    const response = await fetch(`${BASE}/goals/my-goals`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-User-Id': userId
-      },
-      credentials: 'include'
-    })
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        localStorage.removeItem('userId')
-        localStorage.removeItem('user')
-        throw new Error('Session expired. Please log in again.')
-      }
-      throw new Error('Failed to fetch goals')
-    }
-
-    return response.json()
-  }
 }
