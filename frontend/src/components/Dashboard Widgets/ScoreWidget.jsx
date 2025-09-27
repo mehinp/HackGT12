@@ -112,13 +112,6 @@ const ScoreWidget = () => {
     border: '1px solid #e2e8f0'
   }
 
-  const getScoreEmoji = (score) => {
-    if (score >= 800) return '🏆'
-    if (score >= 700) return '✨'
-    if (score >= 600) return '👍'
-    return '📈'
-  }
-
   const getImprovementTip = (score) => {
     if (score >= 800) return "Excellent! You're in the top tier!"
     if (score >= 700) return "Great job! Small optimizations can boost you higher"
@@ -130,11 +123,8 @@ const ScoreWidget = () => {
     <div>
       <div style={headerStyle}>
         <h3 style={titleStyle}>
-          🎯 Goal Score
+          Goal Score
         </h3>
-        <span style={{ fontSize: '1.5rem' }}>
-          {getScoreEmoji(displayScore)}
-        </span>
       </div>
 
       <div style={scoreContainerStyle}>

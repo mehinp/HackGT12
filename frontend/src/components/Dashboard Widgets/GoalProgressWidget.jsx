@@ -133,7 +133,7 @@ const GoalProgressWidget = () => {
     <div>
       <div style={headerStyle}>
         <h3 style={titleStyle}>
-          🎯 Goal Progress
+          Goal Progress
         </h3>
         <Link to="/goals">
           <Button variant="outline" size="sm">
@@ -177,7 +177,7 @@ const GoalProgressWidget = () => {
 
                 <div style={progressTextStyle}>
                   <span>${remaining.toLocaleString()} to go</span>
-                  <span>{progress >= 100 ? '🎉 Complete!' : `${(100 - progress).toFixed(0)}% remaining`}</span>
+                  <span>{progress >= 100 ? 'Complete!' : `${(100 - progress).toFixed(0)}% remaining`}</span>
                 </div>
               </div>
             )
@@ -206,7 +206,6 @@ const GoalProgressWidget = () => {
         </div>
       ) : (
         <div style={emptyStateStyle}>
-          <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🎯</div>
           <p>No goals set yet</p>
           <Button variant="primary" size="sm" style={{ marginTop: '1rem' }}>
             Set Your First Goal

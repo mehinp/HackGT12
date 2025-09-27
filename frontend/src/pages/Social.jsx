@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSocialContext } from '../hooks/Data Management Hooks/useSocialContext'
 import { useAuthContext } from '../hooks/Authentication hooks/useAuthContext'
 import Button from '../components/Button'
 import Input from '../components/Input'
 import Leaderboard from '../components/Social Components/Leaderboard'
+import { socialService } from '../services/socialService'
 
 const Social = () => {
   const { friends } = useSocialContext()
@@ -12,6 +13,9 @@ const Social = () => {
   const [friendEmail, setFriendEmail] = useState('')
   const [isAddingFriend, setIsAddingFriend] = useState(false)
   const [addFriendError, setAddFriendError] = useState('')
+  const [friendCount, setFriendCount] = useState(0)
+  const [loadingCount, setLoadingCount] = useState(true)
+  const [countError, setCountError] = useState('')
 
   const currentFriends = friends || []
   
@@ -28,6 +32,45 @@ const Social = () => {
   // Create leaderboard with current user
   const leaderboardData = [...currentFriends, currentUser].sort((a, b) => b.score - a.score)
 
+  // Fetch friend count when component mounts
+  useEffect(() => {
+    fetchFriendCount()
+  }, [])
+
+  const fetchFriendCount = async () => {
+    try {
+      setLoadingCount(true)
+      setCountError('')
+      
+      const userId = localStorage.getItem('userId')
+      console.log('Fetching friend count for userId:', userId)
+      
+      if (!userId) {
+        setCountError('User not authenticated. Please log in again.')
+        return
+      }
+
+      const result = await socialService.getFriendCount()
+      console.log('Friend count API response:', result)
+      
+      // The backend returns { friendsCount: 2, userId: 11 }
+      if (result && typeof result.friendsCount === 'number') {
+        setFriendCount(result.friendsCount)
+      } else {
+        console.log('Unexpected response format:', result)
+        setFriendCount(currentFriends.length) // Fallback
+      }
+      
+    } catch (err) {
+      console.error('Error fetching friend count:', err)
+      setCountError(err.message)
+      // Keep the fallback count from context
+      setFriendCount(currentFriends.length)
+    } finally {
+      setLoadingCount(false)
+    }
+  }
+
   const handleAddFriend = async () => {
     if (!friendEmail.trim()) {
       setAddFriendError('Please enter an email address')
@@ -43,31 +86,17 @@ const Social = () => {
     setAddFriendError('')
 
     try {
-      // API call to add friend by email
-      const response = await fetch('http://143.215.104.239:8080/social/add-friend', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-Id': localStorage.getItem('userId')
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          friendEmail: friendEmail.trim().toLowerCase()
-        })
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.message || 'Failed to add friend')
-      }
-
-      const newFriend = await response.json()
+      // Use the socialService method
+      const result = await socialService.addFriend(friendEmail.trim().toLowerCase())
       
-      // Update friends list (this would typically be handled by context)
-      // dispatch({ type: 'ADD_FRIEND', payload: newFriend })
+      console.log('Friend added successfully:', result)
       
+      // Clear the form and close modal
       setShowAddFriend(false)
       setFriendEmail('')
+      
+      // Refresh friend count after adding friend
+      fetchFriendCount()
       
     } catch (err) {
       setAddFriendError(err.message)
@@ -147,8 +176,37 @@ const Social = () => {
           >
             Add Friend
           </Button>
+          <Button 
+            variant="outline" 
+            icon="📊"
+            onClick={fetchFriendCount}
+          >
+            Refresh Count
+          </Button>
         </div>
       </div>
+
+      {/* Error Display for Count */}
+      {countError && (
+        <div style={{
+          backgroundColor: '#fef2f2',
+          color: '#dc2626',
+          padding: '1rem',
+          borderRadius: '0.5rem',
+          marginBottom: '1rem',
+          border: '1px solid #fecaca'
+        }}>
+          ⚠️ {countError}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={fetchFriendCount}
+            style={{ marginLeft: '1rem' }}
+          >
+            Retry
+          </Button>
+        </div>
+      )}
 
       {/* User Rank Card */}
       <div style={{
@@ -245,7 +303,7 @@ const Social = () => {
                 fontWeight: '700',
                 color: '#f59e0b'
               }}>
-                {currentFriends.length}
+                {loadingCount ? '...' : friendCount}
               </div>
               <div style={{
                 fontSize: '0.75rem',
