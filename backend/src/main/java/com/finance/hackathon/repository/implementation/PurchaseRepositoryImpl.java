@@ -59,7 +59,7 @@ public class PurchaseRepositoryImpl implements PurchaseRepository {
 
     private Purchase mapRowToPurchase(ResultSet rs, int rowNum) throws SQLException {
         return new Purchase(
-                rs.getString("id"),
+                rs.getLong("id"),
                 rs.getLong("user_id"),
                 rs.getBigDecimal("amount"),
                 rs.getString("category"),

@@ -25,15 +25,15 @@ public class UserResource {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<User> login(@RequestBody User loginUser, HttpSession session) {
+    public ResponseEntity<User> login(@RequestBody User loginUser) {
         try {
             User user = userService.authenticate(loginUser.getEmail(), loginUser.getPassword());
-            session.setAttribute("userId", user.getId());
             return ResponseEntity.ok(user);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
+
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpSession session) {

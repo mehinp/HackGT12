@@ -1,23 +1,23 @@
 package com.finance.hackathon.domain;
 
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-public class Purchase {
+@Builder
+public class Goal {
     private Long id;
+    private String title;
     private Long userId;
-    private BigDecimal amount;
-    private String category;
-    private String merchant;
-    private LocalDateTime purchaseTime;
+    private BigDecimal saved;
+    private LocalDate endDate;
 }

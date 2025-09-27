@@ -18,11 +18,10 @@ public class PurchaseResource {
     private final PurchaseService purchaseService;
 
     @PostMapping("/record")
-    public ResponseEntity<?> newPurchase(@RequestBody Purchase purchase, HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId");
+    public ResponseEntity<?> newPurchase(@RequestBody Purchase purchase, @RequestHeader(value="X-User-Id", required=false) Long userId) {
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("User not logged in");
+                    .body("Missing or invalid X-User-Id.");
         }
         purchaseService.newPurchase(purchase, userId);
         return ResponseEntity
@@ -38,7 +37,6 @@ public class PurchaseResource {
     @GetMapping("/admin/{id}")
     public ResponseEntity<?> getPurchaseAdmin(@PathVariable("id") Long id) {
         Purchase purchase = purchaseService.getPurchaseById(id);
-
         if (purchase == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Purchase not found");
@@ -48,9 +46,7 @@ public class PurchaseResource {
     }
 
     @GetMapping("/my-purchases")
-    public ResponseEntity<?> getMyPurchases(HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId");
-
+    public ResponseEntity<?> getMyPurchases(@RequestHeader(value="X-User-Id", required=false) Long userId) {
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("User not logged in");
