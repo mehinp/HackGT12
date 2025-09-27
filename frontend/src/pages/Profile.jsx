@@ -1,27 +1,21 @@
 import { useState } from 'react'
-import { useAuthContext } from '../hooks/useAuthContext'
+import { useAuthContext } from '../hooks/Authentication hooks/useAuthContext'
 import { useTheme } from '../context/ThemeContext'
 import Button from '../components/Button'
 import Input from '../components/Input'
-import ProfileForm from '../components/ProfileForm'
-import IncomeSettings from '../components/IncomeSettings'
-import SecuritySettings from '../components/SecuritySettings'
-import NotificationSettings from '../components/NotificationSettings'
+import ProfileForm from '../components/Profile Components/ProfileForm'
+import IncomeSettings from '../components/Profile Components/IncomeSettings'
+import SecuritySettings from '../components/Profile Components/SecuritySettings'
+import NotificationSettings from '../components/Profile Components/NotificationSettings'
 
 const Profile = () => {
-  const { user, dispatch } = useAuthContext()
+  const { user } = useAuthContext()
   const { darkMode } = useTheme()
   const [activeTab, setActiveTab] = useState('profile')
   const [showDeleteAccount, setShowDeleteAccount] = useState(false)
 
-  const pageStyle = {
-    padding: '1rem 0'
-  }
-
-  const headerStyle = {
-    marginBottom: '2rem'
-  }
-
+  const pageStyle = { padding: '1rem 0' }
+  const headerStyle = { marginBottom: '2rem' }
   const titleStyle = {
     fontSize: '2.5rem',
     fontWeight: '700',
@@ -31,12 +25,10 @@ const Profile = () => {
     alignItems: 'center',
     gap: '0.5rem'
   }
-
   const subtitleStyle = {
     fontSize: '1.125rem',
     color: darkMode ? '#94a3b8' : '#64748b'
   }
-
   const tabsStyle = {
     display: 'flex',
     gap: '0.5rem',
@@ -44,7 +36,6 @@ const Profile = () => {
     borderBottom: `1px solid ${darkMode ? '#374151' : '#e2e8f0'}`,
     overflowX: 'auto'
   }
-
   const tabStyle = (isActive) => ({
     padding: '1rem 1.5rem',
     backgroundColor: isActive ? (darkMode ? '#374151' : '#f8fafc') : 'transparent',
@@ -58,7 +49,6 @@ const Profile = () => {
     whiteSpace: 'nowrap',
     borderBottom: isActive ? `2px solid #3b82f6` : 'none'
   })
-
   const contentStyle = {
     backgroundColor: darkMode ? '#1e293b' : '#ffffff',
     borderRadius: '1rem',
@@ -68,11 +58,11 @@ const Profile = () => {
   }
 
   const tabs = [
-    { id: 'profile', label: '👤 Personal Info', icon: '👤' },
-    { id: 'income', label: '💰 Income & Job', icon: '💰' },
-    { id: 'security', label: '🔒 Security', icon: '🔒' },
-    { id: 'notifications', label: '🔔 Notifications', icon: '🔔' },
-    { id: 'account', label: '⚙️ Account', icon: '⚙️' }
+    { id: 'profile', label: '👤 Personal Info' },
+    { id: 'income', label: '💰 Income & Job' },
+    { id: 'security', label: '🔒 Security' },
+    { id: 'notifications', label: '🔔 Notifications' },
+    { id: 'account', label: '⚙️ Account' }
   ]
 
   const renderTabContent = () => {
@@ -105,60 +95,36 @@ const Profile = () => {
               marginBottom: '2rem',
               border: darkMode ? '1px solid #4b5563' : '1px solid #e2e8f0'
             }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-                marginBottom: '1rem'
-              }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
                 <div style={{
-                  width: '60px',
-                  height: '60px',
+                  width: '60px', height: '60px',
                   backgroundColor: darkMode ? '#4b5563' : '#e2e8f0',
                   borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '1.5rem'
                 }}>
                   👤
                 </div>
                 <div>
-                  <h4 style={{
-                    fontSize: '1.25rem',
-                    fontWeight: '600',
-                    color: darkMode ? '#f8fafc' : '#1e293b',
-                    marginBottom: '0.25rem'
-                  }}>
+                  <h4 style={{ fontSize: '1.25rem', fontWeight: '600', color: darkMode ? '#f8fafc' : '#1e293b', marginBottom: '0.25rem' }}>
                     {user?.name || 'User Name'}
                   </h4>
-                  <p style={{
-                    color: darkMode ? '#9ca3af' : '#6b7280',
-                    fontSize: '0.875rem'
-                  }}>
+                  <p style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '0.875rem' }}>
                     {user?.email || 'user@example.com'}
                   </p>
-                  <p style={{
-                    color: darkMode ? '#9ca3af' : '#6b7280',
-                    fontSize: '0.75rem'
-                  }}>
+                  <p style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '0.75rem' }}>
                     Account created: January 2024
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Data Export */}
+            {/* Data Management */}
             <div style={{ marginBottom: '2rem' }}>
-              <h4 style={{
-                fontSize: '1.125rem',
-                fontWeight: '600',
-                color: darkMode ? '#f8fafc' : '#1e293b',
-                marginBottom: '1rem'
-              }}>
+              <h4 style={{ fontSize: '1.125rem', fontWeight: '600', color: darkMode ? '#f8fafc' : '#1e293b', marginBottom: '1rem' }}>
                 📊 Data Management
               </h4>
-              
+
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
@@ -171,24 +137,13 @@ const Profile = () => {
                   borderRadius: '0.5rem',
                   border: darkMode ? '1px solid #4b5563' : '1px solid #e2e8f0'
                 }}>
-                  <h5 style={{
-                    fontSize: '1rem',
-                    fontWeight: '600',
-                    color: darkMode ? '#f8fafc' : '#1e293b',
-                    marginBottom: '0.5rem'
-                  }}>
+                  <h5 style={{ fontSize: '1rem', fontWeight: '600', color: darkMode ? '#f8fafc' : '#1e293b', marginBottom: '0.5rem' }}>
                     Export Data
                   </h5>
-                  <p style={{
-                    fontSize: '0.875rem',
-                    color: darkMode ? '#9ca3af' : '#6b7280',
-                    marginBottom: '1rem'
-                  }}>
+                  <p style={{ fontSize: '0.875rem', color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: '1rem' }}>
                     Download all your financial data
                   </p>
-                  <Button variant="outline" size="sm">
-                    📥 Export
-                  </Button>
+                  <Button variant="outline" size="sm">📥 Export</Button>
                 </div>
 
                 <div style={{
@@ -197,24 +152,13 @@ const Profile = () => {
                   borderRadius: '0.5rem',
                   border: darkMode ? '1px solid #4b5563' : '1px solid #e2e8f0'
                 }}>
-                  <h5 style={{
-                    fontSize: '1rem',
-                    fontWeight: '600',
-                    color: darkMode ? '#f8fafc' : '#1e293b',
-                    marginBottom: '0.5rem'
-                  }}>
+                  <h5 style={{ fontSize: '1rem', fontWeight: '600', color: darkMode ? '#f8fafc' : '#1e293b', marginBottom: '0.5rem' }}>
                     Import Data
                   </h5>
-                  <p style={{
-                    fontSize: '0.875rem',
-                    color: darkMode ? '#9ca3af' : '#6b7280',
-                    marginBottom: '1rem'
-                  }}>
+                  <p style={{ fontSize: '0.875rem', color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: '1rem' }}>
                     Import from bank or other apps
                   </p>
-                  <Button variant="outline" size="sm">
-                    📤 Import
-                  </Button>
+                  <Button variant="outline" size="sm">📤 Import</Button>
                 </div>
               </div>
             </div>
@@ -226,40 +170,21 @@ const Profile = () => {
               borderRadius: '0.75rem',
               border: '1px solid #fecaca'
             }}>
-              <h4 style={{
-                fontSize: '1.125rem',
-                fontWeight: '600',
-                color: '#dc2626',
-                marginBottom: '1rem'
-              }}>
+              <h4 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#dc2626', marginBottom: '1rem' }}>
                 ⚠️ Danger Zone
               </h4>
-              
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '1rem'
-              }}>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
-                  <h5 style={{
-                    fontSize: '1rem',
-                    fontWeight: '600',
-                    color: '#dc2626',
-                    marginBottom: '0.25rem'
-                  }}>
+                  <h5 style={{ fontSize: '1rem', fontWeight: '600', color: '#dc2626', marginBottom: '0.25rem' }}>
                     Delete Account
                   </h5>
-                  <p style={{
-                    fontSize: '0.875rem',
-                    color: '#7f1d1d'
-                  }}>
+                  <p style={{ fontSize: '0.875rem', color: '#7f1d1d' }}>
                     Permanently delete your account and all data. This cannot be undone.
                   </p>
                 </div>
-                <Button 
-                  variant="danger" 
+                <Button
+                  variant="danger"
                   size="sm"
                   onClick={() => setShowDeleteAccount(true)}
                 >
@@ -278,12 +203,31 @@ const Profile = () => {
     <div style={pageStyle}>
       {/* Header */}
       <div style={headerStyle}>
-        <h1 style={titleStyle}>
-          ⚙️ Settings & Profile
-        </h1>
-        <p style={subtitleStyle}>
-          Manage your account, privacy, and preferences
-        </p>
+        <h1 style={titleStyle}>⚙️ Settings & Profile</h1>
+        <p style={subtitleStyle}>Manage your account, privacy, and preferences</p>
       </div>
 
-      {/*
+      {/* Tabs */}
+      <div style={tabsStyle}>
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            style={tabStyle(activeTab === tab.id)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Content */}
+      <div style={contentStyle}>
+        {renderTabContent()}
+      </div>
+
+      {/* Delete modal could go here based on showDeleteAccount */}
+    </div>
+  )
+}
+
+export default Profile

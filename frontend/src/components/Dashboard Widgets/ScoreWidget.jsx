@@ -1,5 +1,5 @@
-import { useScoreContext } from '../hooks/useScoreContext'
-import { useTheme } from '../context/ThemeContext'
+import { useScoreContext } from '../../hooks/Data Management Hooks/useScoreContext'
+import { useTheme } from '../../context/ThemeContext'
 import { useState, useEffect } from 'react'
 
 const ScoreWidget = () => {

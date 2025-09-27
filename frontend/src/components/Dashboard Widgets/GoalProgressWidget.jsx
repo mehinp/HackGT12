@@ -1,7 +1,7 @@
-import { useGoalsContext } from '../hooks/useGoalsContext'
-import { useTheme } from '../context/ThemeContext'
+import { useGoalsContext } from '../../hooks/Data Management Hooks/useGoalsContext'
+import { useTheme } from '../../context/ThemeContext'
 import { Link } from 'react-router-dom'
-import Button from './Button'
+import Button from '../Button'
 
 const GoalProgressWidget = () => {
   const { goals } = useGoalsContext()

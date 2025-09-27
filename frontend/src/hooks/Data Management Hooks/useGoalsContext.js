@@ -1,4 +1,4 @@
-import { GoalsContext } from '../context/GoalsContext'
+import { GoalsContext } from '../../context/GoalsContext'
 import { useContext } from 'react'
 
 export const useGoalsContext = () => {

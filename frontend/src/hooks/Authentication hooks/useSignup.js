@@ -1,3 +1,4 @@
+// hooks/useSignup.js
 import { useState } from 'react'
 import { useAuthContext } from './useAuthContext'
 
@@ -31,38 +32,21 @@ export const useSignup = () => {
     }
 
     try {
-      const response = await fetch('/api/user/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          firstName, 
-          lastName, 
-          email, 
-          password,
-          name: `${firstName} ${lastName}` // Combine for full name
-        })
-      })
-      
-      const json = await response.json()
-
-      if (!response.ok) {
-        setIsLoading(false)
-        setError(json.error || 'Failed to create account')
-        return false
+      // Mock signup - replace with actual API call
+      const mockUser = {
+        id: Date.now(),
+        name: `${firstName} ${lastName}`,
+        email,
+        token: 'mock-jwt-token'
       }
 
-      // Save user to local storage
-      localStorage.setItem('user', JSON.stringify(json))
-
-      // Update auth context
-      dispatch({ type: 'LOGIN', payload: json })
-
+      localStorage.setItem('user', JSON.stringify(mockUser))
+      dispatch({ type: 'LOGIN', payload: mockUser })
       setIsLoading(false)
       return true
-
     } catch (err) {
       setIsLoading(false)
-      setError('Network error. Please try again.')
+      setError('Failed to create account')
       return false
     }
   }

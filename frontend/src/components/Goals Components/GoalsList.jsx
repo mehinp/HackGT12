@@ -1,5 +1,5 @@
-import { useTheme } from '../context/ThemeContext'
-import { useGoalsContext } from '../hooks/useGoalsContext'
+import { useTheme } from '../../context/ThemeContext'
+import { useGoalsContext } from '../../hooks/Data Management Hooks/useGoalsContext'
 import GoalCard from './GoalCard'
 
 const GoalsList = ({ goals, onSelectGoal }) => {

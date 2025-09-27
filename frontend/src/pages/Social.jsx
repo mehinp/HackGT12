@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { useSocialContext } from '../hooks/useSocialContext'
-import { useAuthContext } from '../hooks/useAuthContext'
+import { useSocialContext } from '../hooks/Data Management Hooks/useSocialContext'
+import { useAuthContext } from '../hooks/Authentication hooks/useAuthContext'
 import { useTheme } from '../context/ThemeContext'
 import Button from '../components/Button'
 import Input from '../components/Input'
-import Leaderboard from '../components/Leaderboard'
-import FriendManagement from '../components/FriendManagement'
-import SocialStats from '../components/SocialStats'
+import Leaderboard from '../components/Social Components/Leaderboard'
+import FriendManagement from '../components/Social Components/FriendManagement'
+import SocialStats from '../components/Social Components/SocialStats'
 
 const Social = () => {
   const { friends } = useSocialContext()

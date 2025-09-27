@@ -1,5 +1,5 @@
-import { usePurchasesContext } from '../hooks/usePurchasesContext'
-import { useTheme } from '../context/ThemeContext'
+import { usePurchasesContext } from '../../hooks/Data Management Hooks/usePurchasesContext'
+import { useTheme } from '../../context/ThemeContext'
 
 const QuickStatsWidget = () => {
   const { purchases } = usePurchasesContext()

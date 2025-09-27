@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
-import { useAuthContext } from '../hooks/useAuthContext'
-import { useScoreContext } from '../hooks/useScoreContext'
+import { useAuthContext } from '../hooks/Authentication hooks/useAuthContext'
+import { useScoreContext } from '../hooks/Data Management Hooks/useScoreContext'
 import Button from './Button'
 
 const Navbar = () => {

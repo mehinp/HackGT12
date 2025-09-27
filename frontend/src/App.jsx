@@ -5,7 +5,8 @@ import { PurchasesContextProvider } from './context/PurchasesContext'
 import { GoalsContextProvider } from './context/GoalsContext'
 import { SocialContextProvider } from './context/SocialContext'
 import { ScoreContextProvider } from './context/ScoreContext'
-import { useAuthContext } from './hooks/useAuthContext'
+import { useAuthContext } from "./hooks/Authentication hooks/useAuthContext.js";
+
 
 import Layout from './components/Layout'
 import Home from './pages/Home'

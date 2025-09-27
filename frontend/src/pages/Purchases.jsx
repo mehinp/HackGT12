@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { usePurchasesContext } from '../hooks/usePurchasesContext'
+import { usePurchasesContext } from '../hooks/Data Management Hooks/usePurchasesContext'
 import { useTheme } from '../context/ThemeContext'
 import Button from '../components/Button'
 import Input from '../components/Input'
-import PurchasesList from '../components/PurchasesList'
-import PurchaseFilter from '../components/PurchaseFilter'
-import PurchaseStats from '../components/PurchaseStats'
+import PurchasesList from '../components/Purchases Components/PurchasesList'
+import PurchaseFilter from '../components/Purchases Components/PurchaseFilter'
+import PurchaseStats from '../components/Purchases Components/PurchaseStats'
 
 const Purchases = () => {
   const { purchases } = usePurchasesContext()
@@ -405,5 +405,27 @@ const Purchases = () => {
                 <option value="other">Other</option>
               </select>
             </div>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <Input label="Description" placeholder="Optional description" />
+            
+            <div style={{
+              display: 'flex',
+              gap: '1rem',
+              justifyContent: 'flex-end'
+            }}>
+              <Button 
+                variant="secondary" 
+                onClick={() => setShowAddPurchase(false)}
+              >
+                Cancel
+              </Button>
+              <Button variant="primary">
+                Add Purchase
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default Purchases

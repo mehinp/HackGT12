@@ -1,7 +1,7 @@
-import { usePurchasesContext } from '../hooks/usePurchasesContext'
-import { useTheme } from '../context/ThemeContext'
+import { usePurchasesContext } from '../../hooks/Data Management Hooks/usePurchasesContext'
+import { useTheme } from '../../context/ThemeContext'
 import { Link } from 'react-router-dom'
-import Button from './Button'
+import Button from '../Button'
 import formatDistanceToNow from 'date-fns/formatDistanceToNow'
 
 const RecentPurchasesWidget = () => {

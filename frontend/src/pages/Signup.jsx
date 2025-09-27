@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
-import { useSignup } from '../hooks/useSignup'
+import { useSignup } from '../hooks/Authentication hooks/useSignup'
 import Button from '../components/Button'
 import Input from '../components/Input'
 

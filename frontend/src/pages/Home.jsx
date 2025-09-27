@@ -1,9 +1,9 @@
-import { useAuthContext } from '../hooks/useAuthContext'
+import { useAuthContext } from '../hooks/Authentication hooks/useAuthContext'
 import { useTheme } from '../context/ThemeContext'
-import ScoreWidget from '../components/ScoreWidget'
-import RecentPurchasesWidget from '../components/RecentPurchasesWidget'
-import GoalProgressWidget from '../components/GoalProgressWidget'
-import QuickStatsWidget from '../components/QuickStatsWidget'
+import ScoreWidget from '../components/Dashboard Widgets/ScoreWidget'
+import RecentPurchasesWidget from '../components/Dashboard Widgets/RecentPurchasesWidget'
+import GoalProgressWidget from '../components/Dashboard Widgets/GoalProgressWidget'
+import QuickStatsWidget from '../components/Dashboard Widgets/QuickStatsWidget'
 import Button from '../components/Button'
 
 const Home = () => {

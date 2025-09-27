@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { useGoalsContext } from '../hooks/useGoalsContext'
+import { useGoalsContext } from '../hooks/Data Management Hooks/useGoalsContext'
 import { useTheme } from '../context/ThemeContext'
 import Button from '../components/Button'
-import GoalsList from '../components/GoalsList'
-import GoalForm from '../components/GoalForm'
-import GoalChart from '../components/GoalChart'
-import ChatbotModal from '../components/ChatbotModal'
+import GoalsList from '../components/Goals Components/GoalsList'
+import GoalForm from '../components/Goals Components/GoalForm'
+import GoalChart from '../components/Goals Components/GoalChart'
+import ChatbotModal from '../components/chatbot/ChatbotModal'
 
 const Goals = () => {
   const { goals } = useGoalsContext()
