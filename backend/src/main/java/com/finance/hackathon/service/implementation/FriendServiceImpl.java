@@ -6,6 +6,8 @@ import com.finance.hackathon.service.FriendService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class FriendServiceImpl implements FriendService {
@@ -19,5 +21,10 @@ public class FriendServiceImpl implements FriendService {
     @Override
     public int getFriendsCount(Long userId) {
         return friendRepository.getFriendsCount(userId);
+    }
+
+    @Override
+    public List<User> getAllFriends(Long userId) {
+        return friendRepository.getAllFriends(userId);
     }
 }

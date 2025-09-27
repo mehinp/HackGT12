@@ -21,4 +21,18 @@ public class User {
     private String confirmPassword;
     private BigDecimal income;
     private BigDecimal expenditures;
+    private int score;
+
+    public User(Long id, String firstName, String lastName,
+                String email, String password,
+                BigDecimal income, BigDecimal expenditures, int score) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.password = password;
+        this.income = income;
+        this.expenditures = expenditures;
+        this.score = score;
+    }
 }

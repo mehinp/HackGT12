@@ -69,6 +69,9 @@ public class UserRepositoryImpl implements UserRepository<User> {
                 .lastName(rs.getString("last_name"))
                 .email(rs.getString("email"))
                 .password(rs.getString("password"))
+                .income(rs.getBigDecimal("income"))
+                .expenditures(rs.getBigDecimal("expenditures"))
+                .score(rs.getInt("score"))
                 .build();
     }
 }
