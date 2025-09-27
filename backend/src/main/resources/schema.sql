@@ -5,8 +5,8 @@ SET NAMES 'UTF8MB4';
 USE HackGT;
 
 -- drop tables if they exist
-DROP TABLE IF EXISTS Users;
 DROP TABLE IF EXISTS Purchases;
+DROP TABLE IF EXISTS Users;
 
 -- create tables
 

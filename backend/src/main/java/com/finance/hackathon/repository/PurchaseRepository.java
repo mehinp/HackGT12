@@ -3,5 +3,6 @@ import com.finance.hackathon.domain.Purchase;
 
 public interface PurchaseRepository {
 
-    Purchase newPurchase(Purchase purchase);
+    void newPurchase(Purchase purchase, Long currentUserId);
+    Purchase getPurchaseById(Long id);
 }

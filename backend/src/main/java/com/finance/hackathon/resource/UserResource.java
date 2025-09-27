@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping(path="/user")
@@ -24,13 +25,20 @@ public class UserResource {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<User> login(@RequestBody User loginUser) {
+    public ResponseEntity<User> login(@RequestBody User loginUser, HttpSession session) {
         try {
             User user = userService.authenticate(loginUser.getEmail(), loginUser.getPassword());
+            session.setAttribute("userId", user.getId());
             return ResponseEntity.ok(user);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpSession session) {
+        session.invalidate();
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}")

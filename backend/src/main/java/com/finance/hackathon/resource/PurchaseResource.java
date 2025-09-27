@@ -1,16 +1,14 @@
 package com.finance.hackathon.resource;
 
 import com.finance.hackathon.domain.Purchase;
-import com.finance.hackathon.domain.User;
 import com.finance.hackathon.service.PurchaseService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,16 +17,35 @@ public class PurchaseResource {
     private final PurchaseService purchaseService;
 
     @PostMapping("/record")
-    public ResponseEntity<Purchase> newPurchase(@RequestBody Purchase purchase, Authentication authentication) {
-        Long userId = getCurrentUserId(authentication);
-        Purchase saved = purchaseService.newPurchase(purchase, userId);
+    public ResponseEntity<?> newPurchase(@RequestBody Purchase purchase, HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("User not logged in");
+        }
+        purchaseService.newPurchase(purchase, userId);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(saved);
+                .body(Map.of(
+                        "userId", userId,
+                        "amount", purchase.getAmount(),
+                        "category", purchase.getCategory(),
+                        "merchant", purchase.getMerchant()
+                ));
     }
 
-    private Long getCurrentUserId(Authentication authentication) {
-        return ((User) authentication.getPrincipal()).getId();
+    @GetMapping("/admin/{id}")
+    public ResponseEntity<?> getPurchaseAdmin(@PathVariable("id") Long id) {
+        Purchase purchase = purchaseService.getPurchaseById(id);
+
+        if (purchase == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Purchase not found");
+        }
+
+        return ResponseEntity.ok(purchase);
     }
+
+
 
 }

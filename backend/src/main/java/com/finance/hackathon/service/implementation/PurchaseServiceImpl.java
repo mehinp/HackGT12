@@ -11,17 +11,13 @@ import org.springframework.stereotype.Service;
 public class PurchaseServiceImpl implements PurchaseService {
     private final PurchaseRepository purchaseRepository;
 
+    @Override
+    public void newPurchase(Purchase purchase, Long currentUserId){
+        purchaseRepository.newPurchase(purchase, currentUserId);
+    }
 
-
-
-    public Purchase newPurchase(Purchase purchase, Long currentUserId){
-        Purchase purchaseWithUserId = new Purchase(
-                purchase.getId(),
-                currentUserId,  // Set the user ID from the logged-in user
-                purchase.getAmount(),
-                purchase.getCategory(),
-                purchase.getMerchant()
-        );
-        return purchaseRepository.newPurchase(purchaseWithUserId);
+    @Override
+    public Purchase getPurchaseById(Long id) {
+        return purchaseRepository.getPurchaseById(id);
     }
 }
