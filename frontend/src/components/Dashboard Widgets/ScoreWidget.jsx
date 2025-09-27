@@ -3,22 +3,41 @@ import { useTheme } from '../../context/ThemeContext'
 import { useState, useEffect } from 'react'
 
 const ScoreWidget = () => {
-  const { currentScore, getScoreColor, getScoreLabel } = useScoreContext()
+  const { currentScore } = useScoreContext()
   const { darkMode } = useTheme()
   const [animatedScore, setAnimatedScore] = useState(0)
+
+  // Add missing functions locally
+  const getScoreColor = (score) => {
+    if (score >= 700) return '#10b981' // green
+    if (score >= 600) return '#f59e0b' // yellow/orange
+    if (score >= 500) return '#ef4444' // red
+    return '#6b7280' // gray for no score
+  }
+
+  const getScoreLabel = (score) => {
+    if (score >= 800) return 'Excellent'
+    if (score >= 700) return 'Good'
+    if (score >= 600) return 'Fair'
+    if (score >= 500) return 'Poor'
+    return 'No Score'
+  }
+
+  // Use fallback score if context doesn't provide one
+  const displayScore = currentScore || 500
 
   useEffect(() => {
     // Animate score counting up
     const timer = setTimeout(() => {
-      if (animatedScore < currentScore) {
-        setAnimatedScore(prev => Math.min(prev + 5, currentScore))
+      if (animatedScore < displayScore) {
+        setAnimatedScore(prev => Math.min(prev + 5, displayScore))
       }
     }, 20)
     return () => clearTimeout(timer)
-  }, [animatedScore, currentScore])
+  }, [animatedScore, displayScore])
 
-  const scoreColor = getScoreColor(currentScore)
-  const scoreLabel = getScoreLabel(currentScore)
+  const scoreColor = getScoreColor(displayScore)
+  const scoreLabel = getScoreLabel(displayScore)
 
   const headerStyle = {
     display: 'flex',
@@ -72,7 +91,7 @@ const ScoreWidget = () => {
     height: '100%',
     backgroundColor: scoreColor,
     borderRadius: '4px',
-    width: `${(currentScore / 850) * 100}%`,
+    width: `${(displayScore / 850) * 100}%`,
     transition: 'width 0.5s ease'
   }
 
@@ -116,7 +135,7 @@ const ScoreWidget = () => {
           📊 Financial Score
         </h3>
         <span style={{ fontSize: '1.5rem' }}>
-          {getScoreEmoji(currentScore)}
+          {getScoreEmoji(displayScore)}
         </span>
       </div>
 
@@ -142,7 +161,7 @@ const ScoreWidget = () => {
 
       <div style={improvementStyle}>
         <span style={{ fontSize: '0.875rem', textAlign: 'center', color: darkMode ? '#cbd5e1' : '#64748b' }}>
-          {getImprovementTip(currentScore)}
+          {getImprovementTip(displayScore)}
         </span>
       </div>
     </div>

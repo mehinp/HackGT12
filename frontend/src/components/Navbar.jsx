@@ -7,8 +7,16 @@ import Button from './Button'
 const Navbar = () => {
   const { darkMode, toggleDarkMode } = useTheme()
   const { user, dispatch } = useAuthContext()
-  const { currentScore, getScoreColor } = useScoreContext()
+  const { currentScore } = useScoreContext()
   const location = useLocation()
+
+  // Add the missing getScoreColor function
+  const getScoreColor = (score) => {
+    if (score >= 700) return '#10b981' // green
+    if (score >= 600) return '#f59e0b' // yellow/orange
+    if (score >= 500) return '#ef4444' // red
+    return '#6b7280' // gray for no score
+  }
 
   const handleLogout = () => {
     localStorage.removeItem('user')
@@ -183,7 +191,7 @@ const Navbar = () => {
               color: getScoreColor(currentScore),
               fontSize: '1rem'
             }}>
-              {currentScore}
+              {currentScore || 500}
             </span>
           </div>
 

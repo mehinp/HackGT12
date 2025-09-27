@@ -1,30 +1,49 @@
-// src/hooks/Authentication hooks/useLogin.js
+// hooks/useLogin.js
 import { useState } from 'react'
 import { useAuthContext } from './useAuthContext'
-import useAPI from '../Data Management Hooks/useAPI'
 
 export const useLogin = () => {
   const [error, setError] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const { dispatch } = useAuthContext()
-  const api = useAPI()
 
-  const login = async (rawEmail, password, rememberMe = false) => {
+  const login = async (email, password, rememberMe = false) => {
     setIsLoading(true)
     setError(null)
-    const email = (rawEmail || '').trim().toLowerCase()
 
     try {
-      const data = await api.post('/user/login', { email, password, rememberMe })
-      let user = data?.user || data // handle either {user:...} or plain user
+      const response = await fetch('http://143.215.104.239:8080/user/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          email: email.trim().toLowerCase(), 
+          password,
+          rememberMe 
+        })
+      })
 
-      if (!user) throw new Error('No user returned from API')
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Login failed')
+      }
 
-      dispatch({ type: 'LOGIN', payload: user })
+      const userData = await response.json()
+      
+      // Store user data
+      localStorage.setItem('user', JSON.stringify(userData))
+      
+      dispatch({ 
+        type: 'LOGIN_SUCCESS', 
+        payload: userData 
+      })
+      
       setIsLoading(false)
       return true
-    } catch (e) {
-      setError(e.message || 'Login failed')
+
+    } catch (err) {
+      setError(err.message || 'Login failed')
       setIsLoading(false)
       return false
     }

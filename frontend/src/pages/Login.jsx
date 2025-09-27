@@ -1,13 +1,14 @@
 // src/pages/Login.jsx
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
 import { useLogin } from '../hooks/Authentication hooks/useLogin'
 import Button from '../components/Button'
 import Input from '../components/Input'
 
 const Login = () => {
-  const [email, setEmail] = useState('')
+  const location = useLocation()
+  const [email, setEmail] = useState(location.state?.email || '')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
   const [debug, setDebug] = useState(null) // shows extra error info if available
@@ -15,6 +16,9 @@ const Login = () => {
   const navigate = useNavigate()
   const { darkMode, toggleDarkMode } = useTheme()
   const { login, error, isLoading } = useLogin()
+
+  // Success message from signup
+  const successMessage = location.state?.message
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -77,6 +81,15 @@ const Login = () => {
     borderRadius: '0.5rem', border: '1px solid #fecaca',
     fontSize: '0.875rem', marginBottom: '0.25rem'
   }
+  const successStyle = {
+    backgroundColor: darkMode ? '#064e3b' : '#f0fdf4',
+    color: darkMode ? '#34d399' : '#166534',
+    padding: '0.75rem',
+    borderRadius: '0.5rem',
+    border: darkMode ? '1px solid #065f46' : '1px solid #bbf7d0',
+    fontSize: '0.875rem',
+    marginBottom: '1rem'
+  }
   const debugStyle = {
     backgroundColor: darkMode ? '#0b1020' : '#f1f5f9',
     color: darkMode ? '#cbd5e1' : '#334155',
@@ -102,6 +115,13 @@ const Login = () => {
         </div>
 
         <form onSubmit={handleSubmit} style={formStyle} noValidate>
+          {/* Show success message if coming from signup */}
+          {successMessage && (
+            <div style={successStyle}>
+              ✅ {successMessage}
+            </div>
+          )}
+          
           {error && <div style={errorStyle}>{error}</div>}
           {debug && <div style={debugStyle}>{debug}</div>}
 

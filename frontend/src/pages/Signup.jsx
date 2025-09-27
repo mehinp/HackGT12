@@ -10,7 +10,7 @@ const Signup = () => {
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
+
   const [income, setIncome] = useState('')
   const [expenditures, setExpenditures] = useState('')
   const { darkMode, toggleDarkMode } = useTheme()
@@ -19,12 +19,17 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     
-    if (password !== confirmPassword) {
-      // Handle password mismatch error
-      return
-    }
+    const success = await signup(firstName, lastName, email, password, income, expenditures)
     
-    await signup(firstName, lastName, email, password, income, expenditures)
+    // Clear form fields after successful signup
+    if (success) {
+      setFirstName('')
+      setLastName('')
+      setEmail('')
+      setPassword('')
+      setIncome('')
+      setExpenditures('')
+    }
   }
 
   const pageStyle = {
@@ -130,7 +135,7 @@ const Signup = () => {
     marginTop: '1rem'
   }
 
-  const passwordMismatchError = password !== confirmPassword && confirmPassword !== ''
+
 
   return (
     <div style={pageStyle}>
@@ -164,11 +169,7 @@ const Signup = () => {
             </div>
           )}
 
-          {passwordMismatchError && (
-            <div style={errorStyle}>
-              Passwords do not match
-            </div>
-          )}
+
 
           {/* Personal Information */}
           <div style={nameRowStyle}>
@@ -214,16 +215,7 @@ const Signup = () => {
             required
           />
 
-          <Input
-            label="Confirm Password"
-            type="password"
-            placeholder="Confirm your password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            icon="🔒"
-            error={passwordMismatchError ? "Passwords don't match" : ''}
-            required
-          />
+
 
           {/* Financial Information */}
           <div style={sectionHeaderStyle}>
@@ -259,7 +251,7 @@ const Signup = () => {
           <Button
             type="submit"
             size="lg"
-            disabled={isLoading || passwordMismatchError || !firstName || !lastName || !email || !password || !confirmPassword || !income || !expenditures}
+            disabled={isLoading || !firstName || !lastName || !email || !password || !income || !expenditures}
             style={{ marginTop: '0.5rem' }}
           >
             {isLoading ? '⏳ Creating Account...' : '🎉 Create Account'}
