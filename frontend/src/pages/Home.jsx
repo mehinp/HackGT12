@@ -1,8 +1,6 @@
 import { useAuthContext } from '../hooks/Authentication hooks/useAuthContext'
 import { useTheme } from '../context/ThemeContext'
 import ScoreWidget from '../components/Dashboard Widgets/ScoreWidget'
-import RecentPurchasesWidget from '../components/Dashboard Widgets/RecentPurchasesWidget'
-import GoalProgressWidget from '../components/Dashboard Widgets/GoalProgressWidget'
 import QuickStatsWidget from '../components/Dashboard Widgets/QuickStatsWidget'
 import Button from '../components/Button'
 
@@ -88,12 +86,6 @@ const Home = () => {
           <Button variant="primary" icon="➕">
             Add Purchase
           </Button>
-          <Button variant="secondary" icon="🎯">
-            Set New Goal
-          </Button>
-          <Button variant="outline" icon="💬">
-            Ask AI Assistant
-          </Button>
         </div>
       </div>
 
@@ -107,22 +99,6 @@ const Home = () => {
         {/* Quick Stats */}
         <div style={widgetContainerStyle}>
           <QuickStatsWidget />
-        </div>
-
-        {/* Goal Progress */}
-        <div style={widgetContainerStyle}>
-          <GoalProgressWidget />
-        </div>
-
-        {/* Recent Purchases */}
-        <div style={{
-          ...widgetContainerStyle,
-          gridColumn: 'span 2',
-          '@media (max-width: 768px)': {
-            gridColumn: 'span 1'
-          }
-        }}>
-          <RecentPurchasesWidget />
         </div>
       </div>
 

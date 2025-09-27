@@ -13,8 +13,6 @@ const Purchases = () => {
   const [showAddPurchase, setShowAddPurchase] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
-  const [dateRange, setDateRange] = useState('all')
-  const [sortBy, setSortBy] = useState('date')
 
   // Mock data if no purchases
   const mockPurchases = [
@@ -197,26 +195,12 @@ const Purchases = () => {
                          purchase.description?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesCategory = selectedCategory === 'all' || purchase.category === selectedCategory
     
-    // Date filtering logic would go here
-    const matchesDateRange = true // Simplified for now
-    
-    return matchesSearch && matchesCategory && matchesDateRange
+    return matchesSearch && matchesCategory
   })
 
-  // Sort purchases
+  // Sort purchases by date (newest first) by default
   const sortedPurchases = [...filteredPurchases].sort((a, b) => {
-    switch (sortBy) {
-      case 'date':
-        return new Date(b.date) - new Date(a.date)
-      case 'amount':
-        return b.amount - a.amount
-      case 'merchant':
-        return a.merchant.localeCompare(b.merchant)
-      case 'impact':
-        return b.scoreImpact - a.scoreImpact
-      default:
-        return 0
-    }
+    return new Date(b.date) - new Date(a.date)
   })
 
   return (
@@ -279,30 +263,6 @@ const Purchases = () => {
           <option value="bills">Bills & Utilities</option>
           <option value="investment">Investment</option>
           <option value="other">Other</option>
-        </select>
-
-        <select 
-          value={dateRange}
-          onChange={(e) => setDateRange(e.target.value)}
-          style={selectStyle}
-        >
-          <option value="all">All Time</option>
-          <option value="today">Today</option>
-          <option value="week">This Week</option>
-          <option value="month">This Month</option>
-          <option value="quarter">This Quarter</option>
-          <option value="year">This Year</option>
-        </select>
-
-        <select 
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          style={selectStyle}
-        >
-          <option value="date">Sort by Date</option>
-          <option value="amount">Sort by Amount</option>
-          <option value="merchant">Sort by Merchant</option>
-          <option value="impact">Sort by Impact</option>
         </select>
       </div>
 

@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { useTheme } from '../../context/ThemeContext'
 import { useAuthContext } from '../../hooks/Authentication hooks/useAuthContext'
-import Button from '../Button'
 
-const Leaderboard = ({ data, currentUser }) => {
+const Leaderboard = ({ data, currentUser, showDeleteButton = false }) => {
   const { darkMode } = useTheme()
   const { user } = useAuthContext()
   const [selectedReaction, setSelectedReaction] = useState(null)
@@ -26,6 +25,12 @@ const Leaderboard = ({ data, currentUser }) => {
       case 3: return '#cd7c2f'
       default: return darkMode ? '#f8fafc' : '#1e293b'
     }
+  }
+
+  const handleDeleteFriend = (friendId) => {
+    // Implement delete logic here
+    console.log('Delete friend:', friendId)
+    // You would typically call an API or update context here
   }
 
   const itemStyle = (isCurrentUser, rank) => ({
@@ -121,6 +126,20 @@ const Leaderboard = ({ data, currentUser }) => {
     marginRight: '0.25rem'
   }
 
+  const deleteButtonStyle = {
+    position: 'absolute',
+    top: '0.5rem',
+    right: '0.5rem',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '1rem',
+    color: '#ef4444',
+    padding: '0.25rem',
+    borderRadius: '0.25rem',
+    transition: 'all 0.2s ease'
+  }
+
   const handleReaction = (friendId, reaction) => {
     // Mock reaction functionality
     console.log(`Reacted to ${friendId} with ${reaction}`)
@@ -160,6 +179,23 @@ const Leaderboard = ({ data, currentUser }) => {
               }
             }}
           >
+            {/* Delete button - only show for friends, not current user */}
+            {showDeleteButton && !isCurrentUser && (
+              <button 
+                onClick={() => handleDeleteFriend(friend.id)}
+                style={deleteButtonStyle}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = 'rgba(239, 68, 68, 0.1)'
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'transparent'
+                }}
+                title="Remove friend"
+              >
+                ❌
+              </button>
+            )}
+
             {/* Rank */}
             <div style={rankStyle(rank)}>
               {getRankIcon(rank)}
@@ -264,30 +300,6 @@ const Leaderboard = ({ data, currentUser }) => {
           }
         `}
       </style>
-
-      {/* Footer */}
-      <div style={{
-        textAlign: 'center',
-        padding: '1rem',
-        color: darkMode ? '#9ca3af' : '#6b7280',
-        fontSize: '0.875rem'
-      }}>
-        <p>🏆 Compete with friends and achieve your financial goals together!</p>
-        
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          gap: '1rem',
-          marginTop: '1rem'
-        }}>
-          <Button variant="outline" size="sm">
-            📊 View My Progress
-          </Button>
-          <Button variant="outline" size="sm">
-            🎯 Create Challenge
-          </Button>
-        </div>
-      </div>
     </div>
   )
 }

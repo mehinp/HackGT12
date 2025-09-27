@@ -5,8 +5,6 @@ import { useTheme } from '../context/ThemeContext'
 import Button from '../components/Button'
 import Input from '../components/Input'
 import Leaderboard from '../components/Social Components/Leaderboard'
-import FriendManagement from '../components/Social Components/FriendManagement'
-import SocialStats from '../components/Social Components/SocialStats'
 
 const Social = () => {
   const { friends } = useSocialContext()
@@ -120,30 +118,12 @@ const Social = () => {
     flexWrap: 'wrap'
   }
 
-  const contentGridStyle = {
-    display: 'grid',
-    gridTemplateColumns: '1fr 350px',
-    gap: '2rem',
-    '@media (max-width: 1024px)': {
-      gridTemplateColumns: '1fr'
-    }
-  }
-
   const mainContentStyle = {
     backgroundColor: darkMode ? '#1e293b' : '#ffffff',
     borderRadius: '1rem',
     padding: '1.5rem',
     border: darkMode ? '1px solid #374151' : '1px solid #e2e8f0',
     boxShadow: darkMode ? '0 4px 6px rgba(0,0,0,0.3)' : '0 4px 6px rgba(0,0,0,0.07)'
-  }
-
-  const sidebarStyle = {
-    backgroundColor: darkMode ? '#1e293b' : '#ffffff',
-    borderRadius: '1rem',
-    padding: '1.5rem',
-    border: darkMode ? '1px solid #374151' : '1px solid #e2e8f0',
-    boxShadow: darkMode ? '0 4px 6px rgba(0,0,0,0.3)' : '0 4px 6px rgba(0,0,0,0.07)',
-    height: 'fit-content'
   }
 
   const userRank = leaderboardData.findIndex(f => f.email === user?.email) + 1
@@ -168,18 +148,6 @@ const Social = () => {
             onClick={() => setShowAddFriend(true)}
           >
             Add Friend
-          </Button>
-          <Button 
-            variant="secondary" 
-            icon="🏆"
-          >
-            View Challenges
-          </Button>
-          <Button 
-            variant="outline" 
-            icon="📊"
-          >
-            Group Analytics
           </Button>
         </div>
       </div>
@@ -311,147 +279,21 @@ const Social = () => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div style={contentGridStyle}>
-        {/* Leaderboard */}
-        <div style={mainContentStyle}>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '1.5rem'
+      {/* Leaderboard */}
+      <div style={mainContentStyle}>
+        <div style={{
+          marginBottom: '1.5rem'
+        }}>
+          <h2 style={{
+            fontSize: '1.5rem',
+            fontWeight: '600',
+            color: darkMode ? '#f8fafc' : '#1e293b'
           }}>
-            <h2 style={{
-              fontSize: '1.5rem',
-              fontWeight: '600',
-              color: darkMode ? '#f8fafc' : '#1e293b'
-            }}>
-              🏆 Leaderboard
-            </h2>
-            <select style={{
-              padding: '0.5rem 1rem',
-              borderRadius: '0.5rem',
-              border: darkMode ? '1px solid #374151' : '1px solid #e2e8f0',
-              backgroundColor: darkMode ? '#374151' : '#f8fafc',
-              color: darkMode ? '#f8fafc' : '#1e293b',
-              fontSize: '0.875rem'
-            }}>
-              <option>This Month</option>
-              <option>This Week</option>
-              <option>All Time</option>
-            </select>
-          </div>
-          
-          <Leaderboard data={leaderboardData} currentUser={currentUser} />
+            🏆 Leaderboard
+          </h2>
         </div>
-
-        {/* Sidebar */}
-        <div>
-          {/* Friend Management */}
-          <div style={sidebarStyle}>
-            <h3 style={{
-              fontSize: '1.25rem',
-              fontWeight: '600',
-              color: darkMode ? '#f8fafc' : '#1e293b',
-              marginBottom: '1rem'
-            }}>
-              👫 Friends
-            </h3>
-            <FriendManagement friends={currentFriends} />
-          </div>
-
-          {/* Social Stats */}
-          <div style={{ ...sidebarStyle, marginTop: '1rem' }}>
-            <h3 style={{
-              fontSize: '1.25rem',
-              fontWeight: '600',
-              color: darkMode ? '#f8fafc' : '#1e293b',
-              marginBottom: '1rem'
-            }}>
-              📊 Social Stats
-            </h3>
-            <SocialStats friends={currentFriends} currentUser={currentUser} />
-          </div>
-
-          {/* Challenges */}
-          <div style={{ ...sidebarStyle, marginTop: '1rem' }}>
-            <h3 style={{
-              fontSize: '1.25rem',
-              fontWeight: '600',
-              color: darkMode ? '#f8fafc' : '#1e293b',
-              marginBottom: '1rem'
-            }}>
-              🎯 Active Challenges
-            </h3>
-            
-            <div style={{ marginBottom: '1rem' }}>
-              <div style={{
-                padding: '1rem',
-                backgroundColor: darkMode ? '#374151' : '#f8fafc',
-                borderRadius: '0.5rem',
-                border: darkMode ? '1px solid #4b5563' : '1px solid #e2e8f0'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '0.5rem'
-                }}>
-                  <h4 style={{
-                    fontSize: '0.875rem',
-                    fontWeight: '600',
-                    color: darkMode ? '#f8fafc' : '#1e293b'
-                  }}>
-                    💰 Savings Challenge
-                  </h4>
-                  <span style={{
-                    fontSize: '0.75rem',
-                    color: '#10b981',
-                    fontWeight: '600'
-                  }}>
-                    5 days left
-                  </span>
-                </div>
-                <p style={{
-                  fontSize: '0.75rem',
-                  color: darkMode ? '#cbd5e1' : '#64748b',
-                  marginBottom: '0.5rem'
-                }}>
-                  Save $100 this week with friends
-                </p>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}>
-                  <div style={{
-                    width: '100%',
-                    height: '4px',
-                    backgroundColor: darkMode ? '#1e293b' : '#e2e8f0',
-                    borderRadius: '2px'
-                  }}>
-                    <div style={{
-                      width: '65%',
-                      height: '100%',
-                      backgroundColor: '#10b981',
-                      borderRadius: '2px'
-                    }}></div>
-                  </div>
-                  <span style={{
-                    fontSize: '0.75rem',
-                    color: darkMode ? '#9ca3af' : '#6b7280'
-                  }}>
-                    65%
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <Button variant="outline" size="sm" style={{ width: '100%' }}>
-              View All Challenges
-            </Button>
-          </div>
-        </div>
+        
+        <Leaderboard data={leaderboardData} currentUser={currentUser} showDeleteButton={true} />
       </div>
 
       {/* Add Friend Modal */}

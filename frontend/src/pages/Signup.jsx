@@ -10,7 +10,7 @@ const Signup = () => {
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [income, setIncome] = useState('')
   const [expenditures, setExpenditures] = useState('')
   const { darkMode, toggleDarkMode } = useTheme()
@@ -19,7 +19,7 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     
-    const success = await signup(firstName, lastName, email, password, income, expenditures)
+    const success = await signup(firstName, lastName, email, password, confirmPassword, income, expenditures)
     
     // Clear form fields after successful signup
     if (success) {
@@ -27,6 +27,7 @@ const Signup = () => {
       setLastName('')
       setEmail('')
       setPassword('')
+      setConfirmPassword('')
       setIncome('')
       setExpenditures('')
     }
@@ -43,7 +44,7 @@ const Signup = () => {
 
   const containerStyle = {
     width: '100%',
-    maxWidth: '500px', // Increased width slightly for better layout
+    maxWidth: '500px',
     backgroundColor: darkMode ? '#1e293b' : '#ffffff',
     padding: '2rem',
     borderRadius: '1rem',
@@ -135,8 +136,6 @@ const Signup = () => {
     marginTop: '1rem'
   }
 
-
-
   return (
     <div style={pageStyle}>
       <button 
@@ -168,8 +167,6 @@ const Signup = () => {
               {error}
             </div>
           )}
-
-
 
           {/* Personal Information */}
           <div style={nameRowStyle}>
@@ -215,7 +212,15 @@ const Signup = () => {
             required
           />
 
-
+          <Input
+            label="Confirm Password"
+            type="password"
+            placeholder="Confirm your password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            icon="🔒"
+            required
+          />
 
           {/* Financial Information */}
           <div style={sectionHeaderStyle}>
@@ -251,7 +256,7 @@ const Signup = () => {
           <Button
             type="submit"
             size="lg"
-            disabled={isLoading || !firstName || !lastName || !email || !password || !income || !expenditures}
+            disabled={isLoading || !firstName || !lastName || !email || !password || !confirmPassword || !income || !expenditures}
             style={{ marginTop: '0.5rem' }}
           >
             {isLoading ? '⏳ Creating Account...' : '🎉 Create Account'}

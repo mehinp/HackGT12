@@ -9,13 +9,19 @@ export const useSignup = () => {
   const { dispatch } = useAuthContext()
   const navigate = useNavigate()
 
-  const signup = async (firstName, lastName, email, password, income, expenditures) => {
+  const signup = async (firstName, lastName, email, password, confirmPassword, income, expenditures) => {
     setIsLoading(true)
     setError(null)
 
     // Basic validation
-    if (!firstName || !lastName || !email || !password || income === '' || expenditures === '') {
+    if (!firstName || !lastName || !email || !password || !confirmPassword || income === '' || expenditures === '') {
       setError('Please fill in all fields')
+      setIsLoading(false)
+      return false
+    }
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match')
       setIsLoading(false)
       return false
     }
