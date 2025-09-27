@@ -11,6 +11,8 @@ const Signup = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [income, setIncome] = useState('')
+  const [expenditures, setExpenditures] = useState('')
   const { darkMode, toggleDarkMode } = useTheme()
   const { signup, error, isLoading } = useSignup()
 
@@ -22,7 +24,7 @@ const Signup = () => {
       return
     }
     
-    await signup(firstName, lastName, email, password)
+    await signup(firstName, lastName, email, password, income, expenditures)
   }
 
   const pageStyle = {
@@ -36,7 +38,7 @@ const Signup = () => {
 
   const containerStyle = {
     width: '100%',
-    maxWidth: '450px',
+    maxWidth: '500px', // Increased width slightly for better layout
     backgroundColor: darkMode ? '#1e293b' : '#ffffff',
     padding: '2rem',
     borderRadius: '1rem',
@@ -79,6 +81,12 @@ const Signup = () => {
     gap: '1rem'
   }
 
+  const financialRowStyle = {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '1rem'
+  }
+
   const linkStyle = {
     color: '#3b82f6',
     textDecoration: 'none',
@@ -112,6 +120,14 @@ const Signup = () => {
     border: '1px solid #fecaca',
     fontSize: '0.875rem',
     marginBottom: '1rem'
+  }
+
+  const sectionHeaderStyle = {
+    fontSize: '1rem',
+    fontWeight: '600',
+    color: darkMode ? '#f8fafc' : '#1e293b',
+    marginBottom: '0.5rem',
+    marginTop: '1rem'
   }
 
   const passwordMismatchError = password !== confirmPassword && confirmPassword !== ''
@@ -154,7 +170,7 @@ const Signup = () => {
             </div>
           )}
 
-          {/* Name Fields */}
+          {/* Personal Information */}
           <div style={nameRowStyle}>
             <Input
               label="First Name"
@@ -187,6 +203,7 @@ const Signup = () => {
             required
           />
 
+          {/* Account Security */}
           <Input
             label="Password"
             type="password"
@@ -208,10 +225,41 @@ const Signup = () => {
             required
           />
 
+          {/* Financial Information */}
+          <div style={sectionHeaderStyle}>
+            💰 Financial Information
+          </div>
+          
+          <div style={financialRowStyle}>
+            <Input
+              label="Monthly Income"
+              type="number"
+              step="0.01"
+              min="0.01"
+              placeholder="0.00"
+              value={income}
+              onChange={(e) => setIncome(e.target.value)}
+              icon="💵"
+              required
+            />
+
+            <Input
+              label="Monthly Expenditures"
+              type="number"
+              step="0.01"
+              min="0.01"
+              placeholder="0.00"
+              value={expenditures}
+              onChange={(e) => setExpenditures(e.target.value)}
+              icon="💸"
+              required
+            />
+          </div>
+
           <Button
             type="submit"
             size="lg"
-            disabled={isLoading || passwordMismatchError || !firstName || !lastName || !email || !password || !confirmPassword}
+            disabled={isLoading || passwordMismatchError || !firstName || !lastName || !email || !password || !confirmPassword || !income || !expenditures}
             style={{ marginTop: '0.5rem' }}
           >
             {isLoading ? '⏳ Creating Account...' : '🎉 Create Account'}
@@ -227,9 +275,27 @@ const Signup = () => {
           </p>
         </div>
 
+        {/* Financial Information Note */}
+        <div style={{
+          marginTop: '1rem',
+          padding: '1rem',
+          backgroundColor: darkMode ? '#374151' : '#f0f9ff',
+          borderRadius: '0.5rem',
+          fontSize: '0.875rem',
+          color: darkMode ? '#cbd5e1' : '#0369a1',
+          border: darkMode ? '1px solid #4b5563' : '1px solid #bae6fd'
+        }}>
+          <p style={{ fontWeight: '600', marginBottom: '0.5rem' }}>💡 Financial Information:</p>
+          <ul style={{ paddingLeft: '1rem', margin: 0 }}>
+            <li>Enter your monthly income and expenditures</li>
+            <li>This helps us provide personalized financial insights</li>
+            <li>All amounts must be greater than $0.00</li>
+          </ul>
+        </div>
+
         {/* Password Requirements */}
         <div style={{
-          marginTop: '1.5rem',
+          marginTop: '1rem',
           padding: '1rem',
           backgroundColor: darkMode ? '#374151' : '#f8fafc',
           borderRadius: '0.5rem',

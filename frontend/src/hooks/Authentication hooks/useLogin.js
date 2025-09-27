@@ -1,36 +1,31 @@
-// hooks/useLogin.js
+// src/hooks/Authentication hooks/useLogin.js
 import { useState } from 'react'
 import { useAuthContext } from './useAuthContext'
+import useAPI from '../Data Management Hooks/useAPI'
 
 export const useLogin = () => {
   const [error, setError] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const { dispatch } = useAuthContext()
+  const api = useAPI()
 
-  const login = async (email, password, rememberMe = false) => {
+  const login = async (rawEmail, password, rememberMe = false) => {
     setIsLoading(true)
     setError(null)
+    const email = (rawEmail || '').trim().toLowerCase()
 
     try {
-      // Mock login - replace with actual API call
-      if (email === 'demo@example.com' && password === 'demo123') {
-        const mockUser = {
-          id: 1,
-          name: 'Demo User',
-          email: 'demo@example.com',
-          token: 'mock-jwt-token'
-        }
+      const data = await api.post('/user/login', { email, password, rememberMe })
+      let user = data?.user || data // handle either {user:...} or plain user
 
-        localStorage.setItem('user', JSON.stringify(mockUser))
-        dispatch({ type: 'LOGIN', payload: mockUser })
-        setIsLoading(false)
-        return true
-      } else {
-        throw new Error('Invalid email or password')
-      }
-    } catch (err) {
+      if (!user) throw new Error('No user returned from API')
+
+      dispatch({ type: 'LOGIN', payload: user })
       setIsLoading(false)
-      setError(err.message)
+      return true
+    } catch (e) {
+      setError(e.message || 'Login failed')
+      setIsLoading(false)
       return false
     }
   }

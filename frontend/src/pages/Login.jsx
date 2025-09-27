@@ -1,5 +1,6 @@
+// src/pages/Login.jsx
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
 import { useLogin } from '../hooks/Authentication hooks/useLogin'
 import Button from '../components/Button'
@@ -8,12 +9,25 @@ import Input from '../components/Input'
 const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(false)
+  const [debug, setDebug] = useState(null) // shows extra error info if available
+
+  const navigate = useNavigate()
   const { darkMode, toggleDarkMode } = useTheme()
   const { login, error, isLoading } = useLogin()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    await login(email, password)
+    setDebug(null)
+    const ok = await login(email, password, rememberMe)
+    if (ok) {
+      // go to dashboard/home; change this to your desired route
+      navigate('/')
+    } else {
+      // If the hook surfaced structured info on error, show it
+      // (the improved useAPI attaches status/payload on Error)
+      setDebug((prev) => prev ?? 'Login failed. Check Network tab for details.')
+    }
   }
 
   const pageStyle = {
@@ -22,7 +36,8 @@ const Login = () => {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '1rem'
+    padding: '1rem',
+    position: 'relative'
   }
 
   const containerStyle = {
@@ -31,17 +46,13 @@ const Login = () => {
     backgroundColor: darkMode ? '#1e293b' : '#ffffff',
     padding: '2rem',
     borderRadius: '1rem',
-    boxShadow: darkMode 
-      ? '0 20px 25px -5px rgba(0, 0, 0, 0.3)' 
+    boxShadow: darkMode
+      ? '0 20px 25px -5px rgba(0, 0, 0, 0.3)'
       : '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
     border: darkMode ? '1px solid #374151' : '1px solid #e2e8f0'
   }
 
-  const headerStyle = {
-    textAlign: 'center',
-    marginBottom: '2rem'
-  }
-
+  const headerStyle = { textAlign: 'center', marginBottom: '2rem' }
   const titleStyle = {
     fontSize: '2rem',
     fontWeight: '700',
@@ -52,84 +63,47 @@ const Login = () => {
     justifyContent: 'center',
     gap: '0.5rem'
   }
-
-  const subtitleStyle = {
-    color: darkMode ? '#94a3b8' : '#64748b',
-    fontSize: '1rem'
-  }
-
-  const formStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem'
-  }
-
-  const linkStyle = {
-    color: '#3b82f6',
-    textDecoration: 'none',
-    fontWeight: '500'
-  }
-
-  const footerStyle = {
-    textAlign: 'center',
-    marginTop: '1.5rem',
-    color: darkMode ? '#94a3b8' : '#64748b'
-  }
-
+  const subtitleStyle = { color: darkMode ? '#94a3b8' : '#64748b', fontSize: '1rem' }
+  const formStyle = { display: 'flex', flexDirection: 'column', gap: '1rem' }
+  const linkStyle = { color: '#3b82f6', textDecoration: 'none', fontWeight: '500' }
+  const footerStyle = { textAlign: 'center', marginTop: '1.5rem', color: darkMode ? '#94a3b8' : '#64748b' }
   const themeToggleStyle = {
-    position: 'absolute',
-    top: '1rem',
-    right: '1rem',
-    background: 'none',
-    border: 'none',
-    fontSize: '1.5rem',
-    cursor: 'pointer',
-    padding: '0.5rem',
-    borderRadius: '0.5rem',
-    transition: 'all 0.2s ease'
+    position: 'absolute', top: '1rem', right: '1rem', background: 'none',
+    border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: '0.5rem',
+    borderRadius: '0.5rem', transition: 'all 0.2s ease'
   }
-
   const errorStyle = {
-    backgroundColor: '#fef2f2',
-    color: '#dc2626',
-    padding: '0.75rem',
-    borderRadius: '0.5rem',
-    border: '1px solid #fecaca',
-    fontSize: '0.875rem',
-    marginBottom: '1rem'
+    backgroundColor: '#fef2f2', color: '#dc2626', padding: '0.75rem',
+    borderRadius: '0.5rem', border: '1px solid #fecaca',
+    fontSize: '0.875rem', marginBottom: '0.25rem'
+  }
+  const debugStyle = {
+    backgroundColor: darkMode ? '#0b1020' : '#f1f5f9',
+    color: darkMode ? '#cbd5e1' : '#334155',
+    padding: '0.5rem', borderRadius: '0.5rem', fontSize: '0.75rem'
   }
 
   return (
     <div style={pageStyle}>
-      <button 
+      <button
         onClick={toggleDarkMode}
         style={themeToggleStyle}
-        onMouseEnter={(e) => {
-          e.target.style.backgroundColor = darkMode ? '#374151' : '#f8fafc'
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.backgroundColor = 'transparent'
-        }}
+        onMouseEnter={(e) => { e.target.style.backgroundColor = darkMode ? '#374151' : '#f8fafc' }}
+        onMouseLeave={(e) => { e.target.style.backgroundColor = 'transparent' }}
+        aria-label="Toggle theme"
       >
         {darkMode ? '☀️' : '🌙'}
       </button>
 
       <div style={containerStyle}>
         <div style={headerStyle}>
-          <h1 style={titleStyle}>
-            💰 Welcome Back
-          </h1>
-          <p style={subtitleStyle}>
-            Sign in to track your financial journey
-          </p>
+          <h1 style={titleStyle}>💰 Welcome Back</h1>
+          <p style={subtitleStyle}>Sign in to track your financial journey</p>
         </div>
 
-        <form onSubmit={handleSubmit} style={formStyle}>
-          {error && (
-            <div style={errorStyle}>
-              {error}
-            </div>
-          )}
+        <form onSubmit={handleSubmit} style={formStyle} noValidate>
+          {error && <div style={errorStyle}>{error}</div>}
+          {debug && <div style={debugStyle}>{debug}</div>}
 
           <Input
             label="Email"
@@ -139,6 +113,7 @@ const Login = () => {
             onChange={(e) => setEmail(e.target.value)}
             icon="📧"
             required
+            autoComplete="email"
           />
 
           <Input
@@ -149,13 +124,24 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
             icon="🔒"
             required
+            autoComplete="current-password"
           />
+
+          {/* Remember me */}
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: darkMode ? '#cbd5e1' : '#334155' }}>
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+            />
+            Remember me
+          </label>
 
           <Button
             type="submit"
             size="lg"
             disabled={isLoading}
-            style={{ marginTop: '0.5rem' }}
+            style={{ marginTop: '0.25rem' }}
           >
             {isLoading ? '🔄 Signing In...' : '🚀 Sign In'}
           </Button>
@@ -164,9 +150,7 @@ const Login = () => {
         <div style={footerStyle}>
           <p>
             Don't have an account?{' '}
-            <Link to="/signup" style={linkStyle}>
-              Sign up here
-            </Link>
+            <Link to="/signup" style={linkStyle}>Sign up here</Link>
           </p>
         </div>
 
