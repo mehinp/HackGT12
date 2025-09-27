@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Map;
 
 import static com.finance.hackathon.queries.UserQuery.*;
@@ -20,10 +22,15 @@ public class UserRepositoryImpl implements UserRepository<User> {
     @Override
     public User createUser(User user) {
         try {
-            jdbc.update(INSERT_USER_QUERY, Map.of("firstName", user.getFirstName(), "lastName", user.getLastName(),
-                    "email", user.getEmail(), "password", user.getPassword()));
+            jdbc.update(INSERT_USER_QUERY, Map.of(
+                    "firstName", user.getFirstName(),
+                    "lastName", user.getLastName(),
+                    "email", user.getEmail(),
+                    "password", user.getPassword(),
+                    "income", user.getIncome(),
+                    "expenditures", user.getExpenditures()
+            ));
             return user;
-
         } catch (Exception e){
             log.error(e.getMessage());
             throw new RuntimeException(e.getMessage());
@@ -32,6 +39,33 @@ public class UserRepositoryImpl implements UserRepository<User> {
 
     @Override
     public User get(Long id) {
-        return null;
+        try {
+            return jdbc.queryForObject(SELECT_USER_BY_ID_QUERY,
+                    Map.of("id", id), this::mapRowToUser);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
+        }
+    }
+
+    @Override
+    public User findByEmail(String email) {
+        try {
+            return jdbc.queryForObject(SELECT_USER_BY_EMAIL_QUERY,
+                    Map.of("email", email), this::mapRowToUser);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
+        }
+    }
+
+    private User mapRowToUser(ResultSet rs, int rowNum) throws SQLException {
+        return User.builder()
+                .id(rs.getLong("id"))
+                .firstName(rs.getString("first_name"))
+                .lastName(rs.getString("last_name"))
+                .email(rs.getString("email"))
+                .password(rs.getString("password"))
+                .build();
     }
 }

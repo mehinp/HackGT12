@@ -6,19 +6,35 @@ USE HackGT;
 
 -- drop tables if they exist
 DROP TABLE IF EXISTS Users;
-
+DROP TABLE IF EXISTS Purchases;
 
 -- create tables
 
 CREATE TABLE Users (
 
-       id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-       first_name VARCHAR(50) NOT NULL,
-       last_name VARCHAR(50) NOT NULL,
-       email VARCHAR(100) NOT NULL,
-       password VARCHAR(255) NOT NULL,
-       CONSTRAINT UQ_Users_EmailU UNIQUE (email)
+   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+   first_name VARCHAR(50) NOT NULL,
+   last_name VARCHAR(50) NOT NULL,
+   email VARCHAR(100) NOT NULL,
+   password VARCHAR(255) NOT NULL,
+   income DECIMAL(15,2) UNSIGNED NOT NULL,
+   expenditures DECIMAL(15,2) UNSIGNED NOT NULL,
+   score BIGINT UNSIGNED DEFAULT 500,
+   CONSTRAINT UQ_Users_EmailU UNIQUE (email)
 );
+
+CREATE TABLE Purchases (
+
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    amount DECIMAL(10,2) UNSIGNED NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    merchant VARCHAR(100) NOT NULL,
+    purchase_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
 
 
 

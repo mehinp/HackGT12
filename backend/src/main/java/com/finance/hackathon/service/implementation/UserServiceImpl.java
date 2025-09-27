@@ -16,5 +16,20 @@ public class UserServiceImpl implements UserService {
         return userRepository.createUser(user);
     }
 
+    @Override
+    public User authenticate(String email, String password) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+        if (!user.getPassword().equals(password)) {
+            throw new RuntimeException("Invalid password");
+        }
+        return user;
+    }
 
+    @Override
+    public User getUserById(Long id) {
+        return userRepository.get(id);
+    }
 }

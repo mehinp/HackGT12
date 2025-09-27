@@ -3,23 +3,15 @@ package com.finance.hackathon.resource;
 import com.finance.hackathon.domain.User;
 import com.finance.hackathon.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.net.http.HttpResponse;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import static java.time.LocalDateTime.now;
-import static org.springframework.http.HttpStatus.CREATED;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path="/user")
 @RequiredArgsConstructor
+@Slf4j
 public class UserResource {
     private final UserService userService;
 
@@ -30,6 +22,24 @@ public class UserResource {
                 .status(HttpStatus.CREATED)
                 .body(saved);
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<User> login(@RequestBody User loginUser) {
+        try {
+            User user = userService.authenticate(loginUser.getEmail(), loginUser.getPassword());
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUser(@PathVariable("id") Long id) {
+        User user = userService.getUserById(id);
+        return ResponseEntity.ok(user);
+    }
+
+
 
 
 
