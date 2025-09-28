@@ -49,8 +49,23 @@ public class UserResource {
         return ResponseEntity.ok(user);
     }
 
-    @PatchMapping("/{id}/score")
-    public ResponseEntity<Void> updateUserScore(@PathVariable("id") Long id, @RequestBody Map<String, Integer> payload) {
+    @GetMapping("/user-score")
+    public ResponseEntity<?> getUserScore(@RequestHeader(value="X-User-Id", required=false) Long userId) {
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("User not logged in");
+        }
+        User user = userService.getUserById(userId);
+        int score = user.getScore();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(Map.of(
+                        "score", score
+                ));
+    }
+
+    @PatchMapping("/update-score")
+    public ResponseEntity<Void> updateUserScore(@RequestHeader(value="X-User-Id") Long id, @RequestBody Map<String, Integer> payload) {
         Integer score = payload.get("score");
         if (score == null) {
             return ResponseEntity.badRequest().build();
