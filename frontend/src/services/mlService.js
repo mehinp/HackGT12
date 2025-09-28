@@ -53,13 +53,13 @@ export const mlService = {
   },
 
   /**
-   * Store user score in localStorage for later database sync
+   * Store user score in localStorage and automatically sync to database
    */
   storeUserScore(userId, score) {
     try {
       const scoreData = {
         userId: userId,
-        score: score,
+        score: Math.round(score), // Ensure integer as expected by backend
         timestamp: new Date().toISOString(),
         synced: false
       }
@@ -80,6 +80,21 @@ export const mlService = {
       localStorage.setItem('pending_score_updates', JSON.stringify(pendingScores))
       
       console.log('ML Service: Stored user score:', scoreData)
+      
+      // Automatically attempt to sync the new score to database
+      this.syncScoreToDatabase(userId, Math.round(score))
+        .then(success => {
+          if (success) {
+            this.markScoreSynced(userId)
+            console.log('ML Service: Auto-synced score successfully for user:', userId)
+          } else {
+            console.log('ML Service: Auto-sync failed, score will remain in pending queue')
+          }
+        })
+        .catch(error => {
+          console.error('ML Service: Auto-sync error:', error)
+        })
+      
     } catch (error) {
       console.error('ML Service: Error storing user score:', error)
     }
@@ -135,6 +150,36 @@ export const mlService = {
   },
 
   /**
+   * Sync a single score to database
+   */
+  async syncScoreToDatabase(userId, score) {
+    try {
+      const response = await fetch('http://143.215.104.239:8080/user/update-score', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-Id': userId
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          score: Math.round(score) // Ensure integer as expected by backend
+        })
+      })
+      
+      if (response.ok) {
+        console.log('ML Service: Successfully synced score to database for user:', userId)
+        return true
+      } else {
+        console.error('ML Service: Failed to sync score to database:', response.status)
+        return false
+      }
+    } catch (error) {
+      console.error('ML Service: Error syncing score to database:', error)
+      return false
+    }
+  },
+
+  /**
    * Sync pending scores to backend database
    */
   async syncScoresToDatabase() {
@@ -143,31 +188,17 @@ export const mlService = {
     
     for (const scoreData of pendingScores) {
       try {
-        // Call your backend API to update the score
-        const response = await fetch('http://143.215.104.239:8080/users/update-score', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-User-Id': scoreData.userId
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            score: scoreData.score,
-            timestamp: scoreData.timestamp
-          })
-        })
+        const success = await this.syncScoreToDatabase(scoreData.userId, scoreData.score)
         
-        if (response.ok) {
+        if (success) {
           this.markScoreSynced(scoreData.userId)
           results.push({ userId: scoreData.userId, success: true })
-          console.log('ML Service: Successfully synced score for user:', scoreData.userId)
         } else {
           results.push({ 
             userId: scoreData.userId, 
             success: false, 
-            error: `HTTP ${response.status}` 
+            error: 'Failed to sync to database' 
           })
-          console.error('ML Service: Failed to sync score for user:', scoreData.userId, response.status)
         }
       } catch (error) {
         results.push({ 

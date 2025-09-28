@@ -1,4 +1,4 @@
-// src/components/Navbar.jsx
+// src/components/Navbar.jsx - Updated with dynamic score matching Home page
 import { Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { useAuthContext } from '../hooks/Authentication hooks/useAuthContext'
@@ -38,24 +38,29 @@ const Navbar = () => {
     fetchScore()
   }, [user])
 
-const getScoreStatus = (score) => {
-  const s = Math.max(0, Math.min(1000, Number(score) || 0))
-  if (s >= 900) return 'Excellent'
-  if (s >= 700) return 'Good'
-  if (s >= 600) return 'Fair'
-  if (s >= 300) return 'Poor'
-  return 'Dreadful'
-}
+  // Score status and color functions matching Home.jsx exactly
+  const getScoreStatus = (score) => {
+    const s = Math.max(0, Math.min(1000, Number(score) || 0))
+    if (s >= 900) return 'Excellent'
+    if (s >= 700) return 'Good'
+    if (s >= 600) return 'Fair'
+    if (s >= 300) return 'Poor'
+    return 'Dreadful'
+  }
 
-const getScoreColor = (score) => {
-  const s = Math.max(0, Math.min(1000, Number(score) || 0))
-  if (s >= 900) return '#16a34a'   // green (excellent)
-  if (s >= 700) return '#86efac'   // light green (good)
-  if (s >= 600) return '#facc15'   // yellow (fair)
-  if (s >= 300) return '#f97316'   // orange (poor)
-  return '#7f1d1d'                 // dark red (dreadful)
-}
+  const getScoreColor = (score) => {
+    const s = Math.max(0, Math.min(1000, Number(score) || 0))
+    if (s >= 900) return '#16a34a'   // green (excellent)
+    if (s >= 700) return '#86efac'   // light green (good)
+    if (s >= 600) return '#facc15'   // yellow (fair)
+    if (s >= 300) return '#f97316'   // orange (poor)
+    return '#7f1d1d'                 // dark red (dreadful)
+  }
 
+  // Number formatting function
+  const formatNumber = (num) => {
+    return Math.round(num).toLocaleString()
+  }
 
   const handleLogout = async () => { await logout() }
 
@@ -239,7 +244,7 @@ const getScoreColor = (score) => {
             style={scoreDisplayStyle}
             onMouseEnter={(e) => handleScoreHover(e, true)}
             onMouseLeave={(e) => handleScoreHover(e, false)}
-            title={`Financial Score: ${scoreLoading ? '...' : currentScore.toLocaleString()} (${scoreLoading ? 'Loading...' : getScoreStatus(currentScore)})`}
+            title={`Financial Score: ${scoreLoading ? '...' : formatNumber(currentScore)} (${scoreLoading ? 'Loading...' : getScoreStatus(currentScore)})`}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <div
@@ -255,7 +260,7 @@ const getScoreColor = (score) => {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '1px' }}>
               <span style={{ fontWeight: '700', color: getScoreColor(currentScore), fontSize: '1.125rem', lineHeight: '1' }}>
-                {scoreLoading ? '...' : currentScore.toLocaleString()}
+                {scoreLoading ? '...' : formatNumber(currentScore)}
               </span>
               <span style={{
                 fontSize: '0.6rem',
