@@ -1,0 +1,81 @@
+package com.finance.hackathon.resource;
+
+import com.finance.hackathon.domain.User;
+import com.finance.hackathon.service.UserService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpSession;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping(path="/user")
+@RequiredArgsConstructor
+@Slf4j
+public class UserResource {
+    private final UserService userService;
+
+    @PostMapping("/register")
+    public ResponseEntity<User> saveUser(@RequestBody User user) {
+        User saved = userService.createUser(user);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(saved);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<User> login(@RequestBody User loginUser) {
+        try {
+            User user = userService.authenticate(loginUser.getEmail(), loginUser.getPassword());
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpSession session) {
+        session.invalidate();
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUser(@PathVariable("id") Long id) {
+        User user = userService.getUserById(id);
+        return ResponseEntity.ok(user);
+    }
+
+    @GetMapping("/user-score")
+    public ResponseEntity<?> getUserScore(@RequestHeader(value="X-User-Id", required=false) Long userId) {
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("User not logged in");
+        }
+        User user = userService.getUserById(userId);
+        int score = user.getScore();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(Map.of(
+                        "score", score
+                ));
+    }
+
+    @PatchMapping("/update-score")
+    public ResponseEntity<Void> updateUserScore(@RequestHeader(value="X-User-Id") Long id, @RequestBody Map<String, Integer> payload) {
+        Integer score = payload.get("score");
+        if (score == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        userService.updateUserScore(id, score);
+        return ResponseEntity.ok().build();
+    }
+
+
+
+
+
+}
