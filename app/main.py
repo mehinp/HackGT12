@@ -140,10 +140,11 @@ def get_graph_data(x_user_id:int=Header(...,alias="X-User-Id")):
     except Exception as e:
         raise HTTPException(status_code=502,detail=f"Failed to fetch all-data: {e}")
     income_monthly=float(payload.get("income") or 0.0)
+    expenditures_monthly=float(payload.get("expenditures") or 0.0)
     current_savings=float(payload.get("saved") or payload.get("current_savings") or 0.0)
     goal_amount=float(payload.get("saved") or 10000.0)
     days_horizon=int(payload.get("days") or 90)
-    print(f"[INFO] income={income_monthly} saved={current_savings} goal_amount={goal_amount} horizon={days_horizon}")
+    print(f"[INFO] income={income_monthly} exp_m={expenditures_monthly} saved={current_savings} goal_amount={goal_amount} horizon={days_horizon}")
     latest_df=build_purchases_df(payload)
     latest_records=latest_df.to_dict(orient="records")
     old_history=_load_user_history(CURRENT_USER_ID)
@@ -153,7 +154,7 @@ def get_graph_data(x_user_id:int=Header(...,alias="X-User-Id")):
     if has_new_purchase and purchases_records:
         newest_purchase=purchases_records[-1]
         print(f"[TRAIN] GBM+LSTM on new purchase: {newest_purchase}")
-        gbm_success=model_retrainer.retrain_model([newest_purchase],income_monthly)
+        gbm_success=model_retrainer.retrain_model(purchases_records,income_monthly)
         if gbm_success and model_retrainer.model is not None:MODEL=model_retrainer.model
         print(f"[TRAIN] GBM retrain success={bool(gbm_success)}")
         df_hist=pd.DataFrame(purchases_records)
@@ -167,9 +168,12 @@ def get_graph_data(x_user_id:int=Header(...,alias="X-User-Id")):
         daily_spend=daily_spend.reindex(idx,fill_value=0.0)
         daily_spend_hist=daily_spend.values.astype(float).tolist()
         if len(daily_spend_hist)<3:
-            baseline=float(np.mean(daily_spend_hist)) if daily_spend_hist else max(0.0,(income_monthly/30.0)*0.3)
-            daily_spend_hist=[baseline]*(3-len(daily_spend_hist))+daily_spend_hist
+            mbase=(expenditures_monthly/30.0) if expenditures_monthly>0 else None
+            alt=max(0.0,(income_monthly/30.0)*0.3)
+            seed=mbase if mbase is not None else (float(np.mean(daily_spend_hist)) if daily_spend_hist else alt)
+            daily_spend_hist=[seed]*(3-len(daily_spend_hist))+daily_spend_hist
         forecaster=get_forecaster()
+        forecaster.last_training_data_hash=None
         lstm_success=forecaster.train_model(daily_spend_hist)
         print(f"[TRAIN] LSTM retrain success={bool(lstm_success)} len_hist_days={len(daily_spend_hist)}")
     else:
@@ -199,22 +203,24 @@ def get_graph_data(x_user_id:int=Header(...,alias="X-User-Id")):
             daily_spend=daily_spend.reindex(idx,fill_value=0.0)
             daily_spend_hist=daily_spend.values.astype(float).tolist()
             if len(daily_spend_hist)<3:
-                baseline=float(np.mean(daily_spend_hist)) if daily_spend_hist else max(0.0,(income_monthly/30.0)*0.3)
-                daily_spend_hist=[baseline]*(3-len(daily_spend_hist))+daily_spend_hist
+                mbase=(expenditures_monthly/30.0) if expenditures_monthly>0 else None
+                alt=max(0.0,(income_monthly/30.0)*0.3)
+                seed=mbase if mbase is not None else (float(np.mean(daily_spend_hist)) if daily_spend_hist else alt)
+                daily_spend_hist=[seed]*(3-len(daily_spend_hist))+daily_spend_hist
         else:daily_spend_hist=[]
     else:daily_spend_hist=[]
     daily_income=income_monthly/30.0 if income_monthly>0 else 100.0
-    alpha=0.15
+    alpha=0.3
     if len(daily_spend_hist)>=1:
         ema=daily_spend_hist[0]
         for x in daily_spend_hist[1:]:ema=alpha*x+(1-alpha)*ema
     else:
-        ema=daily_income
+        ema=(expenditures_monthly/30.0) if expenditures_monthly>0 else daily_income
     shock=max(0.0,(daily_spend_hist[-1] if len(daily_spend_hist) else ema)-ema)
-    adj_avg=ema+0.35*shock
+    adj_avg=ema+0.6*shock
     base_budget=max(daily_income-ema,0.0)
     daily_savings_budget=max(daily_income-adj_avg,0.0)
-    daily_savings_budget=max(daily_savings_budget,0.5*base_budget)
+    daily_savings_budget=max(daily_savings_budget,0.4*base_budget)
     recent_avg_spend=adj_avg
     print(f"[INFO] daily_income={daily_income:.2f} recent_avg_spend={recent_avg_spend:.2f} daily_savings_budget={daily_savings_budget:.2f}")
     try:
@@ -223,7 +229,7 @@ def get_graph_data(x_user_id:int=Header(...,alias="X-User-Id")):
         else:
             spend_forecast=np.full(days_horizon,recent_avg_spend,dtype=float)
         adj=np.asarray(recent_avg_spend-np.asarray(spend_forecast,dtype=float),dtype=float)
-        cap=max(daily_savings_budget*0.5,0.0)
+        cap=min(daily_income,max(daily_savings_budget*0.75,0.0))
         daily_adjustments=np.clip(adj,-cap,cap)
     except Exception as e:
         print(f"[WARN] LSTM forecast error: {e}");daily_adjustments=np.zeros(days_horizon,dtype=float)
