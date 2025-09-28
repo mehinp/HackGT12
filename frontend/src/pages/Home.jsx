@@ -359,14 +359,8 @@ const Home = () => {
             e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
           }}
         >
-          <div style={{
-            fontSize: '3rem',
-            marginBottom: '1rem'
-          }}>
-            🛒
-          </div>
           <h3 style={{
-            fontSize: '0.875rem',
+            fontSize: '1.5rem',
             fontWeight: '700',
             color: '#2563eb',
             textTransform: 'uppercase',
@@ -375,14 +369,6 @@ const Home = () => {
           }}>
             ADD PURCHASE
           </h3>
-          <p style={{
-            fontSize: '0.75rem',
-            color: '#64748b',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em'
-          }}>
-            Track spending
-          </p>
         </div>
         
         <div style={{
@@ -390,12 +376,14 @@ const Home = () => {
           border: '1px solid #e2e8f0',
           borderRadius: '0.375rem',
           padding: '1.5rem',
-          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textAlign: 'center'
         }}>
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
             marginBottom: '1rem'
           }}>
             <h3 style={{

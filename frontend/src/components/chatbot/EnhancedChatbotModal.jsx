@@ -335,7 +335,6 @@ Feel free to ask me anything else about your financial journey!`
       } else {
         return [
           "How can I save money faster?",
-          "Should I adjust my timeline?",
           "Tips for staying motivated",
           "How to track my progress better"
         ]
@@ -433,11 +432,10 @@ Feel free to ask me anything else about your financial journey!`
         {/* Header */}
         <div style={headerStyle}>
           <div>
-            <h2 style={titleStyle}>🤖 AI Financial Assistant</h2>
-            <span style={contextBadgeStyle}>{context}</span>
+            <h2 style={titleStyle}>AI Financial Assistant</h2>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <Button variant="ghost" size="sm" onClick={handleClearChat} icon="🗑️">
+            <Button variant="ghost" size="sm" onClick={handleClearChat}>
               Clear
             </Button>
             <Button variant="ghost" size="sm" onClick={onClose} icon="✕">
@@ -463,7 +461,7 @@ Feel free to ask me anything else about your financial journey!`
             marginBottom: '0.5rem',
             color: darkMode ? '#f8fafc' : '#374151'
           }}>
-            💡 Quick questions:
+            Quick questions:
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
             {getSuggestedQuestions().map((question, index) => (

@@ -107,13 +107,9 @@ const Navbar = () => {
     position: 'relative',
     backgroundColor: location.pathname === path ? '#dc2626' : 'transparent',
     display: 'flex',
-    flexDirection: 'column',
     alignItems: 'center',
-    minWidth: '4.5rem',
-    fontSize: '0.75rem'
+    fontSize: '0.875rem'
   })
-  const iconStyle = { fontSize: '1.5rem', marginBottom: '0.25rem', display: 'block' }
-  const labelStyle = { fontSize: '0.75rem', fontWeight: '500', textAlign: 'center', lineHeight: '1' }
 
   const scoreDisplayStyle = {
     display: 'flex',
@@ -137,10 +133,32 @@ const Navbar = () => {
     flexDirection: 'row',
     gap: '0.5rem',
     fontSize: '0.875rem',
-    minWidth: 'unset',
     backgroundColor: 'transparent',
     color: '#64748b',
     padding: '0.5rem 0.75rem'
+  }
+
+  const logoutButtonStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.5rem 0.75rem',
+    backgroundColor: 'transparent',
+    border: 'none',
+    borderRadius: '0.5rem',
+    color: '#64748b',
+    fontSize: '0.875rem',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease'
+  }
+
+  const logoutIconStyle = {
+    width: '16px',
+    height: '16px',
+    strokeWidth: '2',
+    stroke: 'currentColor',
+    fill: 'none'
   }
 
   return (
@@ -166,8 +184,7 @@ const Navbar = () => {
               onMouseEnter={(e) => { if (location.pathname !== '/') e.currentTarget.style.backgroundColor = '#f8fafc' }}
               onMouseLeave={(e) => { if (location.pathname !== '/') e.currentTarget.style.backgroundColor = 'transparent' }}
             >
-              <div style={iconStyle}>🏠</div>
-              <span style={labelStyle}>Home</span>
+              Home
             </Link>
 
             <Link
@@ -176,8 +193,7 @@ const Navbar = () => {
               onMouseEnter={(e) => { if (location.pathname !== '/goals') e.currentTarget.style.backgroundColor = '#f8fafc' }}
               onMouseLeave={(e) => { if (location.pathname !== '/goals') e.currentTarget.style.backgroundColor = 'transparent' }}
             >
-              <div style={iconStyle}>🎯</div>
-              <span style={labelStyle}>Goals</span>
+              Goals
             </Link>
 
             <Link
@@ -186,8 +202,7 @@ const Navbar = () => {
               onMouseEnter={(e) => { if (location.pathname !== '/purchases') e.currentTarget.style.backgroundColor = '#f8fafc' }}
               onMouseLeave={(e) => { if (location.pathname !== '/purchases') e.currentTarget.style.backgroundColor = 'transparent' }}
             >
-              <div style={iconStyle}>🛒</div>
-              <span style={labelStyle}>Transactions</span>
+              Transactions
             </Link>
 
             <Link
@@ -196,8 +211,7 @@ const Navbar = () => {
               onMouseEnter={(e) => { if (location.pathname !== '/social') e.currentTarget.style.backgroundColor = '#f8fafc' }}
               onMouseLeave={(e) => { if (location.pathname !== '/social') e.currentTarget.style.backgroundColor = 'transparent' }}
             >
-              <div style={iconStyle}>👥</div>
-              <span style={labelStyle}>Social</span>
+              Social
             </Link>
           </div>
         </div>
@@ -240,13 +254,29 @@ const Navbar = () => {
           </div>
 
           <Link to="/profile" style={userLinkStyle}>
-            <div style={iconStyle}>👤</div>
-            <span style={labelStyle}>{getUserDisplayName()}</span>
+            <div style={{ fontSize: '1rem' }}>👤</div>
+            <span>{getUserDisplayName()}</span>
           </Link>
 
-          <Button variant="ghost" size="sm" onClick={handleLogout} icon="🚪">
+          <button
+            style={logoutButtonStyle}
+            onClick={handleLogout}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#f8fafc'
+              e.currentTarget.style.color = '#dc2626'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent'
+              e.currentTarget.style.color = '#64748b'
+            }}
+          >
+            <svg style={logoutIconStyle} viewBox="0 0 24 24">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16,17 21,12 16,7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
             Logout
-          </Button>
+          </button>
         </div>
       </div>
     </nav>
