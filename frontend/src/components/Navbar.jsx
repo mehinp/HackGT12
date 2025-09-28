@@ -91,7 +91,8 @@ const Navbar = () => {
     top: 0,
     zIndex: 1000,
     backdropFilter: 'blur(10px)',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
   }
 
   const containerStyle = {
@@ -115,18 +116,24 @@ const Navbar = () => {
 
   const navLinksStyle = {
     display: 'flex',
-    gap: '2rem',
+    gap: '0.5rem',
     alignItems: 'center'
   }
 
   const linkStyle = (path) => ({
-    color: location.pathname === path ? '#3b82f6' : '#64748b',
+    color: location.pathname === path ? '#ffffff' : '#64748b',
     textDecoration: 'none',
-    fontWeight: location.pathname === path ? '600' : '500',
-    padding: '0.5rem 1rem',
-    borderRadius: '0.5rem',
+    fontWeight: '500',
+    padding: '0.75rem 1rem',
+    borderRadius: '0.75rem',
     transition: 'all 0.2s ease',
-    position: 'relative'
+    position: 'relative',
+    backgroundColor: location.pathname === path ? '#dc2626' : 'transparent',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    minWidth: '4.5rem',
+    fontSize: '0.75rem'
   })
 
   const scoreDisplayStyle = {
@@ -155,6 +162,19 @@ const Navbar = () => {
     fontSize: '0.875rem'
   }
 
+  const iconStyle = {
+    fontSize: '1.5rem',
+    marginBottom: '0.25rem',
+    display: 'block'
+  }
+
+  const labelStyle = {
+    fontSize: '0.75rem',
+    fontWeight: '500',
+    textAlign: 'center',
+    lineHeight: '1'
+  }
+
   // Add hover effect for score display
   const handleScoreHover = (e, isEntering) => {
     if (isEntering) {
@@ -171,7 +191,7 @@ const Navbar = () => {
       <div style={containerStyle}>
         {/* Logo */}
         <Link to="/" style={logoStyle}>
-          💰 FinanceTracker
+          📊 Metron Finance
         </Link>
 
         {/* Desktop Navigation */}
@@ -190,7 +210,8 @@ const Navbar = () => {
               }
             }}
           >
-            🏠 Home
+            <div style={iconStyle}>🏠</div>
+            <span style={labelStyle}>Home</span>
           </Link>
           
           <Link 
@@ -207,7 +228,8 @@ const Navbar = () => {
               }
             }}
           >
-            🎯 Goals
+            <div style={iconStyle}>🎯</div>
+            <span style={labelStyle}>Goals</span>
           </Link>
           
           <Link 
@@ -224,7 +246,8 @@ const Navbar = () => {
               }
             }}
           >
-            🛒 Purchases
+            <div style={iconStyle}>🛒</div>
+            <span style={labelStyle}>Transactions</span>
           </Link>
           
           <Link 
@@ -241,7 +264,8 @@ const Navbar = () => {
               }
             }}
           >
-            👥 Social
+            <div style={iconStyle}>👥</div>
+            <span style={labelStyle}>Social</span>
           </Link>
         </div>
 
@@ -303,7 +327,8 @@ const Navbar = () => {
 
           {/* User Profile */}
           <Link to="/profile" style={userLinkStyle}>
-            👤 {getUserDisplayName()}
+            <div style={iconStyle}>👤</div>
+            <span style={labelStyle}>{getUserDisplayName()}</span>
           </Link>
 
           {/* Logout Button */}

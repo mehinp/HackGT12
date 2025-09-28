@@ -173,7 +173,7 @@ const GoalForm = ({ onClose, goal, onSuccess }) => {
           </div>
 
           <div style={{ marginBottom: '1.5rem' }}>
-            <label style={labelStyle}>I want to reduce my total spending by</label>
+            <label style={labelStyle}>I want to reduce my total spending  by </label>
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -231,8 +231,9 @@ const GoalForm = ({ onClose, goal, onSuccess }) => {
                 color: '#166534',
                 fontWeight: '500'
               }}>
-                Goal Preview: Reduce spending by ${parseFloat(formData.amount || 0).toFixed(2)} 
-                by {formData.targetDate ? new Date(formData.targetDate).toLocaleDateString() : 'selected date'}
+                Goal Preview: Reduce spending by ${parseFloat(formData.amount || 0).toFixed(2)}
+                {' '}by {formData.targetDate ? new Date(formData.targetDate).toLocaleDateString() : 'selected date'}
+
               </div>
             </div>
           )}
