@@ -3,53 +3,59 @@ import { Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { useAuthContext } from '../hooks/Authentication hooks/useAuthContext'
 import { useLogout } from '../hooks/Authentication hooks/useLogout'
+import { userScoreService } from '../services/userScoreService'
 import Button from './Button'
 
 const Navbar = () => {
   const { user } = useAuthContext()
   const { logout } = useLogout()
   const location = useLocation()
+
+  // --- Score state pulled from API (mirrors Home.jsx pattern) ---
   const [currentScore, setCurrentScore] = useState(500)
+  const [scoreLoading, setScoreLoading] = useState(true)
 
-  // ---- Score calculation ----
   useEffect(() => {
-    const calculateDynamicScore = () => {
+    const fetchScore = async () => {
       try {
-        let calculatedScore = 500
-        if (user?.income && user?.expenditures) {
-          const ratio = user.income / user.expenditures
-          if (ratio >= 2.0) calculatedScore += 150
-          else if (ratio >= 1.5) calculatedScore += 100
-          else if (ratio >= 1.2) calculatedScore += 50
-          else if (ratio >= 1.0) calculatedScore += 25
-          else calculatedScore -= 100
-
-          const userId = parseInt(localStorage.getItem('userId')) || 0
-          const variance = (userId % 100) - 50
-          calculatedScore += variance
+        const userId = localStorage.getItem('userId')
+        if (!userId) {
+          setCurrentScore(500)
+          return
         }
-        calculatedScore = Math.max(300, Math.min(850, calculatedScore))
-        setCurrentScore(Math.round(calculatedScore))
+        setScoreLoading(true)
+        const score = await userScoreService.getUserScore()
+        // Clamp to a sane range like Home.jsx does (0–1000)
+        const clamped = Math.max(0, Math.min(1000, Number(score) || 500))
+        setCurrentScore(Math.round(clamped))
       } catch (e) {
-        console.log('Error calculating score, using default:', e)
-        setCurrentScore(500)
+        console.log('Could not fetch user score:', e)
+        setCurrentScore(500) // Fallback score
+      } finally {
+        setScoreLoading(false)
       }
     }
-    if (user) calculateDynamicScore()
+    fetchScore()
   }, [user])
 
-  const getScoreColor = (score) => {
-    if (score >= 700) return '#10b981'
-    if (score >= 600) return '#f59e0b'
-    if (score >= 500) return '#ef4444'
-    return '#6b7280'
-  }
-  const getScoreStatus = (score) => {
-    if (score >= 700) return 'Excellent'
-    if (score >= 600) return 'Good'
-    if (score >= 500) return 'Fair'
-    return 'Poor'
-  }
+const getScoreStatus = (score) => {
+  const s = Math.max(0, Math.min(1000, Number(score) || 0))
+  if (s >= 900) return 'Excellent'
+  if (s >= 700) return 'Good'
+  if (s >= 600) return 'Fair'
+  if (s >= 300) return 'Poor'
+  return 'Dreadful'
+}
+
+const getScoreColor = (score) => {
+  const s = Math.max(0, Math.min(1000, Number(score) || 0))
+  if (s >= 900) return '#16a34a'   // green (excellent)
+  if (s >= 700) return '#86efac'   // light green (good)
+  if (s >= 600) return '#facc15'   // yellow (fair)
+  if (s >= 300) return '#f97316'   // orange (poor)
+  return '#7f1d1d'                 // dark red (dreadful)
+}
+
 
   const handleLogout = async () => { await logout() }
 
@@ -169,9 +175,20 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" style={logoStyle}>
             <img
-              src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPGNpcmNsZSBjeD0iMTUwIiBjeT0iMTUwIiByPSIxMDAiIHN0cm9rZT0iIzk0YTNiOCIgc3Ryb2tlLXdpZHRoPSI4IiBmaWxsPSJub25lIi8+CiAgPHBhdGggZD0iTTgwIDgwQzgwIDgwIDgwIDIyMCAyMjAgMjIwIiBzdHJva2U9IiNkYzI2MjYiIHN0cm9rZS13aWR0aD0iMTUiIGZpbGw9Im5vbmUiLz4KICA8cGF0aCBkPSJNMTgwIDE4MEwyMjAgMTQwTDE5MCAxMDAiIHN0cm9rZT0iI2RjMjYyNiIgc3Ryb2tlLXdpZHRoPSIxMiIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CiAgPHRleHQgeD0iMTUwIiB5PSIxODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMxZTI5M2IiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI4MCIgZm9udC13ZWlnaHQ9ImJvbGQiPk08L3RleHQ+Cjwvc3ZnPgo="
+              src="/Logo_image.png"
               alt="Metron Finance Logo"
               style={logoImageStyle}
+              onError={(e) => {
+                const fallbacks = ['/Logo_image.jpg', '/Logo_image.jpeg', '/Logo_image.svg', '/Logo_image.gif'];
+                const currentSrc = e.target.src;
+                const currentIndex = fallbacks.findIndex(fallback => currentSrc.includes(fallback.split('.')[1]));
+                if (currentIndex < fallbacks.length - 1) {
+                  e.target.src = fallbacks[currentIndex + 1];
+                } else {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.textContent = 'M';
+                }
+              }}
             />
             Metron Finance
           </Link>
@@ -222,7 +239,7 @@ const Navbar = () => {
             style={scoreDisplayStyle}
             onMouseEnter={(e) => handleScoreHover(e, true)}
             onMouseLeave={(e) => handleScoreHover(e, false)}
-            title={`Financial Score: ${currentScore} (${getScoreStatus(currentScore)})`}
+            title={`Financial Score: ${scoreLoading ? '...' : currentScore.toLocaleString()} (${scoreLoading ? 'Loading...' : getScoreStatus(currentScore)})`}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <div
@@ -238,7 +255,7 @@ const Navbar = () => {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '1px' }}>
               <span style={{ fontWeight: '700', color: getScoreColor(currentScore), fontSize: '1.125rem', lineHeight: '1' }}>
-                {currentScore}
+                {scoreLoading ? '...' : currentScore.toLocaleString()}
               </span>
               <span style={{
                 fontSize: '0.6rem',
@@ -248,7 +265,7 @@ const Navbar = () => {
                 letterSpacing: '0.05em',
                 lineHeight: '1'
               }}>
-                {getScoreStatus(currentScore)}
+                {scoreLoading ? 'Loading...' : getScoreStatus(currentScore)}
               </span>
             </div>
           </div>

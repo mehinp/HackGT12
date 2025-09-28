@@ -17,16 +17,19 @@ const Purchases = () => {
   const [error, setError] = useState('')
   const [showNotification, setShowNotification] = useState(false)
 
-  // Check if we should auto-open the add purchase form
+  // Currency/number formatters (adds commas)
+  const fmtCurrency = (n) =>
+    new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(Number(n) || 0)
+  const fmtNumber = (n) => Number(n || 0).toLocaleString()
+
+  // Auto-open Add Purchase modal if requested
   useEffect(() => {
     if (location.state?.openAddForm) {
       setShowAddPurchase(true)
-      // Clear the state to prevent reopening on refresh
       window.history.replaceState({}, document.title)
     }
   }, [location.state])
 
-  // Fetch purchases from backend
   useEffect(() => {
     fetchPurchases()
   }, [])
@@ -35,7 +38,7 @@ const Purchases = () => {
     try {
       setLoading(true)
       const userId = localStorage.getItem('userId')
-      
+
       if (!userId) {
         setError('User not authenticated. Please log in again.')
         return
@@ -48,26 +51,24 @@ const Purchases = () => {
           'X-User-Id': userId
         }
       })
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch purchases')
-      }
+
+      if (!response.ok) throw new Error('Failed to fetch purchases')
 
       const data = await response.json()
-      
-      // Transform backend data to match frontend format
-      const transformedPurchases = data.purchases.map(purchase => ({
+
+      // Normalize backend -> frontend shape
+      const transformedPurchases = (data.purchases || []).map(purchase => ({
         id: purchase.id,
         merchant: purchase.merchant,
         amount: parseFloat(purchase.amount),
         category: purchase.category,
         date: new Date(purchase.purchaseTime),
         description: `Purchase at ${purchase.merchant}`,
-        scoreImpact: calculateScoreImpact(purchase.amount, purchase.category),
         createdAt: new Date(purchase.purchaseTime)
       }))
 
       setPurchases(transformedPurchases)
+      setError('')
     } catch (err) {
       setError(err.message)
       console.error('Error fetching purchases:', err)
@@ -76,36 +77,23 @@ const Purchases = () => {
     }
   }
 
-  const calculateScoreImpact = (amount, category) => {
-    // Simple score calculation logic
-    if (category === 'investment') return Math.floor(amount / 10)
-    if (category === 'bills') return 0
-    return -Math.floor(amount / 20)
-  }
-
-  const handlePurchaseSuccess = (newPurchase) => {
-    // Refresh purchases after adding new one
+  const handlePurchaseSuccess = () => {
     fetchPurchases()
-    // Show success notification
     setShowNotification(true)
     setTimeout(() => setShowNotification(false), 3000)
   }
 
-  // Professional Search Icon Component
   const SearchIcon = () => (
-    <svg 
-      width="16" 
-      height="16" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
       strokeLinejoin="round"
-      style={{ 
-        color: '#64748b',
-        opacity: 0.7
-      }}
+      style={{ color: '#64748b', opacity: 0.7 }}
     >
       <circle cx="11" cy="11" r="8"></circle>
       <path d="m21 21-4.35-4.35"></path>
@@ -139,17 +127,13 @@ const Purchases = () => {
     flexWrap: 'wrap',
     alignItems: 'center',
     padding: '1rem',
-    backgroundColor: '#ffffff', // white background like demo
-    borderRadius: '0.5rem', // rounded-md like demo
-    border: '1px solid #e2e8f0', // slate-200 border
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' // demo shadow
+    backgroundColor: '#ffffff',
+    borderRadius: '0.5rem',
+    border: '1px solid #e2e8f0',
+    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
   }
 
-  const searchContainerStyle = {
-    position: 'relative',
-    flex: 1,
-    minWidth: '200px'
-  }
+  const searchContainerStyle = { position: 'relative', flex: 1, minWidth: '200px' }
 
   const searchInputStyle = {
     width: '100%',
@@ -172,19 +156,19 @@ const Purchases = () => {
   }
 
   const mainContentStyle = {
-    backgroundColor: '#ffffff', // white background like demo
-    borderRadius: '0.5rem', // rounded-md like demo
+    backgroundColor: '#ffffff',
+    borderRadius: '0.5rem',
     padding: '1.5rem',
-    border: '1px solid #e2e8f0', // slate-200 border
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' // demo shadow
+    border: '1px solid #e2e8f0',
+    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
   }
 
   const selectStyle = {
     padding: '0.5rem 1rem',
     borderRadius: '0.5rem',
-    border: '1px solid #e2e8f0', // slate-200 border
-    backgroundColor: '#f8fafc', // slate-50 background
-    color: '#1e293b', // slate-800 text
+    border: '1px solid #e2e8f0',
+    backgroundColor: '#f8fafc',
+    color: '#1e293b',
     fontSize: '0.875rem',
     minWidth: '120px'
   }
@@ -211,29 +195,28 @@ const Purchases = () => {
 
   const getCategoryEmoji = (category) => {
     const emojis = {
-      'food': '🍽️',
-      'entertainment': '🎬',
-      'transportation': '🚗',
-      'shopping': '🛒',
-      'bills': '💳',
-      'investment': '📈',
-      'other': '💰'
+      food: '🍽️',
+      entertainment: '🎬',
+      transportation: '🚗',
+      shopping: '🛒',
+      bills: '💳',
+      investment: '📈',
+      other: '💰'
     }
     return emojis[category] || emojis.other
   }
 
-  // Filter purchases
+  // Filter + sort
   const filteredPurchases = purchases.filter(purchase => {
-    const matchesSearch = purchase.merchant.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         purchase.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    const q = searchTerm.toLowerCase()
+    const matchesSearch =
+      purchase.merchant.toLowerCase().includes(q) ||
+      purchase.description?.toLowerCase().includes(q)
     const matchesCategory = selectedCategory === 'all' || purchase.category === selectedCategory
-    
     return matchesSearch && matchesCategory
   })
 
-  const sortedPurchases = [...filteredPurchases].sort((a, b) => {
-    return new Date(b.date) - new Date(a.date)
-  })
+  const sortedPurchases = [...filteredPurchases].sort((a, b) => new Date(b.date) - new Date(a.date))
 
   if (loading) {
     return (
@@ -244,7 +227,7 @@ const Purchases = () => {
           alignItems: 'center',
           height: '200px',
           fontSize: '1.125rem',
-          color: '#64748b' // slate-500
+          color: '#64748b'
         }}>
           Loading purchases...
         </div>
@@ -257,17 +240,13 @@ const Purchases = () => {
       {/* Header */}
       <div style={headerStyle}>
         <div style={actionButtonsStyle}>
-          <Button 
-            variant="primary" 
-            icon="+"
-            onClick={() => setShowAddPurchase(true)}
-          >
+          <Button variant="primary" icon="+" onClick={() => setShowAddPurchase(true)}>
             Add Purchase
           </Button>
         </div>
       </div>
 
-      {/* Error Display */}
+      {/* Error */}
       {error && (
         <div style={{
           backgroundColor: '#fef2f2',
@@ -281,12 +260,10 @@ const Purchases = () => {
         </div>
       )}
 
-      {/* Filters Row */}
+      {/* Filters */}
       <div style={filtersRowStyle}>
         <div style={searchContainerStyle}>
-          <div style={searchIconContainerStyle}>
-            <SearchIcon />
-          </div>
+          <div style={searchIconContainerStyle}><SearchIcon /></div>
           <input
             type="text"
             placeholder="Search purchases..."
@@ -304,7 +281,7 @@ const Purchases = () => {
           />
         </div>
 
-        <select 
+        <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
           style={selectStyle}
@@ -322,54 +299,32 @@ const Purchases = () => {
 
       {/* Main Content */}
       <div style={mainContentStyle}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '1.5rem'
-        }}>
-          <h2 style={{
-            fontSize: '1.5rem',
-            fontWeight: '600',
-            color: '#1e293b' // slate-800
-          }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1e293b' }}>
             Recent Transactions
           </h2>
-          <div style={{
-            fontSize: '0.875rem',
-            color: '#64748b' // slate-500
-          }}>
-            {sortedPurchases.length} purchases found
+          <div style={{ fontSize: '0.875rem', color: '#64748b' }}>
+            {fmtNumber(sortedPurchases.length)} purchases found
           </div>
         </div>
-        
-        {/* Purchases List */}
+
+        {/* List */}
         {sortedPurchases.length === 0 ? (
-          <div style={{
-            textAlign: 'center',
-            padding: '3rem 1rem',
-            color: '#64748b' // slate-500
-          }}>
+          <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#64748b' }}>
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛒</div>
-            <h3 style={{ 
-              fontSize: '1.25rem', 
-              fontWeight: '600', 
-              marginBottom: '0.5rem',
-              color: '#1e293b' // slate-800
-            }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '0.5rem', color: '#1e293b' }}>
               {purchases.length === 0 ? 'No purchases yet' : 'No purchases match your filters'}
             </h3>
             <p style={{ marginBottom: '1.5rem' }}>
-              {purchases.length === 0 
+              {purchases.length === 0
                 ? 'Start by adding your first purchase to track your spending.'
-                : 'Try adjusting your search or category filter.'
-              }
+                : 'Try adjusting your search or category filter.'}
             </p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {sortedPurchases.map((purchase) => (
-              <div 
+              <div
                 key={purchase.id}
                 style={{
                   backgroundColor: '#ffffff',
@@ -379,18 +334,10 @@ const Purchases = () => {
                   boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
                   transition: 'all 0.14s ease'
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f8fafc'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#ffffff'
-                }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f8fafc' }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff' }}
               >
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <h3 style={{
                       fontWeight: '600',
@@ -403,12 +350,7 @@ const Purchases = () => {
                     }}>
                       {purchase.merchant}
                     </h3>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '1rem',
-                      fontSize: '0.875rem'
-                    }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.875rem' }}>
                       <span style={{
                         backgroundColor: '#dbeafe',
                         color: '#2563eb',
@@ -426,21 +368,12 @@ const Purchases = () => {
                       </span>
                     </div>
                   </div>
+
                   <div style={{ textAlign: 'right' }}>
-                    <p style={{
-                      fontSize: '1.125rem',
-                      fontWeight: '700',
-                      color: '#0f172a'
-                    }}>
-                      ${purchase.amount.toFixed(2)}
+                    <p style={{ fontSize: '1.125rem', fontWeight: '700', color: '#0f172a' }}>
+                      {fmtCurrency(purchase.amount)}
                     </p>
-                    <p style={{
-                      fontSize: '0.875rem',
-                      fontWeight: '700',
-                      color: purchase.scoreImpact > 0 ? '#0f766e' : purchase.scoreImpact < 0 ? '#dc2626' : '#64748b'
-                    }}>
-                      Score: {purchase.scoreImpact > 0 ? '+' : ''}{purchase.scoreImpact} pts
-                    </p>
+                    {/* Score impact removed */}
                   </div>
                 </div>
               </div>
@@ -449,17 +382,14 @@ const Purchases = () => {
         )}
       </div>
 
-      {/* Success Notification */}
+      {/* Success Toast */}
       <div style={notificationStyle}>
-        Purchase recorded successfully
+        ✅ Purchase recorded successfully
       </div>
 
       {/* Add Purchase Modal */}
       {showAddPurchase && (
-        <PurchaseForm 
-          onClose={() => setShowAddPurchase(false)}
-          onSuccess={handlePurchaseSuccess}
-        />
+        <PurchaseForm onClose={() => setShowAddPurchase(false)} onSuccess={handlePurchaseSuccess} />
       )}
     </div>
   )

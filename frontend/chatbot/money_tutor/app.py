@@ -21,6 +21,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+def root():
+    return {"status": "ok", "routes": ["/ping", "/api/ask", "/docs"]}
+
 # --- sanity check route ---
 @app.get("/ping")
 def ping():

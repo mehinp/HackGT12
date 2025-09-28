@@ -1,7 +1,8 @@
-// src/pages/Home.jsx - Clean, working version with dynamic values
+// src/pages/Home.jsx - Updated with dynamic user score API and comma formatting
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthContext } from '../hooks/Authentication hooks/useAuthContext'
+import { userScoreService } from '../services/userScoreService'
 
 const Home = () => {
   const { user } = useAuthContext()
@@ -10,6 +11,8 @@ const Home = () => {
   const [error, setError] = useState('')
   const [purchases, setPurchases] = useState([])
   const [goals, setGoals] = useState([])
+  const [currentScore, setCurrentScore] = useState(500) // State for dynamic score
+  const [scoreLoading, setScoreLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -18,6 +21,18 @@ const Home = () => {
         const userId = localStorage.getItem('userId')
         
         if (userId) {
+          // Fetch user score
+          try {
+            setScoreLoading(true)
+            const score = await userScoreService.getUserScore()
+            setCurrentScore(score)
+          } catch (e) {
+            console.log('Could not fetch user score:', e)
+            setCurrentScore(500) // Fallback score
+          } finally {
+            setScoreLoading(false)
+          }
+
           // Fetch purchases
           try {
             const purchasesResponse = await fetch('http://143.215.104.239:8080/purchase/my-purchases', {
@@ -97,28 +112,6 @@ const Home = () => {
   const netAmount = monthlyIncome - monthlySpending
   const activeGoals = goals.length
 
-  // Create a utility function for consistent score calculation
-  const calculateUserScore = (userdata) => {
-    let score = 500
-    if (userdata?.income && userdata?.expenditures) {
-      const ratio = userdata.income / userdata.expenditures
-      if (ratio >= 2.0) score += 150
-      else if (ratio >= 1.5) score += 100
-      else if (ratio >= 1.2) score += 50
-      else if (ratio >= 1.0) score += 25
-      else score -= 100
-      
-      // Add user-specific variance for consistency
-      const userId = parseInt(localStorage.getItem('userId')) || 0
-      const variance = (userId % 100) - 50
-      score += variance
-    }
-    return Math.max(0, Math.min(1000, Math.round(score)))
-  }
-
-  // Calculate dynamic financial score (consistent across app)
-  const currentScore = calculateUserScore(user)
-
   const getUserName = () => {
     if (user?.firstName && user?.lastName) {
       return `${user.firstName} ${user.lastName}`
@@ -129,20 +122,27 @@ const Home = () => {
     return 'User'
   }
 
-  const getFinancialScoreColor = (score) => {
-    if (score >= 800) return '#0f766e'
-    if (score >= 740) return '#004977'
-    if (score >= 700) return '#d97706'
-    if (score >= 600) return '#ea580c'
-    return '#D22E1E'
-  }
-
   const getFinancialScoreLabel = (score) => {
-    if (score >= 800) return 'Excellent'
-    if (score >= 740) return 'Very Good'
-    if (score >= 700) return 'Good'
-    if (score >= 600) return 'Fair'
-    return 'Poor'
+  const s = Math.max(0, Math.min(1000, Number(score) || 0))
+  if (s >= 900) return 'Excellent'
+  if (s >= 700) return 'Good'
+  if (s >= 600) return 'Fair'
+  if (s >= 300) return 'Poor'
+  return 'Dreadful'
+}
+
+const getFinancialScoreColor = (score) => {
+  const s = Math.max(0, Math.min(1000, Number(score) || 0))
+  if (s >= 900) return '#16a34a'   // green (excellent)
+  if (s >= 700) return '#86efac'   // light green (good)
+  if (s >= 600) return '#facc15'   // yellow (fair)
+  if (s >= 300) return '#f97316'   // orange (poor)
+  return '#7f1d1d'                 // dark red (dreadful)
+}
+
+  // Number formatting function
+  const formatNumber = (num) => {
+    return Math.round(num).toLocaleString()
   }
 
   const getTipOfTheDay = () => {
@@ -225,10 +225,10 @@ const Home = () => {
           {/* Score Display */}
           <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
             <span style={{ fontSize: '3rem', fontWeight: 'bold', color: '#0f172a' }}>
-              {clamp(currentScore, SCORE_MIN, SCORE_MAX)}
+              {scoreLoading ? '...' : formatNumber(clamp(currentScore, SCORE_MIN, SCORE_MAX))}
             </span>
             <div style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '0.25rem' }}>
-              Financial Score
+              Financial Score {scoreLoading && '(Loading...)'}
             </div>
             <div style={{ 
               fontSize: '1rem', 
@@ -236,7 +236,7 @@ const Home = () => {
               color: getFinancialScoreColor(currentScore),
               marginTop: '0.5rem'
             }}>
-              {getFinancialScoreLabel(currentScore)}
+              {scoreLoading ? 'Loading...' : getFinancialScoreLabel(currentScore)}
             </div>
           </div>
 
@@ -253,13 +253,15 @@ const Home = () => {
               overflow: 'hidden'
             }}>
               {/* Fill (proportional + clamped) */}
-              <div style={{
-                height: '100%',
-                borderRadius: '0.375rem',
-                transition: 'width 0.5s ease',
-                width: `${toPct(currentScore)}%`,
-                backgroundColor: getFinancialScoreColor(currentScore)
-              }} />
+<div style={{
+  height: '100%',
+  borderRadius: '0.375rem',
+  transition: 'width 0.5s ease',
+  width: `${toPct(currentScore)}%`,
+  background: 'linear-gradient(to right, #7f1d1d 0%, #f97316 25%, #facc15 50%, #86efac 75%, #16a34a 100%)'
+}} />
+
+
             </div>
 
             {/* Tick marks */}
@@ -306,7 +308,7 @@ const Home = () => {
                   lineHeight: 1.2,
                   fontSize: '0.75rem'
                 }}>
-                  {tick.value}
+                  {formatNumber(tick.value)}
                 </div>
                 <div style={{ 
                   fontWeight: 'bold', 
@@ -401,7 +403,7 @@ const Home = () => {
             fontWeight: '700',
             color: '#dc2626'
           }}>
-            ${Math.round(monthlySpending)}
+            ${formatNumber(monthlySpending)}
           </p>
           <p style={{
             fontSize: '0.75rem',
@@ -444,7 +446,7 @@ const Home = () => {
               marginBottom: '0.25rem',
               color: '#059669'
             }}>
-              ${Math.round(monthlyIncome)}
+              ${formatNumber(monthlyIncome)}
             </p>
             <p style={{
               fontSize: '0.75rem',
@@ -462,7 +464,7 @@ const Home = () => {
               marginBottom: '0.25rem',
               color: '#dc2626'
             }}>
-              ${Math.round(monthlySpending)}
+              ${formatNumber(monthlySpending)}
             </p>
             <p style={{
               fontSize: '0.75rem',
@@ -480,7 +482,7 @@ const Home = () => {
               marginBottom: '0.25rem',
               color: netAmount >= 0 ? '#2563eb' : '#dc2626'
             }}>
-              ${Math.round(netAmount)}
+              ${formatNumber(netAmount)}
             </p>
             <p style={{
               fontSize: '0.75rem',
@@ -561,8 +563,8 @@ const Home = () => {
               color: '#64748b',
               lineHeight: '1.5'
             }}>
-              You've spent ${monthlySpending.toLocaleString()} out of your ${monthlyIncome.toLocaleString()} income this month. 
-              {netAmount >= 0 ? ` Great job saving $${netAmount.toLocaleString()}!` : ` You're over budget by $${Math.abs(netAmount).toLocaleString()}.`}
+              You've spent ${formatNumber(monthlySpending)} out of your ${formatNumber(monthlyIncome)} income this month. 
+              {netAmount >= 0 ? ` Great job saving $${formatNumber(netAmount)}!` : ` You're over budget by $${formatNumber(Math.abs(netAmount))}.`}
             </p>
           </div>
         </div>

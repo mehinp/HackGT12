@@ -1,3 +1,4 @@
+// src/pages/Social.jsx
 import { useState, useEffect } from 'react'
 import { useSocialContext } from '../hooks/Data Management Hooks/useSocialContext'
 import { useAuthContext } from '../hooks/Authentication hooks/useAuthContext'
@@ -6,65 +7,79 @@ import Button from '../components/Button'
 import Input from '../components/Input'
 import Leaderboard from '../components/Social Components/Leaderboard'
 import { socialService } from '../services/socialService'
+import { userScoreService } from '../services/userScoreService'
 
 const Social = () => {
   const { friends } = useSocialContext()
   const { user } = useAuthContext()
+
   const [showAddFriend, setShowAddFriend] = useState(false)
   const [friendEmail, setFriendEmail] = useState('')
   const [isAddingFriend, setIsAddingFriend] = useState(false)
   const [addFriendError, setAddFriendError] = useState('')
+
   const [friendCount, setFriendCount] = useState(0)
   const [loadingCount, setLoadingCount] = useState(true)
   const [countError, setCountError] = useState('')
+
   const [leaderboardData, setLeaderboardData] = useState([])
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(true)
   const [leaderboardError, setLeaderboardError] = useState('')
-  const [reactions, setReactions] = useState({}) // Store reactions for each user
+
+  // --- New: current user's dynamic score via API (same as Home/Navbar) ---
+  const [currentScore, setCurrentScore] = useState(500)
+  const [scoreLoading, setScoreLoading] = useState(true)
+
+  const [reactions, setReactions] = useState({})
 
   const currentFriends = friends || []
-  
+
   // Enhanced emoji reactions
   const emojiReactions = ['🔥', '💪', '🎉']
-  
-  // Current user data with enhanced achievements
-  const currentUser = {
-    id: user?.id,
-    name: user?.name || `${user?.firstName} ${user?.lastName}`.trim() || 'User',
-    email: user?.email,
-    score: 750,
-    avatar: '👤'
-  }
 
-  // Fetch friend count when component mounts
+  // Fetch on mount
   useEffect(() => {
     fetchFriendCount()
     fetchLeaderboardRankings()
+    fetchUserScore()
   }, [])
+
+  const fetchUserScore = async () => {
+    try {
+      const userId = localStorage.getItem('userId')
+      if (!userId) {
+        setCurrentScore(500)
+        return
+      }
+      setScoreLoading(true)
+      const score = await userScoreService.getUserScore()
+      const clamped = Math.max(0, Math.min(1000, Number(score) || 500))
+      setCurrentScore(Math.round(clamped))
+    } catch (e) {
+      console.log('Could not fetch user score:', e)
+      setCurrentScore(500)
+    } finally {
+      setScoreLoading(false)
+    }
+  }
 
   const fetchFriendCount = async () => {
     try {
       setLoadingCount(true)
       setCountError('')
-      
+
       const userId = localStorage.getItem('userId')
-      console.log('Fetching friend count for userId:', userId)
-      
       if (!userId) {
         setCountError('User not authenticated. Please log in again.')
         return
       }
 
       const result = await socialService.getFriendCount()
-      console.log('Friend count API response:', result)
-      
       if (result && typeof result.friendsCount === 'number') {
         setFriendCount(result.friendsCount)
       } else {
-        console.log('Unexpected response format:', result)
         setFriendCount(currentFriends.length)
       }
-      
     } catch (err) {
       console.error('Error fetching friend count:', err)
       setCountError(err.message)
@@ -78,38 +93,28 @@ const Social = () => {
     try {
       setLoadingLeaderboard(true)
       setLeaderboardError('')
-      
+
       const userId = localStorage.getItem('userId')
-      console.log('DEBUG: userId from localStorage:', userId)
-      
       if (!userId) {
         setLeaderboardError('User not authenticated. Please log in again.')
         return
       }
 
-      console.log('DEBUG: About to call getLeaderboardRankings API...')
       const response = await socialService.getLeaderboardRankings()
-      console.log('DEBUG: Raw API response:', response)
-      
       const rankings = response.ranks || []
-      console.log('DEBUG: Extracted rankings array:', rankings)
-      
+
       const transformedRankings = rankings.map(person => ({
         ...person,
         name: `${person.firstName} ${person.lastName}`.trim(),
         avatar: '👤'
       }))
-      
-      console.log('DEBUG: Transformed rankings:', transformedRankings)
-      
-      const sortedLeaderboard = transformedRankings.sort((a, b) => (b.score || 0) - (a.score || 0))
-      
-      console.log('DEBUG: Final sorted leaderboard:', sortedLeaderboard)
+
+      const sortedLeaderboard = transformedRankings.sort(
+        (a, b) => (b.score || 0) - (a.score || 0)
+      )
       setLeaderboardData(sortedLeaderboard)
-      
     } catch (err) {
-      console.error('DEBUG: Error in fetchLeaderboardRankings:', err)
-      console.error('DEBUG: Error message:', err.message)
+      console.error('Error in fetchLeaderboardRankings:', err)
       setLeaderboardError(err.message)
       setLeaderboardData([])
     } finally {
@@ -133,15 +138,11 @@ const Social = () => {
 
     try {
       const result = await socialService.addFriend(friendEmail.trim().toLowerCase())
-      
       console.log('Friend added successfully:', result)
-      
       setShowAddFriend(false)
       setFriendEmail('')
-      
       fetchFriendCount()
       fetchLeaderboardRankings()
-      
     } catch (err) {
       setAddFriendError(err.message)
     } finally {
@@ -170,9 +171,18 @@ const Social = () => {
     }))
   }
 
+  // Current user data, but score now comes from API
+  const currentUser = {
+    id: user?.id,
+    name: (user?.name || `${user?.firstName || ''} ${user?.lastName || ''}`)?.trim() || 'User',
+    email: user?.email,
+    score: currentScore,
+    avatar: '👤'
+  }
+
   const createLeaderboardWithCurrentUser = () => {
     const allUsers = [...leaderboardData]
-    
+
     const userExists = allUsers.find(u => u.email === currentUser.email)
     if (!userExists) {
       allUsers.push({
@@ -185,10 +195,12 @@ const Social = () => {
       allUsers.forEach(u => {
         if (u.email === currentUser.email) {
           u.isCurrentUser = true
+          // Ensure the visible score for the current user matches the latest API value
+          u.score = currentScore
         }
       })
     }
-    
+
     return allUsers.sort((a, b) => (b.score || 0) - (a.score || 0))
   }
 
@@ -298,7 +310,7 @@ const Social = () => {
                 color: '#6b7280',
                 marginBottom: '8px'
               }}>
-                Rank #{leaderboardWithUser.findIndex(u => u.email === currentUser.email) + 1 || 'N/A'} • Score: {currentUser.score}
+                Rank #{leaderboardWithUser.findIndex(u => u.email === currentUser.email) + 1 || 'N/A'} • Score: {scoreLoading ? '...' : currentUser.score}
               </div>
             </div>
           </div>
@@ -315,7 +327,7 @@ const Social = () => {
                 fontWeight: '700',
                 color: '#3b82f6'
               }}>
-                {currentUser.score}
+                {scoreLoading ? '...' : currentUser.score}
               </div>
               <div style={{
                 fontSize: '12px',
@@ -369,7 +381,7 @@ const Social = () => {
           }}>
             Leaderboard
           </h3>
-          
+
           <button
             onClick={() => setShowAddFriend(true)}
             style={{
@@ -389,7 +401,7 @@ const Social = () => {
             Add Friend
           </button>
         </div>
-        
+
         {loadingLeaderboard ? (
           <div style={{
             textAlign: 'center',
@@ -432,8 +444,7 @@ const Social = () => {
                     }}>
                       {person.name ? person.name.split(' ').map(n => n[0]).join('').toUpperCase() : '??'}
                     </div>
-                    
-                    {/* Enhanced Trophy/Medal icons */}
+
                     {index === 0 && (
                       <div style={{
                         position: 'absolute',
@@ -464,8 +475,7 @@ const Social = () => {
                         🥉
                       </div>
                     )}
-                    
-                    {/* Achievement indicator for high scores */}
+
                     {person.score >= 800 && index > 2 && (
                       <div style={{
                         position: 'absolute',
@@ -477,7 +487,7 @@ const Social = () => {
                       </div>
                     )}
                   </div>
-                  
+
                   <div>
                     <h4 style={{
                       fontWeight: '600',
@@ -492,7 +502,7 @@ const Social = () => {
                         color: '#64748b',
                         margin: 0
                       }}>
-                        Score: {person.score || 0}
+                        Score: {person.isCurrentUser ? (scoreLoading ? '...' : currentScore) : (person.score || 0)}
                       </p>
                       {person.scoreChange && (
                         <span style={{
@@ -512,9 +522,8 @@ const Social = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {/* Emoji Reactions positioned like in the image */}
                   {!person.isCurrentUser && (
                     <div style={{ display: 'flex', gap: '4px', marginRight: '8px' }}>
                       {emojiReactions.slice(0, 3).map(emoji => (
@@ -546,47 +555,50 @@ const Social = () => {
                       ))}
                     </div>
                   )}
-                  
+
                   <div style={{
                     padding: '4px 12px',
                     borderRadius: '9999px',
                     fontSize: '14px',
                     fontWeight: '700',
-                    backgroundColor: index === 0 ? '#fef3c7' : 
-                                   index === 1 ? '#f1f5f9' : 
+                    backgroundColor: index === 0 ? '#fef3c7' :
+                                   index === 1 ? '#f1f5f9' :
                                    index === 2 ? '#fefce8' : '#f8fafc',
-                    color: index === 0 ? '#92400e' : 
-                           index === 1 ? '#475569' : 
+                    color: index === 0 ? '#92400e' :
+                           index === 1 ? '#475569' :
                            index === 2 ? '#a16207' : '#64748b',
-                    border: `1px solid ${index === 0 ? '#fde68a' : 
-                                        index === 1 ? '#e2e8f0' : 
+                    border: `1px solid ${index === 0 ? '#fde68a' :
+                                        index === 1 ? '#e2e8f0' :
                                         index === 2 ? '#fde047' : '#e2e8f0'}`
                   }}>
                     #{index + 1}
                   </div>
-                  
+
                   {!person.isCurrentUser && (
                     <button
-                      onClick={() => removeFriend(person.id)}
-                      style={{
-                        padding: '8px',
-                        borderRadius: '6px',
-                        backgroundColor: '#fef2f2',
-                        color: '#dc2626',
-                        border: '1px solid #fecaca',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                      title="Remove Friend"
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                        <circle cx="9" cy="7" r="4"/>
-                        <line x1="22" y1="11" x2="16" y2="11"/>
-                      </svg>
-                    </button>
+  type="button"
+  onClick={() => removeFriend(person.id)}
+  style={{
+    padding: '8px',
+    borderRadius: '6px',
+    backgroundColor: '#fef2f2',
+    color: '#dc2626',
+    border: '1px solid #fecaca', // ✅ fixed
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  }}
+  title="Remove Friend"
+  aria-label={`Remove ${person?.name || 'friend'}`}
+>
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+    <circle cx="9" cy="7" r="4"/>
+    <line x1="22" y1="11" x2="16" y2="11"/>
+  </svg>
+</button>
+
                   )}
                 </div>
               </div>
@@ -627,10 +639,10 @@ const Social = () => {
               display: 'flex',
               alignItems: 'center',
               gap: '8px'
-            }}            >
+            }}>
               Add Friend
             </h3>
-            
+
             <p style={{
               fontSize: '0.875rem',
               color: '#6b7280',
@@ -652,9 +664,9 @@ const Social = () => {
                 ❌ {addFriendError}
               </div>
             )}
-            
+
             <div style={{ marginBottom: '1.5rem' }}>
-              <Input 
+              <Input
                 label="Friend's Email"
                 type="email"
                 placeholder="Enter email address"
@@ -662,14 +674,14 @@ const Social = () => {
                 onChange={(e) => setFriendEmail(e.target.value)}
               />
             </div>
-            
+
             <div style={{
               display: 'flex',
               gap: '1rem',
               justifyContent: 'flex-end'
             }}>
-              <Button 
-                variant="secondary" 
+              <Button
+                variant="secondary"
                 onClick={() => {
                   setShowAddFriend(false)
                   setFriendEmail('')
@@ -679,7 +691,7 @@ const Social = () => {
               >
                 Cancel
               </Button>
-              <Button 
+              <Button
                 variant="primary"
                 onClick={handleAddFriend}
                 disabled={!friendEmail.trim() || isAddingFriend}

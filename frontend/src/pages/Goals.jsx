@@ -1,4 +1,4 @@
-// src/pages/Goals.jsx - Updated with ML service integration
+// src/pages/Goals.jsx - Updated with ML service integration and comma formatting
 import { useState, useEffect } from 'react'
 import { useGoalsContext } from '../hooks/Data Management Hooks/useGoalsContext'
 import { useScoreContext } from '../hooks/Data Management Hooks/useScoreContext'
@@ -28,6 +28,11 @@ const Goals = () => {
   const [mlLoading, setMlLoading] = useState(false)
   const [mlError, setMlError] = useState('')
   const [selectedView, setSelectedView] = useState('full_horizon') // week, month, full_horizon
+
+  // Number formatting function
+  const formatNumber = (num) => {
+    return Math.round(num).toLocaleString()
+  }
 
   // Fetch both goals and ML data when component mounts
   useEffect(() => {
@@ -217,7 +222,7 @@ const Goals = () => {
               margin: '0.25rem 0',
               fontSize: '0.875rem'
             }}>
-              {entry.name}: ${entry.value?.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              {entry.name}: ${formatNumber(entry.value)}
             </p>
           ))}
         </div>
@@ -243,32 +248,11 @@ const Goals = () => {
 
   const headerStyle = {
     display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
     marginBottom: '2rem',
     flexWrap: 'wrap',
     gap: '1rem'
-  }
-
-  const titleSectionStyle = {
-    flex: 1,
-    minWidth: '300px'
-  }
-
-  const titleStyle = {
-    fontSize: '2.5rem',
-    fontWeight: '700',
-    color: '#1e293b',
-    marginBottom: '0.5rem',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem'
-  }
-
-  const subtitleStyle = {
-    fontSize: '1.125rem',
-    color: '#64748b',
-    marginBottom: '1rem'
   }
 
   const actionButtonsStyle = {
@@ -321,20 +305,6 @@ const Goals = () => {
     color: '#6b7280'
   }
 
-  const insightsStyle = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '1rem',
-    marginBottom: '1.5rem'
-  }
-
-  const insightCardStyle = {
-    backgroundColor: '#f8fafc',
-    padding: '1rem',
-    borderRadius: '0.5rem',
-    border: '1px solid #e2e8f0'
-  }
-
   const viewButtonsStyle = {
     display: 'flex',
     gap: '0.5rem',
@@ -357,13 +327,14 @@ const Goals = () => {
     return (
       <div style={pageStyle}>
         <div style={headerStyle}>
-          <div style={titleSectionStyle}>
-            <h1 style={titleStyle}>
-              🎯 Financial Goals
-            </h1>
-            <p style={subtitleStyle}>
-              Track your progress and achieve your financial dreams
-            </p>
+          <div style={actionButtonsStyle}>
+            <Button 
+              variant="primary" 
+              icon="➕"
+              onClick={() => setShowAddGoal(true)}
+            >
+              Add New Goal
+            </Button>
           </div>
         </div>
 
@@ -385,28 +356,6 @@ const Goals = () => {
     <div style={pageStyle}>
       {/* Header */}
       <div style={headerStyle}>
-        <div style={titleSectionStyle}>
-          <h1 style={titleStyle}>
-            🎯 Financial Goals
-          </h1>
-          <p style={subtitleStyle}>
-            Track your progress and achieve your financial dreams
-          </p>
-          {mlInsights && (
-            <div style={{ 
-              fontSize: '0.875rem', 
-              color: '#6b7280',
-              display: 'flex',
-              gap: '1rem',
-              flexWrap: 'wrap'
-            }}>
-              <span>💰 Current: ${mlInsights.currentSavings?.toLocaleString()}</span>
-              <span>📊 Score: {Math.round(mlInsights.moneyScore * 100)}%</span>
-              {mlInsights.modelError && <span>⚠️ Model Issue</span>}
-            </div>
-          )}
-        </div>
-
         <div style={actionButtonsStyle}>
           <Button 
             variant="primary" 
@@ -414,20 +363,6 @@ const Goals = () => {
             onClick={() => setShowAddGoal(true)}
           >
             Add New Goal
-          </Button>
-          <Button 
-            variant="secondary" 
-            icon="💬"
-            onClick={openChatbotForNewGoal}
-          >
-            Ask AI Assistant
-          </Button>
-          <Button 
-            variant="outline" 
-            icon="🔄"
-            onClick={handleRefreshData}
-          >
-            Refresh Data
           </Button>
         </div>
       </div>
@@ -450,7 +385,7 @@ const Goals = () => {
       {/* ML Error Display */}
       {mlError && (
         <div style={warningStyle}>
-          📊 Projection data unavailable: {mlError}
+          Projection data unavailable: {mlError}
           <Button 
             variant="outline" 
             size="sm" 
@@ -459,36 +394,6 @@ const Goals = () => {
           >
             Retry ML Data
           </Button>
-        </div>
-      )}
-
-      {/* Insights Cards */}
-      {mlInsights && (
-        <div style={insightsStyle}>
-          <div style={insightCardStyle}>
-            <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>Current Savings</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1e293b' }}>
-              ${mlInsights.currentSavings?.toLocaleString()}
-            </div>
-          </div>
-          <div style={insightCardStyle}>
-            <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>Monthly Income</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1e293b' }}>
-              ${mlInsights.incomeMonthly?.toLocaleString()}
-            </div>
-          </div>
-          <div style={insightCardStyle}>
-            <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>Trajectory Score</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: '600', color: mlInsights.moneyScore > 0.7 ? '#10b981' : mlInsights.moneyScore > 0.4 ? '#f59e0b' : '#ef4444' }}>
-              {Math.round(mlInsights.moneyScore * 100)}%
-            </div>
-          </div>
-          <div style={insightCardStyle}>
-            <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>Projection Days</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1e293b' }}>
-              {mlInsights.daysHorizon}
-            </div>
-          </div>
         </div>
       )}
 
@@ -501,7 +406,7 @@ const Goals = () => {
               fontWeight: '600',
               color: '#1e293b'
             }}>
-              📈 Financial Projection
+              Financial Projection
             </h2>
             
             <div style={viewButtonsStyle}>
@@ -564,7 +469,7 @@ const Goals = () => {
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+                  tickFormatter={(value) => `${formatNumber(value / 1000)}k`}
                   label={{ value: 'Amount ($)', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#6b7280', fontSize: '12px' } }}
                 />
                 <Tooltip content={<CustomTooltip />} />
@@ -621,20 +526,8 @@ const Goals = () => {
             fontWeight: '600',
             color: '#1e293b'
           }}>
-            Your Goals ({goals?.length || 0})
+            Your Goals
           </h2>
-          
-          {/* Quick action buttons */}
-          {goals?.length > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              icon="💬"
-              onClick={openChatbotForProgress}
-            >
-              Get Progress Tips
-            </Button>
-          )}
         </div>
         
         {/* Enhanced Goals List with ML Analysis */}
@@ -663,16 +556,9 @@ const Goals = () => {
                         color: '#6b7280',
                         fontSize: '0.875rem'
                       }}>
-                        Target: ${goal.saved?.toLocaleString()} by {goal.days.toLocaleString()}
+                        Target: ${formatNumber(goal.saved)} by {formatNumber(goal.days)} days
                       </p>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedGoal(goal)}
-                    >
-                      Edit
-                    </Button>
                   </div>
                   
                   {analysis && (
@@ -719,26 +605,6 @@ const Goals = () => {
                           </div>
                         </div>
                       )}
-                      
-                      {mlInsights && (
-                        <div style={{
-                          backgroundColor: '#ffffff',
-                          padding: '0.75rem',
-                          borderRadius: '0.5rem',
-                          border: '1px solid #e2e8f0'
-                        }}>
-                          <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>
-                            Gap to Goal
-                          </div>
-                          <div style={{
-                            fontSize: '1rem',
-                            fontWeight: '600',
-                            color: goal.saved > mlInsights.currentSavings ? '#ef4444' : '#10b981'
-                          }}>
-                            ${Math.abs(goal.saved - mlInsights.currentSavings).toLocaleString()}
-                          </div>
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>
@@ -769,7 +635,7 @@ const Goals = () => {
               marginBottom: '1.5rem'
             }}>
               {mlInsights 
-                ? `With your current savings of ${mlInsights.currentSavings?.toLocaleString()}, our AI can help you create realistic goals.`
+                ? `With your current savings of ${formatNumber(mlInsights.currentSavings)}, our AI can help you create realistic goals.`
                 : 'Our AI assistant can help you create personalized financial goals based on your situation.'
               }
             </p>
@@ -815,7 +681,7 @@ const Goals = () => {
           context={chatbotContext}
           initialMessage={
             goals?.length === 0 
-              ? `I see you haven't set any financial goals yet! 🎯 ${mlInsights ? `With your current savings of ${mlInsights.currentSavings?.toLocaleString()} and monthly income of ${mlInsights.incomeMonthly?.toLocaleString()}, ` : ''}I can help you create your first goal. Would you like to start with an emergency fund, vacation savings, or something else?`
+              ? `I see you haven't set any financial goals yet! 🎯 ${mlInsights ? `With your current savings of ${formatNumber(mlInsights.currentSavings)} and monthly income of ${formatNumber(mlInsights.incomeMonthly)}, ` : ''}I can help you create your first goal. Would you like to start with an emergency fund, vacation savings, or something else?`
               : mlInsights 
                 ? `Your current trajectory score is ${Math.round(mlInsights.moneyScore * 100)}%. Let me help you optimize your financial strategy! 📊`
                 : null

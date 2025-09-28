@@ -89,12 +89,6 @@ const Profile = () => {
     marginBottom: '0.75rem'
   }
 
-  const iconStyle = {
-    width: '16px',
-    height: '16px',
-    color: '#3b82f6'
-  }
-
   const labelStyle = {
     fontSize: '0.75rem',
     color: '#6b7280',
@@ -110,12 +104,20 @@ const Profile = () => {
     fontSize: '0.875rem'
   }
 
+  // Fixed SVG icon style
+  const iconStyle = {
+    width: '16px',
+    height: '16px',
+    color: '#6b7280',
+    flexShrink: 0
+  }
+
   const tabs = [
-    { id: 'profile', label: 'Personal Info', icon: '👤' },
-    { id: 'income', label: 'Income & Expenditures', icon: '💰' },
-    { id: 'security', label: 'Security', icon: '🔒' },
-    { id: 'notifications', label: 'Notifications', icon: '🔔' },
-    { id: 'account', label: 'Account', icon: '⚙️' }
+    { id: 'profile', label: 'Personal Info'},
+    { id: 'income', label: 'Income & Expenditures' },
+    { id: 'security', label: 'Security'},
+    { id: 'notifications', label: 'Notifications' },
+    { id: 'account', label: 'Account'}
   ]
 
   const handleProfileSave = () => {
@@ -425,7 +427,7 @@ const Profile = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
               <div>
-                <div style={labelStyle}>USER NAME</div>
+                <div style={labelStyle}>USER EMAIL</div>
                 <div style={valueStyle}>{user?.email || formData.email || 'rizz@gmail.com'}</div>
               </div>
             </div>
@@ -501,7 +503,6 @@ const Profile = () => {
             onClick={() => setActiveTab(tab.id)}
             style={tabStyle(activeTab === tab.id)}
           >
-            <span>{tab.icon}</span>
             {tab.label}
           </button>
         ))}
