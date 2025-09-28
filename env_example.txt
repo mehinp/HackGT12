@@ -1,0 +1,9 @@
+# Database Configuration
+DB_HOST=localhost
+DB_NAME=ml_service_db
+DB_USER=root
+DB_PASSWORD=your_password_here
+DB_PORT=3306
+
+# Model Configuration
+MODEL_DIR=./model_artifacts
