@@ -1,7 +1,7 @@
 {
-  "path": ".\\ml_service\\model_artifacts",
-  "model_dir": ".\\ml_service\\model_artifacts",
-  "model_path": ".\\ml_service\\model_artifacts\\model.joblib",
+  "path": "model_artifacts",
+  "model_dir": "model_artifacts",
+  "model_path": "model_artifacts\\model.joblib",
   "feature_order": [],
   "model_type": "xgboost",
   "random_state": 42

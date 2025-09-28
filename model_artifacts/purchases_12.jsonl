@@ -1,2 +1,9 @@
 {"user_id": 12, "ts": "2025-09-27T23:28:11", "merchant": "Olive Garden", "category": "restaurants", "amount": 25.0, "is_recurring": false, "description": ""}
 {"user_id": 12, "ts": "2025-09-27 23:28:11", "merchant": "Olive Garden", "category": "restaurants", "amount": 25.0, "is_recurring": false, "description": ""}
+{"user_id": 12, "ts": "2025-09-28 04:56:27", "merchant": "cruise", "category": "other", "amount": 1500.0, "is_recurring": false, "description": ""}
+{"user_id": 12, "ts": "2025-09-28 05:00:55", "merchant": "cruise", "category": "other", "amount": 1500.0, "is_recurring": false, "description": ""}
+{"user_id": 12, "ts": "2025-09-28 05:05:03", "merchant": "disney", "category": "entertainment", "amount": 2000.0, "is_recurring": false, "description": ""}
+{"user_id": 12, "ts": "2025-09-28 05:13:23", "merchant": "netflix", "category": "entertainment", "amount": 650.0, "is_recurring": false, "description": ""}
+{"user_id": 12, "ts": "2025-09-28 05:16:30", "merchant": "walmart", "category": "grocery", "amount": 30.0, "is_recurring": false, "description": ""}
+{"user_id": 12, "ts": "2025-09-28 05:21:25", "merchant": "costco", "category": "grocery", "amount": 200.0, "is_recurring": false, "description": ""}
+{"user_id": 12, "ts": "2025-09-28 05:26:46", "merchant": "giant", "category": "grocery", "amount": 100.0, "is_recurring": false, "description": ""}
