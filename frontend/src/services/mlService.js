@@ -36,14 +36,150 @@ export const mlService = {
       console.log('ML Service: Received graph data:', {
         metadata: data.metadata,
         dataPointsKeys: Object.keys(data.data_points || {}),
-        dataPointsLength: data.data_points?.days?.length
+        dataPointsLength: data.data_points?.days?.length,
+        gbmModelScore: data.metadata?.gbm_model_score
       })
+
+      // Store the GBM model score for later database update
+      if (data.metadata?.gbm_model_score !== null && data.metadata?.gbm_model_score !== undefined) {
+        this.storeUserScore(userId, data.metadata.gbm_model_score)
+      }
 
       return data
     } catch (error) {
       console.error('ML Service: Error fetching graph data:', error)
       throw error
     }
+  },
+
+  /**
+   * Store user score in localStorage for later database sync
+   */
+  storeUserScore(userId, score) {
+    try {
+      const scoreData = {
+        userId: userId,
+        score: score,
+        timestamp: new Date().toISOString(),
+        synced: false
+      }
+      
+      // Store individual user score
+      localStorage.setItem(`user_score_${userId}`, JSON.stringify(scoreData))
+      
+      // Also maintain a list of pending score updates
+      const pendingScores = this.getPendingScoreUpdates()
+      const existingIndex = pendingScores.findIndex(item => item.userId === userId)
+      
+      if (existingIndex >= 0) {
+        pendingScores[existingIndex] = scoreData
+      } else {
+        pendingScores.push(scoreData)
+      }
+      
+      localStorage.setItem('pending_score_updates', JSON.stringify(pendingScores))
+      
+      console.log('ML Service: Stored user score:', scoreData)
+    } catch (error) {
+      console.error('ML Service: Error storing user score:', error)
+    }
+  },
+
+  /**
+   * Get pending score updates that need to be synced to database
+   */
+  getPendingScoreUpdates() {
+    try {
+      const pending = localStorage.getItem('pending_score_updates')
+      return pending ? JSON.parse(pending) : []
+    } catch (error) {
+      console.error('ML Service: Error getting pending score updates:', error)
+      return []
+    }
+  },
+
+  /**
+   * Get stored user score
+   */
+  getStoredUserScore(userId) {
+    try {
+      const stored = localStorage.getItem(`user_score_${userId}`)
+      return stored ? JSON.parse(stored) : null
+    } catch (error) {
+      console.error('ML Service: Error getting stored user score:', error)
+      return null
+    }
+  },
+
+  /**
+   * Mark score as synced to database
+   */
+  markScoreSynced(userId) {
+    try {
+      const scoreData = this.getStoredUserScore(userId)
+      if (scoreData) {
+        scoreData.synced = true
+        scoreData.syncedAt = new Date().toISOString()
+        localStorage.setItem(`user_score_${userId}`, JSON.stringify(scoreData))
+      }
+      
+      // Remove from pending updates
+      const pendingScores = this.getPendingScoreUpdates()
+      const filteredScores = pendingScores.filter(item => item.userId !== userId)
+      localStorage.setItem('pending_score_updates', JSON.stringify(filteredScores))
+      
+      console.log('ML Service: Marked score as synced for user:', userId)
+    } catch (error) {
+      console.error('ML Service: Error marking score as synced:', error)
+    }
+  },
+
+  /**
+   * Sync pending scores to backend database
+   */
+  async syncScoresToDatabase() {
+    const pendingScores = this.getPendingScoreUpdates()
+    const results = []
+    
+    for (const scoreData of pendingScores) {
+      try {
+        // Call your backend API to update the score
+        const response = await fetch('http://143.215.104.239:8080/users/update-score', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-User-Id': scoreData.userId
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            score: scoreData.score,
+            timestamp: scoreData.timestamp
+          })
+        })
+        
+        if (response.ok) {
+          this.markScoreSynced(scoreData.userId)
+          results.push({ userId: scoreData.userId, success: true })
+          console.log('ML Service: Successfully synced score for user:', scoreData.userId)
+        } else {
+          results.push({ 
+            userId: scoreData.userId, 
+            success: false, 
+            error: `HTTP ${response.status}` 
+          })
+          console.error('ML Service: Failed to sync score for user:', scoreData.userId, response.status)
+        }
+      } catch (error) {
+        results.push({ 
+          userId: scoreData.userId, 
+          success: false, 
+          error: error.message 
+        })
+        console.error('ML Service: Error syncing score for user:', scoreData.userId, error)
+      }
+    }
+    
+    return results
   },
 
   /**
@@ -227,7 +363,12 @@ export const mlService = {
       projectionMode: metadata.projection_mode || 'piecewise',
       purchasesProcessed: metadata.purchases_processed || 0,
       modelUpdated: metadata.model_updated || false,
-      modelError: metadata.model_error || null
+      modelError: metadata.model_error || null,
+      // Use GBM model score as the primary user score
+      userScore: metadata.gbm_model_score || metadata.score || 0,
+      gbmModelScore: metadata.gbm_model_score,
+      dailySavingsBudget: metadata.daily_savings_budget || 0,
+      recentAvgSpend: metadata.recent_avg_spend || 0
     }
   },
 
