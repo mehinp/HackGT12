@@ -1,10 +1,10 @@
-package com.finance.backend;
+package com.finance.hackathon;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class BackendApplicationTests {
+class HackathonApplicationTests {
 
 	@Test
 	void contextLoads() {
