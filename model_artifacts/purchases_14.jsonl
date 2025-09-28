@@ -1,0 +1,3 @@
+{"user_id": 14, "ts": "2025-09-28T02:54:53", "merchant": "home", "category": "rent", "amount": 500000.0, "is_recurring": false, "description": ""}
+{"user_id": 14, "ts": "2025-09-28T03:09:49", "merchant": "Walmart", "category": "groceries", "amount": 200.0, "is_recurring": false, "description": ""}
+{"user_id": 14, "ts": "2025-09-28 03:09:49", "merchant": "Walmart", "category": "groceries", "amount": 200.0, "is_recurring": false, "description": ""}

@@ -1,0 +1,2 @@
+{"user_id": 12, "ts": "2025-09-27T23:28:11", "merchant": "Olive Garden", "category": "restaurants", "amount": 25.0, "is_recurring": false, "description": ""}
+{"user_id": 12, "ts": "2025-09-27 23:28:11", "merchant": "Olive Garden", "category": "restaurants", "amount": 25.0, "is_recurring": false, "description": ""}
