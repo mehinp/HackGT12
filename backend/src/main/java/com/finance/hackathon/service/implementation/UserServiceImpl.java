@@ -32,4 +32,10 @@ public class UserServiceImpl implements UserService {
     public User getUserById(Long id) {
         return userRepository.get(id);
     }
+
+    @Override
+    public void updateUserScore(Long id, int score) {
+        userRepository.updateUserScore(id, score);
+    }
+
 }

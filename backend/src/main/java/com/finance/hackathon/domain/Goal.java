@@ -19,5 +19,5 @@ public class Goal {
     private String title;
     private Long userId;
     private BigDecimal saved;
-    private LocalDate endDate;
+    private Long days;
 }

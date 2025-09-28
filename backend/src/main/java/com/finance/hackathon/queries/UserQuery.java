@@ -8,4 +8,8 @@ public class UserQuery {
 
     public static final String SELECT_USER_BY_ID_QUERY = "SELECT * FROM users WHERE id = :id";
 
+    public static final String UPDATE_USER_SCORE_QUERY =
+            "UPDATE Users SET score = :score WHERE id = :id";
+
+
 }

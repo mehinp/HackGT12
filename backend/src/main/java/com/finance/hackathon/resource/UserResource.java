@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping(path="/user")
 @RequiredArgsConstructor
@@ -47,7 +49,15 @@ public class UserResource {
         return ResponseEntity.ok(user);
     }
 
-
+    @PatchMapping("/{id}/score")
+    public ResponseEntity<Void> updateUserScore(@PathVariable("id") Long id, @RequestBody Map<String, Integer> payload) {
+        Integer score = payload.get("score");
+        if (score == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        userService.updateUserScore(id, score);
+        return ResponseEntity.ok().build();
+    }
 
 
 

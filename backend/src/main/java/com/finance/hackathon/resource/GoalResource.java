@@ -1,7 +1,6 @@
 package com.finance.hackathon.resource;
 
 import com.finance.hackathon.domain.Goal;
-import com.finance.hackathon.domain.Purchase;
 import com.finance.hackathon.service.GoalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -9,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/goals")
@@ -37,7 +37,7 @@ public class GoalResource {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Missing or invalid X-User-Id.");
         }
-        Goal userGoal = goalService.getGoalByUserId(userId);
+        Optional<Goal> userGoal = goalService.getGoalByUserId(userId);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(Map.of(

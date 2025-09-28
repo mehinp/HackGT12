@@ -62,6 +62,17 @@ public class UserRepositoryImpl implements UserRepository<User> {
         }
     }
 
+    @Override
+    public void updateUserScore(Long id, int score) {
+        try {
+            jdbc.update(UPDATE_USER_SCORE_QUERY,
+                    Map.of("id", id, "score", score));
+        } catch (Exception e) {
+            log.error("Failed to update score for user {}: {}", id, e.getMessage());
+            throw new RuntimeException("Unable to update score");
+        }
+    }
+
     private User mapRowToUser(ResultSet rs, int rowNum) throws SQLException {
         return User.builder()
                 .id(rs.getLong("id"))

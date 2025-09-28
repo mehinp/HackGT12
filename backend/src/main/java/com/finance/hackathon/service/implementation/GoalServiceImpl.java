@@ -6,6 +6,8 @@ import com.finance.hackathon.service.GoalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class GoalServiceImpl implements GoalService {
@@ -15,7 +17,7 @@ public class GoalServiceImpl implements GoalService {
         return goalRepository.createGoal(goal, currentUserId);
     }
 
-    public Goal getGoalByUserId(Long currentUserId){
+    public Optional<Goal> getGoalByUserId(Long currentUserId){
         return goalRepository.getGoalByUserId(currentUserId);
     }
 
