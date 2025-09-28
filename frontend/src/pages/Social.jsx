@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSocialContext } from '../hooks/Data Management Hooks/useSocialContext'
 import { useAuthContext } from '../hooks/Authentication hooks/useAuthContext'
+import { useScoreContext } from '../hooks/Data Management Hooks/useScoreContext'
 import Button from '../components/Button'
 import Input from '../components/Input'
 import Leaderboard from '../components/Social Components/Leaderboard'
@@ -16,6 +17,9 @@ const Social = () => {
   const [friendCount, setFriendCount] = useState(0)
   const [loadingCount, setLoadingCount] = useState(true)
   const [countError, setCountError] = useState('')
+  const [leaderboardData, setLeaderboardData] = useState([])
+  const [loadingLeaderboard, setLoadingLeaderboard] = useState(true)
+  const [leaderboardError, setLeaderboardError] = useState('')
 
   const currentFriends = friends || []
   
@@ -29,12 +33,10 @@ const Social = () => {
     achievements: ['🚀 Getting Started', '💪 Consistent']
   }
 
-  // Create leaderboard with current user
-  const leaderboardData = [...currentFriends, currentUser].sort((a, b) => b.score - a.score)
-
   // Fetch friend count when component mounts
   useEffect(() => {
     fetchFriendCount()
+    fetchLeaderboardRankings()
   }, [])
 
   const fetchFriendCount = async () => {
@@ -71,6 +73,54 @@ const Social = () => {
     }
   }
 
+  const fetchLeaderboardRankings = async () => {
+    try {
+      setLoadingLeaderboard(true)
+      setLeaderboardError('')
+      
+      const userId = localStorage.getItem('userId')
+      console.log('DEBUG: userId from localStorage:', userId)
+      
+      if (!userId) {
+        setLeaderboardError('User not authenticated. Please log in again.')
+        return
+      }
+
+      console.log('DEBUG: About to call getLeaderboardRankings API...')
+      const response = await socialService.getLeaderboardRankings()
+      console.log('DEBUG: Raw API response:', response)
+      
+      // Extract the ranks array from the response object
+      const rankings = response.ranks || []
+      console.log('DEBUG: Extracted rankings array:', rankings)
+      
+      // Transform the data to match what the Leaderboard component expects
+      // and combine firstName + lastName into name
+      const transformedRankings = rankings.map(person => ({
+        ...person,
+        name: `${person.firstName} ${person.lastName}`.trim(),
+        avatar: '👤' // Default avatar for now
+      }))
+      
+      console.log('DEBUG: Transformed rankings:', transformedRankings)
+      
+      // Sort by score in descending order (API should already do this, but just in case)
+      const sortedLeaderboard = transformedRankings.sort((a, b) => (b.score || 0) - (a.score || 0))
+      
+      console.log('DEBUG: Final sorted leaderboard:', sortedLeaderboard)
+      setLeaderboardData(sortedLeaderboard)
+      
+    } catch (err) {
+      console.error('DEBUG: Error in fetchLeaderboardRankings:', err)
+      console.error('DEBUG: Error message:', err.message)
+      setLeaderboardError(err.message)
+      // Fallback to empty array since we can't show current user without duplicating
+      setLeaderboardData([])
+    } finally {
+      setLoadingLeaderboard(false)
+    }
+  }
+
   const handleAddFriend = async () => {
     if (!friendEmail.trim()) {
       setAddFriendError('Please enter an email address')
@@ -95,8 +145,9 @@ const Social = () => {
       setShowAddFriend(false)
       setFriendEmail('')
       
-      // Refresh friend count after adding friend
+      // Refresh friend count and leaderboard after adding friend
       fetchFriendCount()
+      fetchLeaderboardRankings()
       
     } catch (err) {
       setAddFriendError(err.message)
@@ -178,10 +229,13 @@ const Social = () => {
           </Button>
           <Button 
             variant="outline" 
-            icon="📊"
-            onClick={fetchFriendCount}
+            icon="🔄"
+            onClick={() => {
+              fetchFriendCount()
+              fetchLeaderboardRankings()
+            }}
           >
-            Refresh Count
+            Refresh
           </Button>
         </div>
       </div>
@@ -201,6 +255,28 @@ const Social = () => {
             variant="outline" 
             size="sm" 
             onClick={fetchFriendCount}
+            style={{ marginLeft: '1rem' }}
+          >
+            Retry
+          </Button>
+        </div>
+      )}
+
+      {/* Error Display for Leaderboard */}
+      {leaderboardError && (
+        <div style={{
+          backgroundColor: '#fef2f2',
+          color: '#dc2626',
+          padding: '1rem',
+          borderRadius: '0.5rem',
+          marginBottom: '1rem',
+          border: '1px solid #fecaca'
+        }}>
+          ⚠️ Failed to load leaderboard: {leaderboardError}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={fetchLeaderboardRankings}
             style={{ marginLeft: '1rem' }}
           >
             Retry
@@ -253,7 +329,7 @@ const Social = () => {
                 color: '#6b7280',
                 marginBottom: '0.5rem'
               }}>
-                Rank #{userRank} • Score: {currentUser.score}
+                Rank #{userRank || 'N/A'} • Score: {currentUser.score}
               </div>
               <div style={{
                 display: 'flex',
@@ -331,7 +407,18 @@ const Social = () => {
           </h2>
         </div>
         
-        <Leaderboard data={leaderboardData} currentUser={currentUser} showDeleteButton={true} />
+        {loadingLeaderboard ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '2rem',
+            color: '#6b7280'
+          }}>
+            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>⏳</div>
+            <p>Loading leaderboard...</p>
+          </div>
+        ) : (
+          <Leaderboard data={leaderboardData} currentUser={currentUser} showDeleteButton={true} />
+        )}
       </div>
 
       {/* Add Friend Modal */}

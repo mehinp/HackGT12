@@ -1,85 +1,141 @@
-// src/pages/Home.jsx
+// src/pages/Home.jsx - Clean, working version with dynamic values
 import { useState, useEffect } from 'react'
 import { useAuthContext } from '../hooks/Authentication hooks/useAuthContext'
-import ScoreWidget from '../components/Dashboard Widgets/ScoreWidget'
-import QuickStatsWidget from '../components/Dashboard Widgets/QuickStatsWidget'
 
 const Home = () => {
   const { user } = useAuthContext()
-  const [userData, setUserData] = useState({
-    creditScore: 500,
-    scoreChange: 0
-  })
-  const [transactions, setTransactions] = useState([])
-  const [goalsData, setGoalsData] = useState({
-    activeGoal: null
-  })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [purchases, setPurchases] = useState([])
+  const [goals, setGoals] = useState([])
 
-  // Calculate dynamic stats from transactions
-  const monthlySpending = transactions
-    .filter(t => t.amount < 0)
-    .reduce((sum, t) => sum + Math.abs(t.amount), 0)
-  
-  const monthlyIncome = transactions
-    .filter(t => t.amount > 0)
-    .reduce((sum, t) => sum + t.amount, 0)
-
-  const activeGoals = goalsData.activeGoal ? 1 : 0
-
-  // Fetch user data on component mount
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchData = async () => {
       try {
-        // Replace with your actual API call
-        const response = await fetch('/api/user/stats', {
-          headers: {
-            'Authorization': `Bearer ${user?.token}`
+        setLoading(true)
+        const userId = localStorage.getItem('userId')
+        
+        if (userId) {
+          // Fetch purchases
+          try {
+            const purchasesResponse = await fetch('http://143.215.104.239:8080/purchase/my-purchases', {
+              credentials: 'include',
+              headers: {
+                'X-User-Id': userId
+              }
+            })
+            if (purchasesResponse.ok) {
+              const data = await purchasesResponse.json()
+              setPurchases(data.purchases || [])
+            }
+          } catch (e) {
+            console.log('Could not fetch purchases:', e)
           }
-        })
-        if (response.ok) {
-          const data = await response.json()
-          setUserData(data)
+
+          // Fetch goals
+          try {
+            const goalsResponse = await fetch('http://143.215.104.239:8080/goals/my-goals', {
+              credentials: 'include',
+              headers: {
+                'X-User-Id': userId
+              }
+            })
+            if (goalsResponse.ok) {
+              const data = await goalsResponse.json()
+              setGoals(data.goal ? [data.goal] : [])
+            }
+          } catch (e) {
+            console.log('Could not fetch goals:', e)
+          }
         }
-      } catch (error) {
-        console.error('Error fetching user stats:', error)
+      } catch (err) {
+        setError('Failed to load data')
+      } finally {
+        setLoading(false)
       }
     }
 
-    if (user?.token) {
-      fetchUserData()
+    fetchData()
+  }, [])
+
+  // ----- Credit score helpers (proportional ticks + clamping) -----
+  const SCORE_MIN = 0
+  const SCORE_MAX = 1000
+  const clamp = (v, min, max) => Math.min(Math.max(v ?? 0, min), max)
+  const toPct = (v) => ((clamp(v, SCORE_MIN, SCORE_MAX) - SCORE_MIN) / (SCORE_MAX - SCORE_MIN)) * 100
+
+  const SCORE_TICKS = [
+    { value: 300, label: 'Poor', color: '#D22E1E' },
+    { value: 600, label: 'Fair', color: '#ea580c' },
+    { value: 700, label: 'Good', color: '#d97706' },
+    { value: 900, label: 'Excellent', color: '#0f766e' },
+  ]
+  // ---------------------------------------------------------------
+
+  // Calculate dynamic values
+  const monthlyIncome = user?.income || 0
+  
+  // Calculate monthly spending from purchases
+  const currentMonth = new Date().getMonth()
+  const currentYear = new Date().getFullYear()
+  const monthlyPurchases = purchases.filter(purchase => {
+    const purchaseDate = new Date(purchase.purchaseTime || purchase.date)
+    return purchaseDate.getMonth() === currentMonth && 
+           purchaseDate.getFullYear() === currentYear
+  })
+  const monthlySpending = monthlyPurchases.reduce((total, purchase) => {
+    return total + (parseFloat(purchase.amount) || 0)
+  }, 0)
+
+  const netAmount = monthlyIncome - monthlySpending
+  const activeGoals = goals.length
+
+  // Create a utility function for consistent score calculation
+  const calculateUserScore = (userdata) => {
+    let score = 500
+    if (userdata?.income && userdata?.expenditures) {
+      const ratio = userdata.income / userdata.expenditures
+      if (ratio >= 2.0) score += 150
+      else if (ratio >= 1.5) score += 100
+      else if (ratio >= 1.2) score += 50
+      else if (ratio >= 1.0) score += 25
+      else score -= 100
+      
+      // Add user-specific variance for consistency
+      const userId = parseInt(localStorage.getItem('userId')) || 0
+      const variance = (userId % 100) - 50
+      score += variance
     }
-  }, [user])
+    return Math.max(0, Math.min(1000, Math.round(score)))
+  }
+
+  // Calculate dynamic financial score (consistent across app)
+  const currentScore = calculateUserScore(user)
 
   const getUserName = () => {
     if (user?.firstName && user?.lastName) {
       return `${user.firstName} ${user.lastName}`
     }
     if (user?.firstName) return user.firstName
+    if (user?.name) return user.name
     if (user?.email) return user.email.split('@')[0]
     return 'User'
   }
 
-  const getCreditScoreColor = (score) => {
+  const getFinancialScoreColor = (score) => {
     if (score >= 800) return '#0f766e'
     if (score >= 740) return '#004977'
-    if (score >= 670) return '#d97706'
-    if (score >= 580) return '#ea580c'
+    if (score >= 700) return '#d97706'
+    if (score >= 600) return '#ea580c'
     return '#D22E1E'
   }
 
-  const getCreditScoreLabel = (score) => {
+  const getFinancialScoreLabel = (score) => {
     if (score >= 800) return 'Excellent'
     if (score >= 740) return 'Very Good'
-    if (score >= 670) return 'Good'
-    if (score >= 580) return 'Fair'
+    if (score >= 700) return 'Good'
+    if (score >= 600) return 'Fair'
     return 'Poor'
-  }
-
-  const getCurrentTimeGreeting = () => {
-    const hour = new Date().getHours()
-    if (hour < 12) return 'Good morning'
-    if (hour < 17) return 'Good afternoon'
-    return 'Good evening'
   }
 
   const getTipOfTheDay = () => {
@@ -94,6 +150,22 @@ const Home = () => {
     return tips[dayOfMonth % tips.length]
   }
 
+  if (loading) {
+    return (
+      <div style={{
+        padding: '1.5rem',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '50vh',
+        fontSize: '1.125rem',
+        color: '#6b7280'
+      }}>
+        Loading dashboard...
+      </div>
+    )
+  }
+
   return (
     <div style={{
       padding: '1.5rem',
@@ -101,20 +173,20 @@ const Home = () => {
       backgroundColor: '#f8fafc',
       minHeight: '100vh'
     }}>
-      {/* Header */}
-      <div style={{
-        marginBottom: '2rem'
-      }}>
-        <h1 style={{
-          fontSize: '1.25rem',
-          fontWeight: '700',
-          color: '#dc2626'
+
+      {/* Error Display */}
+      {error && (
+        <div style={{
+          backgroundColor: '#fef2f2',
+          color: '#dc2626',
+          padding: '1rem',
+          borderRadius: '0.5rem',
+          marginBottom: '2rem',
+          border: '1px solid #fecaca'
         }}>
-          Dashboard
-        </h1>
-      </div>
-
-
+          {error}
+        </div>
+      )}
 
       {/* User Info Section */}
       <div style={{
@@ -141,72 +213,107 @@ const Home = () => {
           </h2>
         </div>
         
-        {/* Credit Score Widget */}
+        {/* Financial Score Widget */}
         <div style={{ marginBottom: '2rem' }}>
+          {/* Score Display */}
+          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+            <span style={{ fontSize: '3rem', fontWeight: 'bold', color: '#0f172a' }}>
+              {clamp(currentScore, SCORE_MIN, SCORE_MAX)}
+            </span>
+            <div style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '0.25rem' }}>
+              Financial Score
+            </div>
+            <div style={{ 
+              fontSize: '1rem', 
+              fontWeight: 'bold', 
+              color: getFinancialScoreColor(currentScore),
+              marginTop: '0.5rem'
+            }}>
+              {getFinancialScoreLabel(currentScore)}
+            </div>
+          </div>
+
+          {/* Progress Bar Container */}
           <div style={{ position: 'relative', marginBottom: '1rem' }}>
+            {/* Track */}
             <div style={{
               width: '100%',
               backgroundColor: '#e2e8f0',
               borderRadius: '0.375rem',
               height: '1rem',
-              border: '1px solid #cbd5e1'
+              border: '1px solid #cbd5e1',
+              position: 'relative',
+              overflow: 'hidden'
             }}>
+              {/* Fill (proportional + clamped) */}
               <div style={{
                 height: '100%',
                 borderRadius: '0.375rem',
-                transition: 'all 0.5s ease',
-                width: `${((userData.creditScore - 300) / 550) * 100}%`,
-                backgroundColor: getCreditScoreColor(userData.creditScore)
+                transition: 'width 0.5s ease',
+                width: `${toPct(currentScore)}%`,
+                backgroundColor: getFinancialScoreColor(currentScore)
               }} />
             </div>
-          </div>
-          
-          {/* Score labels under the bar */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            fontSize: '0.75rem',
-            marginBottom: '1rem'
-          }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontFamily: 'monospace', color: '#64748b' }}>300</div>
-              <div style={{ fontWeight: 'bold', color: '#D22E1E' }}>Poor</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontFamily: 'monospace', color: '#64748b' }}>600</div>
-              <div style={{ fontWeight: 'bold', color: '#ea580c' }}>Fair</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontFamily: 'monospace', color: '#64748b' }}>700</div>
-              <div style={{ fontWeight: 'bold', color: '#d97706' }}>Good</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontFamily: 'monospace', color: '#64748b' }}>850</div>
-              <div style={{ fontWeight: 'bold', color: '#0f766e' }}>Excellent</div>
-            </div>
+
+            {/* Tick marks */}
+            {SCORE_TICKS.map(tick => (
+              <div
+                key={tick.value}
+                style={{
+                  position: 'absolute',
+                  left: `${toPct(tick.value)}%`,
+                  top: '100%',
+                  width: '2px',
+                  height: '8px',
+                  backgroundColor: '#64748b',
+                  transform: 'translateX(-1px)' // Center the tick mark
+                }}
+              />
+            ))}
           </div>
 
-          <div style={{ textAlign: 'center' }}>
-            <span style={{ fontSize: '3rem', fontWeight: 'bold', color: '#0f172a' }}>
-              {userData.creditScore}
-            </span>
-            <div style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '0.25rem' }}>
-              Credit Score
-            </div>
-            <div style={{ 
-              fontSize: '1rem', 
-              fontWeight: 'bold', 
-              color: getCreditScoreColor(userData.creditScore),
-              marginTop: '0.5rem'
-            }}>
-              {getCreditScoreLabel(userData.creditScore)}
-            </div>
+          {/* Tick labels container */}
+          <div style={{ 
+            position: 'relative', 
+            height: '3rem', 
+            display: 'flex',
+            width: '100%',
+            paddingTop: '0.5rem'
+          }}>
+            {SCORE_TICKS.map((tick, index) => (
+              <div
+                key={tick.label}
+                style={{
+                  position: 'absolute',
+                  left: `${toPct(tick.value)}%`,
+                  transform: 'translateX(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textAlign: 'center'
+                }}
+              >
+                <div style={{ 
+                  fontFamily: 'monospace', 
+                  color: '#64748b', 
+                  lineHeight: 1.2,
+                  fontSize: '0.75rem'
+                }}>
+                  {tick.value}
+                </div>
+                <div style={{ 
+                  fontWeight: 'bold', 
+                  color: tick.color, 
+                  lineHeight: 1.2,
+                  fontSize: '0.75rem',
+                  marginTop: '2px'
+                }}>
+                  {tick.label}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-
-        {/* Recent Activity Impact - Removed */}
-        {/* This section has been removed as requested */}
       </div>
 
       {/* Stats Grid */}
@@ -229,11 +336,6 @@ const Home = () => {
             gap: '0.5rem',
             marginBottom: '1rem'
           }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: '#2563eb' }}>
-              <circle cx="12" cy="12" r="10"/>
-              <circle cx="12" cy="12" r="6"/>
-              <circle cx="12" cy="12" r="2"/>
-            </svg>
             <h3 style={{
               fontSize: '0.875rem',
               fontWeight: '700',
@@ -275,10 +377,6 @@ const Home = () => {
             gap: '0.5rem',
             marginBottom: '1rem'
           }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: '#10b981' }}>
-              <line x1="12" y1="1" x2="12" y2="23"/>
-              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-            </svg>
             <h3 style={{
               fontSize: '0.875rem',
               fontWeight: '700',
@@ -314,7 +412,8 @@ const Home = () => {
         border: '1px solid #e2e8f0',
         borderRadius: '0.375rem',
         padding: '1.5rem',
-        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+        marginBottom: '2rem'
       }}>
         <h3 style={{
           fontSize: '1rem',
@@ -370,9 +469,9 @@ const Home = () => {
               fontSize: '2rem',
               fontWeight: '700',
               marginBottom: '0.25rem',
-              color: '#2563eb'
+              color: netAmount >= 0 ? '#2563eb' : '#dc2626'
             }}>
-              ${Math.round(monthlyIncome - monthlySpending)}
+              ${Math.round(netAmount)}
             </p>
             <p style={{
               fontSize: '0.75rem',
@@ -386,7 +485,7 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Financial Insights Section - Moved to Bottom */}
+      {/* Financial Insights */}
       <div style={{
         backgroundColor: '#ffffff',
         borderRadius: '0.375rem',
@@ -453,7 +552,8 @@ const Home = () => {
               color: '#64748b',
               lineHeight: '1.5'
             }}>
-              You've spent ${monthlySpending.toLocaleString()} out of your ${monthlyIncome.toLocaleString()} income this month. Net: ${(monthlyIncome - monthlySpending).toLocaleString()}
+              You've spent ${monthlySpending.toLocaleString()} out of your ${monthlyIncome.toLocaleString()} income this month. 
+              {netAmount >= 0 ? ` Great job saving $${netAmount.toLocaleString()}!` : ` You're over budget by $${Math.abs(netAmount).toLocaleString()}.`}
             </p>
           </div>
         </div>

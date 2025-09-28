@@ -81,7 +81,8 @@ const Purchases = () => {
   }
 
   const pageStyle = {
-    padding: '1rem 0'
+    padding: '1rem 0',
+    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
   }
 
   const headerStyle = {
@@ -101,7 +102,7 @@ const Purchases = () => {
   const titleStyle = {
     fontSize: '2.5rem',
     fontWeight: '700',
-    color: darkMode ? '#f8fafc' : '#1e293b',
+    color: '#dc2626', // red-600 to match demo
     marginBottom: '0.5rem',
     display: 'flex',
     alignItems: 'center',
@@ -110,7 +111,7 @@ const Purchases = () => {
 
   const subtitleStyle = {
     fontSize: '1.125rem',
-    color: darkMode ? '#94a3b8' : '#64748b',
+    color: '#64748b', // slate-500 to match demo
     marginBottom: '1rem'
   }
 
@@ -127,26 +128,26 @@ const Purchases = () => {
     flexWrap: 'wrap',
     alignItems: 'center',
     padding: '1rem',
-    backgroundColor: darkMode ? '#1e293b' : '#ffffff',
-    borderRadius: '1rem',
-    border: darkMode ? '1px solid #374151' : '1px solid #e2e8f0',
-    boxShadow: darkMode ? '0 2px 4px rgba(0,0,0,0.3)' : '0 2px 4px rgba(0,0,0,0.07)'
+    backgroundColor: '#ffffff', // white background like demo
+    borderRadius: '0.5rem', // rounded-md like demo
+    border: '1px solid #e2e8f0', // slate-200 border
+    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' // demo shadow
   }
 
   const mainContentStyle = {
-    backgroundColor: darkMode ? '#1e293b' : '#ffffff',
-    borderRadius: '1rem',
+    backgroundColor: '#ffffff', // white background like demo
+    borderRadius: '0.5rem', // rounded-md like demo
     padding: '1.5rem',
-    border: darkMode ? '1px solid #374151' : '1px solid #e2e8f0',
-    boxShadow: darkMode ? '0 4px 6px rgba(0,0,0,0.3)' : '0 4px 6px rgba(0,0,0,0.07)'
+    border: '1px solid #e2e8f0', // slate-200 border
+    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' // demo shadow
   }
 
   const selectStyle = {
     padding: '0.5rem 1rem',
     borderRadius: '0.5rem',
-    border: darkMode ? '1px solid #374151' : '1px solid #e2e8f0',
-    backgroundColor: darkMode ? '#374151' : '#f8fafc',
-    color: darkMode ? '#f8fafc' : '#1e293b',
+    border: '1px solid #e2e8f0', // slate-200 border
+    backgroundColor: '#f8fafc', // slate-50 background
+    color: '#1e293b', // slate-800 text
     fontSize: '0.875rem',
     minWidth: '120px'
   }
@@ -156,11 +157,12 @@ const Purchases = () => {
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: '1rem',
-    backgroundColor: darkMode ? '#374151' : '#f8fafc',
+    backgroundColor: '#ffffff', // white background
     borderRadius: '0.5rem',
-    border: darkMode ? '1px solid #4b5563' : '1px solid #e2e8f0',
+    border: '1px solid #e2e8f0', // slate-200 border
     marginBottom: '0.75rem',
-    transition: 'all 0.2s ease'
+    transition: 'all 0.2s ease',
+    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' // demo shadow
   }
 
   const notificationStyle = {
@@ -218,7 +220,7 @@ const Purchases = () => {
           alignItems: 'center',
           height: '200px',
           fontSize: '1.125rem',
-          color: darkMode ? '#9ca3af' : '#6b7280'
+          color: '#64748b' // slate-500
         }}>
           Loading purchases...
         </div>
@@ -302,13 +304,13 @@ const Purchases = () => {
           <h2 style={{
             fontSize: '1.5rem',
             fontWeight: '600',
-            color: darkMode ? '#f8fafc' : '#1e293b'
+            color: '#1e293b' // slate-800
           }}>
             Recent Transactions
           </h2>
           <div style={{
             fontSize: '0.875rem',
-            color: darkMode ? '#9ca3af' : '#6b7280'
+            color: '#64748b' // slate-500
           }}>
             {sortedPurchases.length} purchases found
           </div>
@@ -319,14 +321,14 @@ const Purchases = () => {
           <div style={{
             textAlign: 'center',
             padding: '3rem 1rem',
-            color: darkMode ? '#9ca3af' : '#6b7280'
+            color: '#64748b' // slate-500
           }}>
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛒</div>
             <h3 style={{ 
               fontSize: '1.25rem', 
               fontWeight: '600', 
               marginBottom: '0.5rem',
-              color: darkMode ? '#f8fafc' : '#1e293b'
+              color: '#1e293b' // slate-800
             }}>
               {purchases.length === 0 ? 'No purchases yet' : 'No purchases match your filters'}
             </h3>
@@ -338,60 +340,85 @@ const Purchases = () => {
             </p>
           </div>
         ) : (
-          sortedPurchases.map((purchase) => (
-            <div 
-              key={purchase.id}
-              style={purchaseItemStyle}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = darkMode ? '#475569' : '#f1f5f9'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#f8fafc'
-              }}
-            >
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem'
-              }}>
-                <span style={{ fontSize: '1.25rem' }}>
-                  {getCategoryEmoji(purchase.category)}
-                </span>
-                <div>
-                  <div style={{
-                    fontWeight: '500',
-                    color: darkMode ? '#f8fafc' : '#1e293b',
-                    fontSize: '0.875rem'
-                  }}>
-                    {purchase.merchant}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {sortedPurchases.map((purchase) => (
+              <div 
+                key={purchase.id}
+                style={{
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '0.5rem',
+                  padding: '1.5rem',
+                  boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                  transition: 'all 0.14s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f8fafc'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ffffff'
+                }}
+              >
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <div>
+                    <h3 style={{
+                      fontWeight: '600',
+                      color: '#0f172a',
+                      marginBottom: '0.5rem',
+                      fontSize: '1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem'
+                    }}>
+                      {purchase.merchant}
+                    </h3>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1rem',
+                      fontSize: '0.875rem'
+                    }}>
+                      <span style={{
+                        backgroundColor: '#dbeafe',
+                        color: '#2563eb',
+                        padding: '0.125rem 0.5rem',
+                        fontSize: '0.75rem',
+                        fontWeight: '700',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                        borderRadius: '0.375rem'
+                      }}>
+                        {purchase.category}
+                      </span>
+                      <span style={{ color: '#64748b' }}>
+                        {purchase.date.toLocaleDateString()}
+                      </span>
+                    </div>
                   </div>
-                  <div style={{
-                    fontSize: '0.75rem',
-                    color: darkMode ? '#9ca3af' : '#6b7280'
-                  }}>
-                    {purchase.date.toLocaleDateString()} • {purchase.category}
+                  <div style={{ textAlign: 'right' }}>
+                    <p style={{
+                      fontSize: '1.125rem',
+                      fontWeight: '700',
+                      color: '#0f172a'
+                    }}>
+                      ${purchase.amount.toFixed(2)}
+                    </p>
+                    <p style={{
+                      fontSize: '0.875rem',
+                      fontWeight: '700',
+                      color: purchase.scoreImpact > 0 ? '#0f766e' : purchase.scoreImpact < 0 ? '#dc2626' : '#64748b'
+                    }}>
+                      Score: {purchase.scoreImpact > 0 ? '+' : ''}{purchase.scoreImpact} pts
+                    </p>
                   </div>
                 </div>
               </div>
-
-              <div style={{ textAlign: 'right' }}>
-                <div style={{
-                  fontWeight: '600',
-                  color: darkMode ? '#f8fafc' : '#1e293b',
-                  fontSize: '1rem'
-                }}>
-                  ${purchase.amount.toFixed(2)}
-                </div>
-                <div style={{
-                  fontSize: '0.75rem',
-                  fontWeight: '500',
-                  color: purchase.scoreImpact > 0 ? '#10b981' : purchase.scoreImpact < 0 ? '#ef4444' : '#6b7280'
-                }}>
-                  {purchase.scoreImpact > 0 ? '+' : ''}{purchase.scoreImpact} pts
-                </div>
-              </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
 

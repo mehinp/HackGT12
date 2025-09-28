@@ -6,7 +6,7 @@ export const ScoreContext = createContext(null)
 
 // ---------------- Initial State ----------
 const initialState = {
-  userScore: 0,
+  userScore: 751.978515625,
   categoryScores: {
     spending: 0,
     saving: 0,

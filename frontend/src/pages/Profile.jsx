@@ -39,64 +39,104 @@ const Profile = () => {
     goalAlerts: true
   })
 
-  const pageStyle = { padding: '1rem 0' }
-  const headerStyle = { marginBottom: '2rem' }
-  const titleStyle = {
-    fontSize: '2.5rem',
-    fontWeight: '700',
-    color: '#1e293b',
-    marginBottom: '0.5rem',
+  const pageStyle = { 
+    padding: '1.5rem',
+    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    backgroundColor: '#f8fafc',
+    minHeight: '100vh'
+  }
+
+  const headerStyle = { 
+    marginBottom: '2rem',
     display: 'flex',
     alignItems: 'center',
-    gap: '0.5rem'
+    gap: '0.75rem'
   }
-  const subtitleStyle = {
-    fontSize: '1.125rem',
-    color: '#64748b'
+
+  const titleStyle = {
+    fontSize: '1.25rem',
+    fontWeight: '700',
+    color: '#3b82f6',
+    margin: 0
   }
+
   const tabsStyle = {
     display: 'flex',
-    gap: '0.5rem',
+    gap: '0',
     marginBottom: '2rem',
     borderBottom: '1px solid #e2e8f0',
     overflowX: 'auto'
   }
+
   const tabStyle = (isActive) => ({
-    padding: '1rem 1.5rem',
-    backgroundColor: isActive ? '#f8fafc' : 'transparent',
-    color: isActive ? '#1e293b' : '#6b7280',
+    padding: '0.75rem 1.5rem',
+    backgroundColor: 'transparent',
+    color: isActive ? '#3b82f6' : '#6b7280',
     border: 'none',
-    borderRadius: '0.5rem 0.5rem 0 0',
     cursor: 'pointer',
     fontWeight: isActive ? '600' : '500',
     fontSize: '0.875rem',
     transition: 'all 0.2s ease',
     whiteSpace: 'nowrap',
-    borderBottom: isActive ? '2px solid #3b82f6' : 'none'
+    borderBottom: isActive ? '2px solid #3b82f6' : '2px solid transparent',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem'
   })
+
   const contentStyle = {
     backgroundColor: '#ffffff',
-    borderRadius: '1rem',
-    padding: '2rem',
+    borderRadius: '0.75rem',
+    padding: '1.5rem',
     border: '1px solid #e2e8f0',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.07)'
+    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+  }
+
+  const fieldContainerStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    padding: '1rem',
+    backgroundColor: '#ffffff',
+    border: '1px solid #e2e8f0',
+    borderRadius: '0.5rem',
+    marginBottom: '0.75rem'
+  }
+
+  const iconStyle = {
+    width: '16px',
+    height: '16px',
+    color: '#3b82f6'
+  }
+
+  const labelStyle = {
+    fontSize: '0.75rem',
+    color: '#6b7280',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    marginBottom: '0.25rem'
+  }
+
+  const valueStyle = {
+    fontWeight: '600',
+    color: '#1f2937',
+    fontSize: '0.875rem'
   }
 
   const tabs = [
-    { id: 'profile', label: '👤 Personal Info' },
-    { id: 'income', label: '💰 Income & Expenditures' },
-    { id: 'security', label: '🔒 Security' },
-    { id: 'notifications', label: '🔔 Notifications' },
-    { id: 'account', label: '⚙️ Account' }
+    { id: 'profile', label: 'Personal Info', icon: '👤' },
+    { id: 'income', label: 'Income & Expenditures', icon: '💰' },
+    { id: 'security', label: 'Security', icon: '🔒' },
+    { id: 'notifications', label: 'Notifications', icon: '🔔' },
+    { id: 'account', label: 'Account', icon: '⚙️' }
   ]
 
   const handleProfileSave = () => {
-    // Mock save functionality
     setIsEditing(false)
   }
 
   const handleIncomeUpdate = () => {
-    // Mock update functionality
     console.log('Income updated:', incomeData)
   }
 
@@ -125,9 +165,10 @@ const Profile = () => {
               marginBottom: '2rem'
             }}>
               <h3 style={{
-                fontSize: '1.5rem',
-                fontWeight: '600',
-                color: '#1e293b'
+                fontSize: '1.25rem',
+                fontWeight: '700',
+                color: '#1f2937',
+                margin: 0
               }}>
                 Personal Information
               </h3>
@@ -135,35 +176,56 @@ const Profile = () => {
                 variant={isEditing ? 'primary' : 'secondary'}
                 onClick={() => isEditing ? handleProfileSave() : setIsEditing(true)}
               >
-                {isEditing ? '💾 Save Changes' : '✏️ Edit Profile'}
+                {isEditing ? 'Save Changes' : 'Edit Profile'}
               </Button>
             </div>
 
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-              gap: '1rem'
-            }}>
-              <Input
-                label="First Name"
-                value={formData.firstName}
-                onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-                disabled={!isEditing}
-              />
-              
-              <Input
-                label="Last Name"
-                value={formData.lastName}
-                onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-                disabled={!isEditing}
-              />
-              
-              <Input
-                label="Email"
-                type="email"
-                value={formData.email}
-                disabled={true}
-              />
+            <div style={{ display: 'grid', gap: '1rem' }}>
+              <div style={fieldContainerStyle}>
+                <svg style={iconStyle} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <div style={{ flex: 1 }}>
+                  <div style={labelStyle}>FIRST NAME</div>
+                  {isEditing ? (
+                    <Input
+                      value={formData.firstName}
+                      onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                      style={{ margin: 0, border: 'none', padding: 0, fontSize: '0.875rem' }}
+                    />
+                  ) : (
+                    <div style={valueStyle}>{formData.firstName}</div>
+                  )}
+                </div>
+              </div>
+
+              <div style={fieldContainerStyle}>
+                <svg style={iconStyle} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <div style={{ flex: 1 }}>
+                  <div style={labelStyle}>LAST NAME</div>
+                  {isEditing ? (
+                    <Input
+                      value={formData.lastName}
+                      onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                      style={{ margin: 0, border: 'none', padding: 0, fontSize: '0.875rem' }}
+                    />
+                  ) : (
+                    <div style={valueStyle}>{formData.lastName}</div>
+                  )}
+                </div>
+              </div>
+
+              <div style={fieldContainerStyle}>
+                <svg style={iconStyle} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <div style={{ flex: 1 }}>
+                  <div style={labelStyle}>EMAIL</div>
+                  <div style={valueStyle}>{formData.email}</div>
+                </div>
+              </div>
             </div>
           </div>
         )
@@ -172,37 +234,48 @@ const Profile = () => {
         return (
           <div>
             <h3 style={{
-              fontSize: '1.5rem',
-              fontWeight: '600',
-              color: '#1e293b',
+              fontSize: '1.25rem',
+              fontWeight: '700',
+              color: '#1f2937',
               marginBottom: '2rem'
             }}>
               Income & Expenditures
             </h3>
 
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-              gap: '1rem',
-              marginBottom: '2rem'
-            }}>
-              <Input
-                label="Monthly Income ($)"
-                type="number"
-                step="0.01"
-                min="0.01"
-                value={incomeData.monthlyIncome}
-                onChange={(e) => setIncomeData(prev => ({ ...prev, monthlyIncome: e.target.value }))}
-              />
-              
-              <Input
-                label="Monthly Expenditures ($)"
-                type="number"
-                step="0.01"
-                min="0.01"
-                value={incomeData.monthlyExpenditures}
-                onChange={(e) => setIncomeData(prev => ({ ...prev, monthlyExpenditures: e.target.value }))}
-              />
+            <div style={{ display: 'grid', gap: '1rem', marginBottom: '2rem' }}>
+              <div style={fieldContainerStyle}>
+                <svg style={iconStyle} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                </svg>
+                <div style={{ flex: 1 }}>
+                  <div style={labelStyle}>MONTHLY INCOME ($)</div>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    value={incomeData.monthlyIncome}
+                    onChange={(e) => setIncomeData(prev => ({ ...prev, monthlyIncome: e.target.value }))}
+                    style={{ margin: 0, border: 'none', padding: 0, fontSize: '0.875rem' }}
+                  />
+                </div>
+              </div>
+
+              <div style={fieldContainerStyle}>
+                <svg style={iconStyle} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                </svg>
+                <div style={{ flex: 1 }}>
+                  <div style={labelStyle}>MONTHLY EXPENDITURES ($)</div>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    value={incomeData.monthlyExpenditures}
+                    onChange={(e) => setIncomeData(prev => ({ ...prev, monthlyExpenditures: e.target.value }))}
+                    style={{ margin: 0, border: 'none', padding: 0, fontSize: '0.875rem' }}
+                  />
+                </div>
+              </div>
             </div>
 
             <Button variant="primary" onClick={handleIncomeUpdate}>
@@ -215,40 +288,59 @@ const Profile = () => {
         return (
           <div>
             <h3 style={{
-              fontSize: '1.5rem',
-              fontWeight: '600',
-              color: '#1e293b',
+              fontSize: '1.25rem',
+              fontWeight: '700',
+              color: '#1f2937',
               marginBottom: '2rem'
             }}>
               Security Settings
             </h3>
 
-            <div style={{
-              display: 'grid',
-              gap: '1rem',
-              maxWidth: '420px',
-              marginBottom: '2rem'
-            }}>
-              <Input
-                label="Current Password"
-                type="password"
-                value={securityData.currentPassword}
-                onChange={(e) => setSecurityData(prev => ({ ...prev, currentPassword: e.target.value }))}
-              />
-              
-              <Input
-                label="New Password"
-                type="password"
-                value={securityData.newPassword}
-                onChange={(e) => setSecurityData(prev => ({ ...prev, newPassword: e.target.value }))}
-              />
-              
-              <Input
-                label="Confirm New Password"
-                type="password"
-                value={securityData.confirmPassword}
-                onChange={(e) => setSecurityData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-              />
+            <div style={{ display: 'grid', gap: '1rem', marginBottom: '2rem' }}>
+              <div style={fieldContainerStyle}>
+                <svg style={iconStyle} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <div style={{ flex: 1 }}>
+                  <div style={labelStyle}>CURRENT PASSWORD</div>
+                  <Input
+                    type="password"
+                    value={securityData.currentPassword}
+                    onChange={(e) => setSecurityData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                    style={{ margin: 0, border: 'none', padding: 0, fontSize: '0.875rem' }}
+                  />
+                </div>
+              </div>
+
+              <div style={fieldContainerStyle}>
+                <svg style={iconStyle} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <div style={{ flex: 1 }}>
+                  <div style={labelStyle}>NEW PASSWORD</div>
+                  <Input
+                    type="password"
+                    value={securityData.newPassword}
+                    onChange={(e) => setSecurityData(prev => ({ ...prev, newPassword: e.target.value }))}
+                    style={{ margin: 0, border: 'none', padding: 0, fontSize: '0.875rem' }}
+                  />
+                </div>
+              </div>
+
+              <div style={fieldContainerStyle}>
+                <svg style={iconStyle} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <div style={{ flex: 1 }}>
+                  <div style={labelStyle}>CONFIRM NEW PASSWORD</div>
+                  <Input
+                    type="password"
+                    value={securityData.confirmPassword}
+                    onChange={(e) => setSecurityData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                    style={{ margin: 0, border: 'none', padding: 0, fontSize: '0.875rem' }}
+                  />
+                </div>
+              </div>
             </div>
 
             <Button variant="primary" onClick={handlePasswordChange}>
@@ -271,15 +363,15 @@ const Profile = () => {
         return (
           <div>
             <h3 style={{
-              fontSize: '1.5rem',
-              fontWeight: '600',
-              color: '#1e293b',
+              fontSize: '1.25rem',
+              fontWeight: '700',
+              color: '#1f2937',
               marginBottom: '2rem'
             }}>
               Notification Settings
             </h3>
 
-            <div style={{ display: 'grid', gap: '1rem' }}>
+            <div style={{ display: 'grid', gap: '0.75rem' }}>
               {[
                 ['email', 'Email notifications'],
                 ['push', 'Push notifications'],
@@ -288,17 +380,32 @@ const Profile = () => {
               ].map(([key, label]) => (
                 <label key={key} style={{
                   display: 'flex',
-                  gap: '0.5rem',
+                  gap: '0.75rem',
                   alignItems: 'center',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  padding: '0.75rem',
+                  backgroundColor: notifications[key] ? '#fef3f2' : '#ffffff',
+                  border: `1px solid ${notifications[key] ? '#fecaca' : '#e2e8f0'}`,
+                  borderRadius: '0.5rem',
+                  transition: 'all 0.2s ease'
                 }}>
                   <input
                     type="checkbox"
                     checked={!!notifications[key]}
                     onChange={(e) => setNotifications(prev => ({ ...prev, [key]: e.target.checked }))}
-                    style={{ cursor: 'pointer' }}
+                    style={{ 
+                      cursor: 'pointer',
+                      accentColor: '#3b82f6'
+                    }}
                   />
-                  <span style={{ color: '#1e293b' }}>{label}</span>
+                  <span style={{ 
+                    color: '#1f2937',
+                    fontWeight: '500',
+                    fontSize: '0.875rem'
+                  }}>
+                    {notifications[key] && '🔸 '}
+                    {label}
+                  </span>
                 </label>
               ))}
             </div>
@@ -309,40 +416,31 @@ const Profile = () => {
         return (
           <div>
             <h3 style={{
-              fontSize: '1.5rem',
-              fontWeight: '600',
-              color: '#1e293b',
-              marginBottom: '1rem'
+              fontSize: '1.25rem',
+              fontWeight: '700',
+              color: '#1f2937',
+              marginBottom: '2rem'
             }}>
               Account Settings
             </h3>
 
-            {/* Account Overview */}
+            {/* User Overview */}
             <div style={{
-              padding: '1.5rem',
-              backgroundColor: '#f8fafc',
-              borderRadius: '0.75rem',
-              marginBottom: '2rem',
-              border: '1px solid #e2e8f0'
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+              padding: '1rem',
+              backgroundColor: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '0.5rem',
+              marginBottom: '2rem'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                <div style={{
-                  width: '60px', height: '60px',
-                  backgroundColor: '#e2e8f0',
-                  borderRadius: '50%',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '1.5rem'
-                }}>
-                  👤
-                </div>
-                <div>
-                  <h4 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b', marginBottom: '0.25rem' }}>
-                    {user?.name || `${formData.firstName} ${formData.lastName}`.trim() || 'User Name'}
-                  </h4>
-                  <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
-                    {user?.email || 'user@example.com'}
-                  </p>
-                </div>
+              <svg style={{ width: '16px', height: '16px', color: '#3b82f6' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <div>
+                <div style={labelStyle}>USER NAME</div>
+                <div style={valueStyle}>{user?.email || formData.email || 'rizz@gmail.com'}</div>
               </div>
             </div>
 
@@ -353,16 +451,41 @@ const Profile = () => {
               borderRadius: '0.75rem',
               border: '1px solid #fecaca'
             }}>
-              <h4 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#dc2626', marginBottom: '1rem' }}>
-                ⚠️ Danger Zone
+              <h4 style={{ 
+                fontSize: '0.875rem', 
+                fontWeight: '700', 
+                color: '#dc2626', 
+                marginBottom: '1rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                ⚠️ DANGER ZONE
               </h4>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'flex-start', 
+                flexWrap: 'wrap', 
+                gap: '1rem' 
+              }}>
                 <div>
-                  <h5 style={{ fontSize: '1rem', fontWeight: '600', color: '#dc2626', marginBottom: '0.25rem' }}>
+                  <h5 style={{ 
+                    fontSize: '0.875rem', 
+                    fontWeight: '600', 
+                    color: '#dc2626', 
+                    marginBottom: '0.25rem' 
+                  }}>
                     Delete Account
                   </h5>
-                  <p style={{ fontSize: '0.875rem', color: '#7f1d1d' }}>
+                  <p style={{ 
+                    fontSize: '0.75rem', 
+                    color: '#7f1d1d',
+                    margin: 0
+                  }}>
                     Permanently delete your account and all data. This cannot be undone.
                   </p>
                 </div>
@@ -386,8 +509,10 @@ const Profile = () => {
     <div style={pageStyle}>
       {/* Header */}
       <div style={headerStyle}>
-        <h1 style={titleStyle}>⚙️ Settings & Profile</h1>
-        <p style={subtitleStyle}>Manage your account, privacy, and preferences</p>
+        <svg style={{ width: '20px', height: '20px', color: '#3b82f6' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+        <h2 style={titleStyle}>Profile</h2>
       </div>
 
       {/* Tabs */}
@@ -398,6 +523,7 @@ const Profile = () => {
             onClick={() => setActiveTab(tab.id)}
             style={tabStyle(activeTab === tab.id)}
           >
+            <span>{tab.icon}</span>
             {tab.label}
           </button>
         ))}

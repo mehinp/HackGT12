@@ -1,11 +1,10 @@
 import React, { createContext, useContext, useMemo, useReducer } from 'react'
+import { socialService } from '../services/socialService'
 
 export const SocialContext = createContext(null) // <-- NAMED export
 
 const initialState = {
-  friends: [],       // [{ id, name, handle, avatarUrl, score, level }]
-  reactions: [],     // [{ id, subjectId, fromUserId, emoji, createdAt }]
-  leaderboard: [],   // [{ handle, score, rank }]
+  rankings: [],      // [{ id, firstName, lastName, email, score, ... }] - from API
   loading: false,
   error: null,
 }
@@ -16,16 +15,8 @@ function reducer(state, action) {
       return { ...state, loading: action.payload }
     case 'SET_ERROR':
       return { ...state, error: action.payload }
-    case 'SET_FRIENDS':
-      return { ...state, friends: action.payload, error: null }
-    case 'ADD_FRIEND':
-      return { ...state, friends: [...state.friends, action.payload] }
-    case 'REMOVE_FRIEND':
-      return { ...state, friends: state.friends.filter(f => f.id !== action.payload) }
-    case 'ADD_REACTION':
-      return { ...state, reactions: [action.payload, ...state.reactions] }
-    case 'SET_LEADERBOARD':
-      return { ...state, leaderboard: action.payload }
+    case 'SET_RANKINGS':
+      return { ...state, rankings: action.payload, error: null }
     default:
       return state
   }
@@ -38,11 +29,24 @@ export function SocialContextProvider({ children }) {
     ...state,
     setLoading: (b) => dispatch({ type: 'SET_LOADING', payload: b }),
     setError: (e) => dispatch({ type: 'SET_ERROR', payload: e }),
-    setFriends: (rows) => dispatch({ type: 'SET_FRIENDS', payload: rows }),
-    addFriend: (row) => dispatch({ type: 'ADD_FRIEND', payload: row }),
-    removeFriend: (id) => dispatch({ type: 'REMOVE_FRIEND', payload: id }),
-    addReaction: (row) => dispatch({ type: 'ADD_REACTION', payload: row }),
-    setLeaderboard: (rows) => dispatch({ type: 'SET_LEADERBOARD', payload: rows }),
+    setRankings: (rows) => dispatch({ type: 'SET_RANKINGS', payload: rows }),
+    
+    // API functions
+    async fetchRankings() {
+      dispatch({ type: 'SET_LOADING', payload: true })
+      dispatch({ type: 'SET_ERROR', payload: null })
+      try {
+        const rankings = await socialService.getLeaderboardRankings()
+        dispatch({ type: 'SET_RANKINGS', payload: rankings })
+        return rankings
+      } catch (error) {
+        dispatch({ type: 'SET_ERROR', payload: error.message })
+        throw error
+      } finally {
+        dispatch({ type: 'SET_LOADING', payload: false })
+      }
+    },
+
     dispatch,
   }), [state])
 
