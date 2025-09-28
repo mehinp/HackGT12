@@ -25,36 +25,7 @@ const Social = () => {
   const currentFriends = friends || []
   
   // Enhanced emoji reactions
-  const emojiReactions = ['👍', '🔥', '💪', '🎉', '⚡', '🌟']
-  
-  // Function to get achievement emojis based on score
-  const getAchievementEmojis = (score, rank) => {
-    const emojis = []
-    
-    // Rank-based emojis
-    if (rank === 1) emojis.push('👑')
-    if (rank <= 3) emojis.push('🏅')
-    if (rank <= 5) emojis.push('⭐')
-    
-    // Score-based emojis
-    if (score >= 1000) emojis.push('🚀')
-    if (score >= 800) emojis.push('💎')
-    if (score >= 600) emojis.push('🔥')
-    if (score >= 400) emojis.push('💪')
-    if (score >= 200) emojis.push('⚡')
-    
-    return emojis
-  }
-
-  // Function to get motivational emoji based on score range
-  const getMotivationalEmoji = (score) => {
-    if (score >= 1000) return '🌟'
-    if (score >= 800) return '🚀'
-    if (score >= 600) return '💎'
-    if (score >= 400) return '🔥'
-    if (score >= 200) return '💪'
-    return '⚡'
-  }
+  const emojiReactions = ['🔥', '💪', '🎉']
   
   // Current user data with enhanced achievements
   const currentUser = {
@@ -62,8 +33,7 @@ const Social = () => {
     name: user?.name || `${user?.firstName} ${user?.lastName}`.trim() || 'User',
     email: user?.email,
     score: 750,
-    avatar: '👤',
-    achievements: ['🚀 Getting Started', '💪 Consistent', '🎯 Focused']
+    avatar: '👤'
   }
 
   // Fetch friend count when component mounts
@@ -309,23 +279,9 @@ const Social = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              border: '2px solid #e2e8f0',
-              position: 'relative'
+              border: '2px solid #e2e8f0'
             }}>
               {currentUser.avatar}
-              {/* Add motivational emoji based on score */}
-              <div style={{
-                position: 'absolute',
-                top: '-8px',
-                right: '-8px',
-                fontSize: '20px',
-                background: '#ffffff',
-                borderRadius: '50%',
-                padding: '2px',
-                border: '2px solid #e2e8f0'
-              }}>
-                {getMotivationalEmoji(currentUser.score)}
-              </div>
             </div>
             <div>
               <h2 style={{
@@ -333,16 +289,9 @@ const Social = () => {
                 fontWeight: '700',
                 color: '#1e293b',
                 marginBottom: '4px',
-                margin: 0,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
+                margin: 0
               }}>
                 {currentUser.name}
-                {/* Add achievement emojis */}
-                {getAchievementEmojis(currentUser.score, leaderboardWithUser.findIndex(u => u.email === currentUser.email) + 1).map((emoji, i) => (
-                  <span key={i} style={{ fontSize: '18px' }}>{emoji}</span>
-                ))}
               </h2>
               <div style={{
                 fontSize: '16px',
@@ -350,23 +299,6 @@ const Social = () => {
                 marginBottom: '8px'
               }}>
                 Rank #{leaderboardWithUser.findIndex(u => u.email === currentUser.email) + 1 || 'N/A'} • Score: {currentUser.score}
-              </div>
-              <div style={{
-                display: 'flex',
-                gap: '8px',
-                flexWrap: 'wrap'
-              }}>
-                {currentUser.achievements.map((achievement, index) => (
-                  <span key={index} style={{
-                    fontSize: '12px',
-                    padding: '4px 8px',
-                    backgroundColor: '#e2e8f0',
-                    borderRadius: '16px',
-                    color: '#1e293b'
-                  }}>
-                    {achievement}
-                  </span>
-                ))}
               </div>
             </div>
           </div>
@@ -381,13 +313,9 @@ const Social = () => {
               <div style={{
                 fontSize: '24px',
                 fontWeight: '700',
-                color: '#3b82f6',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '4px'
+                color: '#3b82f6'
               }}>
-                {currentUser.score} 🎯
+                {currentUser.score}
               </div>
               <div style={{
                 fontSize: '12px',
@@ -401,13 +329,9 @@ const Social = () => {
               <div style={{
                 fontSize: '24px',
                 fontWeight: '700',
-                color: '#f59e0b',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '4px'
+                color: '#f59e0b'
               }}>
-                {loadingCount ? '...' : friendCount} 👥
+                {loadingCount ? '...' : friendCount}
               </div>
               <div style={{
                 fontSize: '12px',
@@ -443,7 +367,7 @@ const Social = () => {
             alignItems: 'center',
             gap: '8px'
           }}>
-            🏆 Leaderboard
+            Leaderboard
           </h3>
           
           <button
@@ -462,12 +386,6 @@ const Social = () => {
               fontWeight: '500'
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <line x1="19" y1="8" x2="19" y2="14"/>
-              <line x1="22" y1="11" x2="16" y2="11"/>
-            </svg>
             Add Friend
           </button>
         </div>
@@ -515,15 +433,13 @@ const Social = () => {
                       {person.name ? person.name.split(' ').map(n => n[0]).join('').toUpperCase() : '??'}
                     </div>
                     
-                    {/* Enhanced Trophy/Medal icons with additional emojis */}
+                    {/* Enhanced Trophy/Medal icons */}
                     {index === 0 && (
                       <div style={{
                         position: 'absolute',
                         top: '-4px',
                         right: '-4px',
-                        fontSize: '16px',
-                        display: 'flex',
-                        gap: '2px'
+                        fontSize: '16px'
                       }}>
                         🏆
                       </div>
@@ -566,27 +482,17 @@ const Social = () => {
                     <h4 style={{
                       fontWeight: '600',
                       color: '#1e293b',
-                      margin: '0 0 4px 0',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
+                      margin: '0 0 4px 0'
                     }}>
                       {person.isCurrentUser ? `${person.name} (You)` : person.name}
-                      {/* Add achievement emojis next to name */}
-                      {getAchievementEmojis(person.score || 0, index + 1).slice(0, 2).map((emoji, i) => (
-                        <span key={i} style={{ fontSize: '14px' }}>{emoji}</span>
-                      ))}
                     </h4>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <p style={{
                         fontSize: '14px',
                         color: '#64748b',
-                        margin: 0,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px'
+                        margin: 0
                       }}>
-                        Score: {person.score || 0} {getMotivationalEmoji(person.score || 0)}
+                        Score: {person.score || 0}
                       </p>
                       {person.scoreChange && (
                         <span style={{
@@ -608,7 +514,7 @@ const Social = () => {
                 </div>
                 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {/* Emoji Reactions */}
+                  {/* Emoji Reactions positioned like in the image */}
                   {!person.isCurrentUser && (
                     <div style={{ display: 'flex', gap: '4px', marginRight: '8px' }}>
                       {emojiReactions.slice(0, 3).map(emoji => (
@@ -622,10 +528,7 @@ const Social = () => {
                             cursor: 'pointer',
                             padding: '4px',
                             borderRadius: '4px',
-                            transition: 'transform 0.1s ease',
-                            ':hover': {
-                              transform: 'scale(1.2)'
-                            }
+                            transition: 'transform 0.1s ease'
                           }}
                           title={`React with ${emoji}`}
                         >
@@ -724,8 +627,8 @@ const Social = () => {
               display: 'flex',
               alignItems: 'center',
               gap: '8px'
-            }}>
-              👥 Add Friend
+            }}            >
+              Add Friend
             </h3>
             
             <p style={{
@@ -733,7 +636,7 @@ const Social = () => {
               color: '#6b7280',
               marginBottom: '1.5rem'
             }}>
-              Enter your friend's email address to add them to your network! 🚀
+              Enter your friend's email address to add them to your network!
             </p>
 
             {addFriendError && (
@@ -757,7 +660,6 @@ const Social = () => {
                 placeholder="Enter email address"
                 value={friendEmail}
                 onChange={(e) => setFriendEmail(e.target.value)}
-                icon="📧"
               />
             </div>
             
@@ -775,14 +677,14 @@ const Social = () => {
                 }}
                 disabled={isAddingFriend}
               >
-                ❌ Cancel
+                Cancel
               </Button>
               <Button 
                 variant="primary"
                 onClick={handleAddFriend}
                 disabled={!friendEmail.trim() || isAddingFriend}
               >
-                {isAddingFriend ? '⏳ Adding...' : '✅ Add Friend'}
+                {isAddingFriend ? 'Adding...' : 'Add Friend'}
               </Button>
             </div>
           </div>

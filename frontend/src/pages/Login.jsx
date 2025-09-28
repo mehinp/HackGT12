@@ -47,7 +47,7 @@ const Login = () => {
 
   const containerStyle = {
     width: '100%',
-    maxWidth: '448px' // max-w-md equivalent
+    maxWidth: '448px'
   }
 
   const logoContainerStyle = {
@@ -66,18 +66,18 @@ const Login = () => {
   const titleStyle = {
     fontSize: '24px',
     fontWeight: '700',
-    color: '#0f172a', // slate-900
+    color: '#0f172a',
     marginBottom: '8px'
   }
 
   const subtitleStyle = {
-    color: '#64748b', // slate-600
+    color: '#64748b',
     fontSize: '16px'
   }
 
   const cardStyle = {
     backgroundColor: '#ffffff',
-    border: '1px solid #e2e8f0', // slate-200
+    border: '1px solid #e2e8f0',
     borderRadius: '6px',
     padding: '24px',
     boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
@@ -100,7 +100,7 @@ const Login = () => {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    color: '#64748b' // slate-600
+    color: '#64748b'
   }
 
   const checkboxStyle = {
@@ -133,10 +133,6 @@ const Login = () => {
     gap: '8px'
   }
 
-  const buttonHoverStyle = {
-    backgroundColor: '#b91c1c' // red-700
-  }
-
   const buttonDisabledStyle = {
     backgroundColor: '#cbd5e1',
     color: '#64748b',
@@ -158,40 +154,6 @@ const Login = () => {
     textDecoration: 'none',
     fontWeight: '500',
     transition: 'color 0.14s'
-  }
-
-  const demoCredentialsStyle = {
-    marginTop: '16px',
-    padding: '16px',
-    backgroundColor: '#dbeafe', // blue-50
-    border: '1px solid #bfdbfe', // blue-200
-    borderRadius: '6px'
-  }
-
-  const demoTitleStyle = {
-    color: '#1e3a8a', // blue-900
-    fontSize: '14px',
-    fontWeight: '500',
-    marginBottom: '8px'
-  }
-
-  const demoTextStyle = {
-    color: '#1e40af', // blue-800
-    fontSize: '12px',
-    margin: '0'
-  }
-
-  const themeToggleStyle = {
-    position: 'absolute',
-    top: '1rem',
-    right: '1rem',
-    background: 'none',
-    border: 'none',
-    fontSize: '1.5rem',
-    cursor: 'pointer',
-    padding: '0.5rem',
-    borderRadius: '0.5rem',
-    transition: 'all 0.2s ease'
   }
 
   const errorStyle = {
@@ -246,7 +208,7 @@ const Login = () => {
         {/* Header */}
         <div style={logoContainerStyle}>
           <img 
-            src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjE1MCIgY3k9IjE1MCIgcj0iMTQwIiBzdHJva2U9IiNkYzI2MjYiIHN0cm9rZS13aWR0aD0iMTAiIGZpbGw9Im5vbmUiLz4KPGNpcmNsZSBjeD0iMTUwIiBjeT0iMTUwIiByPSIxMDAiIHN0cm9rZT0iIzk0YTNiOCIgc3Ryb2tlLXdpZHRoPSI4IiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik04MCA4MEM4MCA4MCA4MCAyMjAgMjIwIDIyMCIgc3Ryb2tlPSIjZGMyNjI2IiBzdHJva2Utd2lkdGg9IjE1IiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0xODAgMTgwTDIyMCAxNDBMMTkwIDEwMCIgc3Ryb2tlPSIjZGMyNjI2IiBzdHJva2Utd2lkdGg9IjEyIiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHR4dCB4PSIxNTAiIHk9IjE4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzFlMjkzYiIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjgwIiBmb250LXdlaWdodD0iYm9sZCI+TTwvdGV4dD4KPC9zdmc+Cg==" 
+            src="/Logo_image.png" 
             alt="Metron Finance Logo" 
             style={logoImageStyle}
           />
@@ -273,7 +235,6 @@ const Login = () => {
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              icon="📧"
               required
               autoComplete="email"
             />
@@ -284,7 +245,6 @@ const Login = () => {
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              icon="🔒"
               required
               autoComplete="current-password"
             />
@@ -309,8 +269,7 @@ const Login = () => {
               disabled={isLoading}
               style={{
                 ...buttonStyle,
-                ...(isLoading ? buttonDisabledStyle : {}),
-                ':hover': !isLoading ? buttonHoverStyle : {}
+                ...(isLoading ? buttonDisabledStyle : {})
               }}
               onMouseEnter={(e) => {
                 if (!isLoading) {

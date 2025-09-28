@@ -204,7 +204,6 @@ const Signup = () => {
               placeholder="Enter your first name"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              icon="👤"
               required
             />
 
@@ -214,7 +213,6 @@ const Signup = () => {
               placeholder="Enter your last name"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              icon="👤"
               required
             />
 
@@ -224,7 +222,6 @@ const Signup = () => {
               placeholder="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              icon="📧"
               required
             />
 
@@ -234,7 +231,6 @@ const Signup = () => {
               placeholder="Create password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              icon="🔒"
               required
             />
 
@@ -244,7 +240,6 @@ const Signup = () => {
               placeholder="Confirm password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              icon="🔒"
               required
             />
 
@@ -254,7 +249,6 @@ const Signup = () => {
               placeholder="5000"
               value={income}
               onChange={(e) => setIncome(e.target.value)}
-              icon="💰"
               required
             />
 
@@ -264,7 +258,6 @@ const Signup = () => {
               placeholder="3500"
               value={expenditures}
               onChange={(e) => setExpenditures(e.target.value)}
-              icon="💸"
               required
             />
 

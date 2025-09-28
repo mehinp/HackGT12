@@ -1,9 +1,11 @@
 // src/pages/Home.jsx - Clean, working version with dynamic values
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuthContext } from '../hooks/Authentication hooks/useAuthContext'
 
 const Home = () => {
   const { user } = useAuthContext()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [purchases, setPurchases] = useState([])
@@ -57,6 +59,11 @@ const Home = () => {
 
     fetchData()
   }, [])
+
+  // Navigate to purchases page and trigger add purchase modal
+  const handleAddPurchase = () => {
+    navigate('/purchases', { state: { openAddForm: true } })
+  }
 
   // ----- Credit score helpers (proportional ticks + clamping) -----
   const SCORE_MIN = 0
@@ -323,44 +330,58 @@ const Home = () => {
         gap: '1.5rem',
         marginBottom: '2rem'
       }}>
-        <div style={{
-          backgroundColor: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: '0.375rem',
-          padding: '1.5rem',
-          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-        }}>
-          <div style={{
+        {/* Add Purchase Card */}
+        <div 
+          style={{
+            backgroundColor: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderRadius: '0.375rem',
+            padding: '1.5rem',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
-            gap: '0.5rem',
+            justifyContent: 'center',
+            textAlign: 'center',
+            minHeight: '150px'
+          }}
+          onClick={handleAddPurchase}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#f8fafc'
+            e.currentTarget.style.transform = 'translateY(-2px)'
+            e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#ffffff'
+            e.currentTarget.style.transform = 'translateY(0)'
+            e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+          }}
+        >
+          <div style={{
+            fontSize: '3rem',
             marginBottom: '1rem'
           }}>
-            <h3 style={{
-              fontSize: '0.875rem',
-              fontWeight: '700',
-              color: '#2563eb',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em'
-            }}>
-              ACTIVE GOALS
-            </h3>
+            🛒
           </div>
-          <p style={{
-            fontSize: '3rem',
+          <h3 style={{
+            fontSize: '0.875rem',
             fontWeight: '700',
-            color: '#dc2626'
+            color: '#2563eb',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            marginBottom: '0.5rem'
           }}>
-            {activeGoals}
-          </p>
+            ADD PURCHASE
+          </h3>
           <p style={{
             fontSize: '0.75rem',
             color: '#64748b',
             textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            marginTop: '0.5rem'
+            letterSpacing: '0.05em'
           }}>
-            In progress
+            Track spending
           </p>
         </div>
         

@@ -1,5 +1,6 @@
 // src/pages/Purchases.jsx
 import { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
 import Button from '../components/Button'
 import Input from '../components/Input'
@@ -7,6 +8,7 @@ import PurchaseForm from '../components/Purchases Components/PurchaseForm'
 
 const Purchases = () => {
   const { darkMode } = useTheme()
+  const location = useLocation()
   const [showAddPurchase, setShowAddPurchase] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -14,6 +16,15 @@ const Purchases = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [showNotification, setShowNotification] = useState(false)
+
+  // Check if we should auto-open the add purchase form
+  useEffect(() => {
+    if (location.state?.openAddForm) {
+      setShowAddPurchase(true)
+      // Clear the state to prevent reopening on refresh
+      window.history.replaceState({}, document.title)
+    }
+  }, [location.state])
 
   // Fetch purchases from backend
   useEffect(() => {
@@ -80,6 +91,27 @@ const Purchases = () => {
     setTimeout(() => setShowNotification(false), 3000)
   }
 
+  // Professional Search Icon Component
+  const SearchIcon = () => (
+    <svg 
+      width="16" 
+      height="16" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="2" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+      style={{ 
+        color: '#64748b',
+        opacity: 0.7
+      }}
+    >
+      <circle cx="11" cy="11" r="8"></circle>
+      <path d="m21 21-4.35-4.35"></path>
+    </svg>
+  )
+
   const pageStyle = {
     padding: '1rem 0',
     fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
@@ -87,32 +119,11 @@ const Purchases = () => {
 
   const headerStyle = {
     display: 'flex',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'flex-start',
     marginBottom: '2rem',
     flexWrap: 'wrap',
     gap: '1rem'
-  }
-
-  const titleSectionStyle = {
-    flex: 1,
-    minWidth: '300px'
-  }
-
-  const titleStyle = {
-    fontSize: '2.5rem',
-    fontWeight: '700',
-    color: '#dc2626', // red-600 to match demo
-    marginBottom: '0.5rem',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem'
-  }
-
-  const subtitleStyle = {
-    fontSize: '1.125rem',
-    color: '#64748b', // slate-500 to match demo
-    marginBottom: '1rem'
   }
 
   const actionButtonsStyle = {
@@ -134,6 +145,32 @@ const Purchases = () => {
     boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' // demo shadow
   }
 
+  const searchContainerStyle = {
+    position: 'relative',
+    flex: 1,
+    minWidth: '200px'
+  }
+
+  const searchInputStyle = {
+    width: '100%',
+    padding: '0.75rem 1rem 0.75rem 2.5rem',
+    fontSize: '0.875rem',
+    borderRadius: '0.5rem',
+    border: '1px solid #e2e8f0',
+    backgroundColor: '#ffffff',
+    color: '#1e293b',
+    outline: 'none',
+    transition: 'all 0.2s ease'
+  }
+
+  const searchIconContainerStyle = {
+    position: 'absolute',
+    left: '0.75rem',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    pointerEvents: 'none'
+  }
+
   const mainContentStyle = {
     backgroundColor: '#ffffff', // white background like demo
     borderRadius: '0.5rem', // rounded-md like demo
@@ -150,19 +187,6 @@ const Purchases = () => {
     color: '#1e293b', // slate-800 text
     fontSize: '0.875rem',
     minWidth: '120px'
-  }
-
-  const purchaseItemStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '1rem',
-    backgroundColor: '#ffffff', // white background
-    borderRadius: '0.5rem',
-    border: '1px solid #e2e8f0', // slate-200 border
-    marginBottom: '0.75rem',
-    transition: 'all 0.2s ease',
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' // demo shadow
   }
 
   const notificationStyle = {
@@ -232,19 +256,10 @@ const Purchases = () => {
     <div style={pageStyle}>
       {/* Header */}
       <div style={headerStyle}>
-        <div style={titleSectionStyle}>
-          <h1 style={titleStyle}>
-            🛒 Purchase History
-          </h1>
-          <p style={subtitleStyle}>
-            Track and analyze all your spending in one place
-          </p>
-        </div>
-
         <div style={actionButtonsStyle}>
           <Button 
             variant="primary" 
-            icon="➕"
+            icon="+"
             onClick={() => setShowAddPurchase(true)}
           >
             Add Purchase
@@ -268,12 +283,24 @@ const Purchases = () => {
 
       {/* Filters Row */}
       <div style={filtersRowStyle}>
-        <div style={{ flex: 1, minWidth: '200px' }}>
-          <Input
+        <div style={searchContainerStyle}>
+          <div style={searchIconContainerStyle}>
+            <SearchIcon />
+          </div>
+          <input
+            type="text"
             placeholder="Search purchases..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            icon="🔍"
+            style={searchInputStyle}
+            onFocus={(e) => {
+              e.target.style.borderColor = '#3b82f6'
+              e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)'
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = '#e2e8f0'
+              e.target.style.boxShadow = 'none'
+            }}
           />
         </div>
 
@@ -424,7 +451,7 @@ const Purchases = () => {
 
       {/* Success Notification */}
       <div style={notificationStyle}>
-        ✅ Purchase recorded successfully
+        Purchase recorded successfully
       </div>
 
       {/* Add Purchase Modal */}
