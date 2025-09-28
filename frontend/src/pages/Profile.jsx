@@ -46,20 +46,6 @@ const Profile = () => {
     minHeight: '100vh'
   }
 
-  const headerStyle = { 
-    marginBottom: '2rem',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem'
-  }
-
-  const titleStyle = {
-    fontSize: '1.25rem',
-    fontWeight: '700',
-    color: '#3b82f6',
-    margin: 0
-  }
-
   const tabsStyle = {
     display: 'flex',
     gap: '0',
@@ -439,7 +425,7 @@ const Profile = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
               <div>
-                <div style={labelStyle}>USER EMAIL</div>
+                <div style={labelStyle}>USER NAME</div>
                 <div style={valueStyle}>{user?.email || formData.email || 'rizz@gmail.com'}</div>
               </div>
             </div>
@@ -507,14 +493,6 @@ const Profile = () => {
 
   return (
     <div style={pageStyle}>
-      {/* Header */}
-      <div style={headerStyle}>
-        <svg style={{ width: '20px', height: '20px', color: '#3b82f6' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-        <h2 style={titleStyle}>Profile</h2>
-      </div>
-
       {/* Tabs */}
       <div style={tabsStyle}>
         {tabs.map((tab) => (

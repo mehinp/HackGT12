@@ -1,4 +1,4 @@
-// src/pages/Goals.jsx - Updated with proper data fetching and chart
+// src/pages/Goals.jsx - Updated with integrated chatbot
 import { useState, useEffect } from 'react'
 import { useGoalsContext } from '../hooks/Data Management Hooks/useGoalsContext'
 import { useScoreContext } from '../hooks/Data Management Hooks/useScoreContext'
@@ -6,7 +6,8 @@ import { authService } from '../services/authService'
 import Button from '../components/Button'
 import GoalsList from '../components/Goals Components/GoalsList'
 import GoalForm from '../components/Goals Components/GoalForm'
-import ChatbotModal from '../components/chatbot/ChatbotModal'
+import EnhancedChatbotModal from '../components/chatbot/EnhancedChatbotModal'
+import FloatingChatbotButton from '../components/chatbot/FloatingChatbotButton'
 import React from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
@@ -18,6 +19,7 @@ const Goals = () => {
   const [selectedGoal, setSelectedGoal] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [chatbotContext, setChatbotContext] = useState('goals')
 
   // Mock data from your JSON (replace with actual API call)
   const getChartData = () => {
@@ -115,87 +117,87 @@ const Goals = () => {
   }, [])
 
   const fetchGoals = async () => {
-  try {
-    setLoading(true)
-    setError('')
-    
-    const userId = localStorage.getItem('userId')
-    console.log('Fetching goals for userId:', userId)
-    
-    if (!userId) {
-      setError('User not authenticated. Please log in again.')
-      return
-    }
-
-    // Fetch goals from the backend
-    const response = await fetch('http://143.215.104.239:8080/goals/my-goals', {
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-User-Id': userId
-      }
-    })
-
-    console.log('Goals API Response Status:', response.status)
-    console.log('Goals API Response Headers:', [...response.headers.entries()])
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Goals API Error Response:', errorText)
+    try {
+      setLoading(true)
+      setError('')
       
-      if (response.status === 401) {
-        setError('Session expired. Please log in again.')
-        localStorage.removeItem('userId')
-        localStorage.removeItem('user')
+      const userId = localStorage.getItem('userId')
+      console.log('Fetching goals for userId:', userId)
+      
+      if (!userId) {
+        setError('User not authenticated. Please log in again.')
         return
       }
-      throw new Error(`Failed to fetch goals: ${response.status} - ${errorText}`)
-    }
 
-    const data = await response.json()
-    console.log('Goals API Response Data:', data)
-    
-    // Check if data has the expected structure
-    if (!data || typeof data !== 'object') {
-      console.error('Invalid response format:', data)
-      throw new Error('Invalid response format from goals API')
-    }
+      // Fetch goals from the backend
+      const response = await fetch('http://143.215.104.239:8080/goals/my-goals', {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-Id': userId
+        }
+      })
 
-    // Transform single goal from backend
-    let transformedGoals = []
-    
-    if (data.goal) {
-      console.log('Transforming single goal:', data.goal)
-      const goal = data.goal
-      
-      const transformedGoal = {
-        title: goal.title || `Goal ${goal.id}`,
-        saved: parseFloat(goal.saved) || 0,
-        endDate: new Date(goal.endDate)
+      console.log('Goals API Response Status:', response.status)
+      console.log('Goals API Response Headers:', [...response.headers.entries()])
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Goals API Error Response:', errorText)
+        
+        if (response.status === 401) {
+          setError('Session expired. Please log in again.')
+          localStorage.removeItem('userId')
+          localStorage.removeItem('user')
+          return
+        }
+        throw new Error(`Failed to fetch goals: ${response.status} - ${errorText}`)
       }
+
+      const data = await response.json()
+      console.log('Goals API Response Data:', data)
       
-      transformedGoals = [transformedGoal]
-      console.log('Transformed goal:', transformedGoal)
-    } else {
-      console.log('No goal found in response')
-      transformedGoals = []
+      // Check if data has the expected structure
+      if (!data || typeof data !== 'object') {
+        console.error('Invalid response format:', data)
+        throw new Error('Invalid response format from goals API')
+      }
+
+      // Transform single goal from backend
+      let transformedGoals = []
+      
+      if (data.goal) {
+        console.log('Transforming single goal:', data.goal)
+        const goal = data.goal
+        
+        const transformedGoal = {
+          title: goal.title || `Goal ${goal.id}`,
+          saved: parseFloat(goal.saved) || 0,
+          endDate: new Date(goal.endDate)
+        }
+        
+        transformedGoals = [transformedGoal]
+        console.log('Transformed goal:', transformedGoal)
+      } else {
+        console.log('No goal found in response')
+        transformedGoals = []
+      }
+
+      console.log('Final goals array:', transformedGoals)
+
+      // Update context with fetched goals
+      dispatch({ type: 'SET_GOALS', payload: transformedGoals })
+      
+    } catch (err) {
+      console.error('Error fetching goals:', err)
+      setError(err.message || 'Failed to load goals')
+      
+      // Set empty goals array if fetch fails
+      dispatch({ type: 'SET_GOALS', payload: [] })
+    } finally {
+      setLoading(false)
     }
-
-    console.log('Final goals array:', transformedGoals)
-
-    // Update context with fetched goals
-    dispatch({ type: 'SET_GOALS', payload: transformedGoals })
-    
-  } catch (err) {
-    console.error('Error fetching goals:', err)
-    setError(err.message || 'Failed to load goals')
-    
-    // Set empty goals array if fetch fails
-    dispatch({ type: 'SET_GOALS', payload: [] })
-  } finally {
-    setLoading(false)
   }
-}
 
   const handleGoalCreated = () => {
     // Refresh goals after creating a new one
@@ -203,8 +205,20 @@ const Goals = () => {
     setShowAddGoal(false)
   }
 
+  // Enhanced chatbot triggers
+  const openChatbotForNewGoal = () => {
+    setChatbotContext('goals')
+    setShowChatbot(true)
+  }
+
+  const openChatbotForProgress = () => {
+    setChatbotContext('goals')
+    setShowChatbot(true)
+  }
+
   const pageStyle = {
-    padding: '1rem 0'
+    padding: '1rem 0',
+    position: 'relative' // For floating button positioning
   }
 
   const headerStyle = {
@@ -298,6 +312,12 @@ const Goals = () => {
             Loading your goals...
           </div>
         </div>
+        
+        {/* Floating Chatbot Button */}
+        <FloatingChatbotButton 
+          onClick={() => setShowChatbot(true)} 
+          context="goals"
+        />
       </div>
     )
   }
@@ -326,7 +346,7 @@ const Goals = () => {
           <Button 
             variant="secondary" 
             icon="💬"
-            onClick={() => setShowChatbot(true)}
+            onClick={openChatbotForNewGoal}
           >
             Ask AI Assistant
           </Button>
@@ -393,7 +413,7 @@ const Goals = () => {
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
                 label={{ value: 'Amount ($)', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#6b7280', fontSize: '12px' } }}
               />
               <Tooltip content={<CustomTooltip />} />
@@ -406,7 +426,7 @@ const Goals = () => {
                 dataKey="Goal Curve"
                 stroke="#3b82f6"
                 strokeWidth={1}
-                strokeOpacity = {0.6}
+                strokeOpacity={0.6}
                 dot={{ fill: '#3b82f6', strokeWidth: 1, r: 3 }}
                 activeDot={{ r: 5, stroke: '#3b82f6', strokeWidth: 2, fill: '#ffffff' }}
               />
@@ -415,7 +435,7 @@ const Goals = () => {
                 dataKey="Current Trajectory"
                 stroke="#10b981"
                 strokeWidth={1}
-                strokeOpacity = {0.6}
+                strokeOpacity={0.6}
                 dot={{ fill: '#10b981', strokeWidth: 1, r: 3 }}
                 activeDot={{ r: 5, stroke: '#10b981', strokeWidth: 2, fill: '#ffffff' }}
                 strokeDasharray="5 5"
@@ -428,6 +448,9 @@ const Goals = () => {
       {/* Goals List Section */}
       <div style={mainContentStyle}>
         <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
           marginBottom: '1.5rem'
         }}>
           <h2 style={{
@@ -437,25 +460,98 @@ const Goals = () => {
           }}>
             Your Goals ({goals?.length || 0})
           </h2>
+          
+          {/* Quick action buttons */}
+          {goals?.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              icon="💬"
+              onClick={openChatbotForProgress}
+            >
+              Get Progress Tips
+            </Button>
+          )}
         </div>
         
         <GoalsList goals={goals} onSelectGoal={setSelectedGoal} />
+        
+        {/* Empty state with chatbot integration */}
+        {(!goals || goals.length === 0) && (
+          <div style={{
+            textAlign: 'center',
+            padding: '2rem',
+            backgroundColor: '#f8fafc',
+            borderRadius: '0.75rem',
+            border: '1px solid #e2e8f0',
+            marginTop: '1rem'
+          }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎯</div>
+            <h3 style={{
+              fontSize: '1.25rem',
+              fontWeight: '600',
+              color: '#1e293b',
+              marginBottom: '0.5rem'
+            }}>
+              Ready to set your first goal?
+            </h3>
+            <p style={{
+              color: '#6b7280',
+              marginBottom: '1.5rem'
+            }}>
+              Our AI assistant can help you create personalized financial goals based on your situation.
+            </p>
+            <div style={{
+              display: 'flex',
+              gap: '1rem',
+              justifyContent: 'center',
+              flexWrap: 'wrap'
+            }}>
+              <Button
+                variant="primary"
+                onClick={() => setShowAddGoal(true)}
+                icon="🎯"
+              >
+                Create Goal Manually
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={openChatbotForNewGoal}
+                icon="🤖"
+              >
+                Get AI Help
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Modals */}
       {showAddGoal && (
         <GoalForm 
-          onClose={handleGoalCreated} 
+          onClose={() => setShowAddGoal(false)} 
           goal={selectedGoal}
+          onSuccess={handleGoalCreated}
         />
       )}
 
+      {/* Enhanced Chatbot Integration */}
       {showChatbot && (
-        <ChatbotModal 
+        <EnhancedChatbotModal 
           onClose={() => setShowChatbot(false)}
-          context="goals"
+          context={chatbotContext}
+          initialMessage={goals?.length === 0 
+            ? "I see you haven't set any financial goals yet! 🎯 I can help you create your first goal. Would you like to start with an emergency fund, vacation savings, or something else?"
+            : null
+          }
         />
       )}
+
+      {/* Floating Chatbot Button */}
+      <FloatingChatbotButton 
+        onClick={() => setShowChatbot(true)} 
+        context="goals"
+      />
     </div>
   )
 }

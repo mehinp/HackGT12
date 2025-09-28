@@ -10,7 +10,7 @@ const GoalForm = ({ onClose, goal, onSuccess }) => {
   const [formData, setFormData] = useState({
     title: goal?.title || '',
     amount: goal?.targetAmount || '',
-    targetDate: goal?.deadline ? goal.deadline.toISOString().split('T')[0] : ''
+    days: goal?.days || ''
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -19,7 +19,7 @@ const GoalForm = ({ onClose, goal, onSuccess }) => {
     e.preventDefault()
     setError('')
     
-    if (!formData.title || !formData.amount || !formData.targetDate) {
+    if (!formData.title || !formData.amount || !formData.days) {
       setError('Please fill in all required fields')
       return
     }
@@ -29,23 +29,23 @@ const GoalForm = ({ onClose, goal, onSuccess }) => {
       return
     }
 
-    // Check if date is at least 3 months away
-    const selectedDate = new Date(formData.targetDate)
-    const threeMonthsFromNow = new Date()
-    threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3)
-    
-    if (selectedDate <= threeMonthsFromNow) {
-      setError('Target date must be at least 3 months from today for a realistic spending reduction goal')
+    const daysValue = parseInt(formData.days)
+    if (isNaN(daysValue) || daysValue < 90) {
+      setError('Goal duration must be at least 90 days for realistic spending reduction results')
       return
     }
 
     setIsSubmitting(true)
 
     try {
+      // Calculate target date from days
+      const targetDate = new Date()
+      targetDate.setDate(targetDate.getDate() + parseInt(formData.days))
+
       const goalData = {
         title: formData.title,
         saved: parseFloat(formData.amount),
-        endDate: formData.targetDate
+        days: formData.days
       }
 
       const result = await goalService.createGoal(goalData)
@@ -137,12 +137,6 @@ const GoalForm = ({ onClose, goal, onSuccess }) => {
     border: '1px solid #e2e8f0'
   }
 
-  const getMinDate = () => {
-    const threeMonthsFromNow = new Date()
-    threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3)
-    return threeMonthsFromNow.toISOString().split('T')[0]
-  }
-
   return (
     <div style={modalStyle} onClick={onClose}>
       <div style={formContainerStyle} onClick={(e) => e.stopPropagation()}>
@@ -152,7 +146,7 @@ const GoalForm = ({ onClose, goal, onSuccess }) => {
 
         <div style={descriptionStyle}>
           Set a goal to reduce your spending and build better financial habits. 
-          Choose a realistic timeframe of at least 3 months to see meaningful results.
+          Choose a realistic timeframe of at least 90 days to see meaningful results.
         </div>
         
         {error && (
@@ -195,30 +189,32 @@ const GoalForm = ({ onClose, goal, onSuccess }) => {
                 }}
                 required
               />
-              <span style={{ color: '#1e293b' }}>by</span>
+              <span style={{ color: '#1e293b' }}>over</span>
               <input
-                type="date"
-                value={formData.targetDate}
-                onChange={(e) => setFormData(prev => ({ ...prev, targetDate: e.target.value }))}
+                type="number"
+                min="90"
+                placeholder="90"
+                value={formData.days}
+                onChange={(e) => setFormData(prev => ({ ...prev, days: e.target.value }))}
                 style={{
                   ...dateInputStyle,
-                  width: '150px',
+                  width: '80px',
                   display: 'inline-block'
                 }}
-                min={getMinDate()}
                 required
               />
+              <span style={{ color: '#1e293b' }}>days</span>
             </div>
             <div style={{
               fontSize: '0.75rem',
               color: '#6b7280',
               marginTop: '0.5rem'
             }}>
-              Target date must be at least 3 months from today
+              Goal duration must be at least 90 days for realistic results
             </div>
           </div>
 
-          {formData.amount && formData.targetDate && (
+          {formData.amount && formData.days && (
             <div style={{
               padding: '1rem',
               backgroundColor: '#f0fdf4',
@@ -232,8 +228,12 @@ const GoalForm = ({ onClose, goal, onSuccess }) => {
                 fontWeight: '500'
               }}>
                 Goal Preview: Reduce spending by ${parseFloat(formData.amount || 0).toFixed(2)}
-                {' '}by {formData.targetDate ? new Date(formData.targetDate).toLocaleDateString() : 'selected date'}
-
+                {' '}over {formData.days} days
+                {formData.days && (
+                  <div style={{ marginTop: '0.5rem', fontSize: '0.75rem' }}>
+                    Target completion: {new Date(Date.now() + parseInt(formData.days || 0) * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                  </div>
+                )}
               </div>
             </div>
           )}

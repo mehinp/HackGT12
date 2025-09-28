@@ -13,7 +13,7 @@ const Signup = () => {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [income, setIncome] = useState('')
   const [expenditures, setExpenditures] = useState('')
-  const { darkMode, toggleDarkMode } = useTheme()
+
   const { signup, error, isLoading } = useSignup()
 
   const handleSubmit = async (e) => {
@@ -35,141 +35,169 @@ const Signup = () => {
 
   const pageStyle = {
     minHeight: '100vh',
-    backgroundColor: darkMode ? '#0f172a' : '#f8fafc',
+    backgroundColor: '#f8fafc',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '1rem'
+    padding: '1rem',
+    position: 'relative',
+    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
   }
 
   const containerStyle = {
     width: '100%',
-    maxWidth: '500px',
-    backgroundColor: darkMode ? '#1e293b' : '#ffffff',
-    padding: '2rem',
-    borderRadius: '1rem',
-    boxShadow: darkMode 
-      ? '0 20px 25px -5px rgba(0, 0, 0, 0.3)' 
-      : '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-    border: darkMode ? '1px solid #374151' : '1px solid #e2e8f0'
+    maxWidth: '448px' // max-w-md equivalent
   }
 
-  const headerStyle = {
+  const logoContainerStyle = {
     textAlign: 'center',
     marginBottom: '2rem'
   }
 
+  const logoImageStyle = {
+    width: '64px',
+    height: '64px',
+    objectFit: 'contain',
+    margin: '0 auto 1rem auto',
+    display: 'block'
+  }
+
   const titleStyle = {
-    fontSize: '2rem',
+    fontSize: '24px',
     fontWeight: '700',
-    color: darkMode ? '#f8fafc' : '#1e293b',
-    marginBottom: '0.5rem',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '0.5rem'
+    color: '#0f172a', // slate-900
+    marginBottom: '8px'
   }
 
   const subtitleStyle = {
-    color: darkMode ? '#94a3b8' : '#64748b',
-    fontSize: '1rem'
+    color: '#64748b', // slate-600
+    fontSize: '16px'
+  }
+
+  const cardStyle = {
+    backgroundColor: '#ffffff',
+    border: '1px solid #e2e8f0', // slate-200
+    borderRadius: '6px',
+    padding: '24px',
+    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
   }
 
   const formStyle = {
     display: 'flex',
     flexDirection: 'column',
-    gap: '1rem'
+    gap: '16px'
   }
 
-  const nameRowStyle = {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '1rem'
+  const buttonStyle = {
+    width: '100%',
+    backgroundColor: '#dc2626',
+    color: 'white',
+    padding: '12px',
+    borderRadius: '6px',
+    border: 'none',
+    fontSize: '16px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'background-color 0.14s',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    marginTop: '8px'
   }
 
-  const financialRowStyle = {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '1rem'
-  }
-
-  const linkStyle = {
-    color: '#3b82f6',
-    textDecoration: 'none',
-    fontWeight: '500'
+  const buttonDisabledStyle = {
+    backgroundColor: '#cbd5e1',
+    color: '#64748b',
+    cursor: 'not-allowed'
   }
 
   const footerStyle = {
     textAlign: 'center',
-    marginTop: '1.5rem',
-    color: darkMode ? '#94a3b8' : '#64748b'
+    marginTop: '24px'
   }
 
-  const themeToggleStyle = {
-    position: 'absolute',
-    top: '1rem',
-    right: '1rem',
-    background: 'none',
-    border: 'none',
-    fontSize: '1.5rem',
-    cursor: 'pointer',
-    padding: '0.5rem',
-    borderRadius: '0.5rem',
-    transition: 'all 0.2s ease'
+  const footerTextStyle = {
+    color: '#64748b',
+    fontSize: '14px'
+  }
+
+  const linkStyle = {
+    color: '#dc2626',
+    textDecoration: 'none',
+    fontWeight: '500',
+    transition: 'color 0.14s'
   }
 
   const errorStyle = {
     backgroundColor: '#fef2f2',
     color: '#dc2626',
-    padding: '0.75rem',
-    borderRadius: '0.5rem',
+    padding: '12px',
+    borderRadius: '6px',
     border: '1px solid #fecaca',
-    fontSize: '0.875rem',
-    marginBottom: '1rem'
+    fontSize: '14px',
+    marginBottom: '16px'
   }
 
-  const sectionHeaderStyle = {
-    fontSize: '1rem',
-    fontWeight: '600',
-    color: darkMode ? '#f8fafc' : '#1e293b',
-    marginBottom: '0.5rem',
-    marginTop: '1rem'
+  const termsStyle = {
+    display: 'flex',
+    alignItems: 'start',
+    gap: '12px',
+    fontSize: '14px'
+  }
+
+  const checkboxStyle = {
+    borderRadius: '4px',
+    border: '1px solid #d1d5db',
+    accentColor: '#dc2626',
+    marginTop: '1px'
+  }
+
+  const termsTextStyle = {
+    color: '#64748b'
+  }
+
+  const spinnerStyle = {
+    width: '16px',
+    height: '16px',
+    border: '2px solid white',
+    borderTop: '2px solid transparent',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite'
   }
 
   return (
     <div style={pageStyle}>
-      <button 
-        onClick={toggleDarkMode}
-        style={themeToggleStyle}
-        onMouseEnter={(e) => {
-          e.target.style.backgroundColor = darkMode ? '#374151' : '#f8fafc'
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.backgroundColor = 'transparent'
-        }}
-      >
-        {darkMode ? '☀️' : '🌙'}
-      </button>
-
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
+      
       <div style={containerStyle}>
-        <div style={headerStyle}>
-          <h1 style={titleStyle}>
-            🚀 Join FinanceTracker
-          </h1>
-          <p style={subtitleStyle}>
-            Start your journey to financial freedom
-          </p>
+        {/* Header */}
+        <div style={logoContainerStyle}>
+          <img 
+            src="/Logo_image.png" 
+            alt="Metron Finance Logo" 
+            style={logoImageStyle}
+          />
+          <h1 style={titleStyle}>Create Account</h1>
+          <p style={subtitleStyle}>Join thousands improving their financial health</p>
         </div>
 
-        <form onSubmit={handleSubmit} style={formStyle}>
-          {error && (
-            <div style={errorStyle}>
-              {error}
-            </div>
-          )}
+        {/* Signup Form */}
+        <div style={cardStyle}>
+          <form onSubmit={handleSubmit} style={formStyle}>
+            {error && (
+              <div style={errorStyle}>
+                {error}
+              </div>
+            )}
 
-          {/* Personal Information */}
-          <div style={nameRowStyle}>
             <Input
               label="First Name"
               type="text"
@@ -189,136 +217,102 @@ const Signup = () => {
               icon="👤"
               required
             />
-          </div>
 
-          <Input
-            label="Email"
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            icon="📧"
-            required
-          />
-
-          {/* Account Security */}
-          <Input
-            label="Password"
-            type="password"
-            placeholder="Create a password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            icon="🔒"
-            required
-          />
-
-          <Input
-            label="Confirm Password"
-            type="password"
-            placeholder="Confirm your password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            icon="🔒"
-            required
-          />
-
-          {/* Financial Information */}
-          <div style={sectionHeaderStyle}>
-            💰 Financial Information
-          </div>
-          
-          <div style={financialRowStyle}>
             <Input
-              label="Monthly Income"
-              type="number"
-              step="0.01"
-              min="0.01"
-              placeholder="0.00"
-              value={income}
-              onChange={(e) => setIncome(e.target.value)}
-              icon="💵"
+              label="Email"
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              icon="📧"
               required
             />
 
             <Input
-              label="Monthly Expenditures"
+              label="Create Password"
+              type="password"
+              placeholder="Create password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              icon="🔒"
+              required
+            />
+
+            <Input
+              label="Confirm Password"
+              type="password"
+              placeholder="Confirm password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              icon="🔒"
+              required
+            />
+
+            <Input
+              label="Monthly Income"
               type="number"
-              step="0.01"
-              min="0.01"
-              placeholder="0.00"
+              placeholder="5000"
+              value={income}
+              onChange={(e) => setIncome(e.target.value)}
+              icon="💰"
+              required
+            />
+
+            <Input
+              label="Monthly Expenditure"
+              type="number"
+              placeholder="3500"
               value={expenditures}
               onChange={(e) => setExpenditures(e.target.value)}
               icon="💸"
               required
             />
+
+            <button
+              type="submit"
+              disabled={isLoading || !firstName || !lastName || !email || !password || !confirmPassword || !income || !expenditures}
+              style={{
+                ...buttonStyle,
+                ...(isLoading || !firstName || !lastName || !email || !password || !confirmPassword || !income || !expenditures ? buttonDisabledStyle : {})
+              }}
+              onMouseEnter={(e) => {
+                if (!isLoading && firstName && lastName && email && password && confirmPassword && income && expenditures) {
+                  e.target.style.backgroundColor = '#b91c1c'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isLoading && firstName && lastName && email && password && confirmPassword && income && expenditures) {
+                  e.target.style.backgroundColor = '#dc2626'
+                }
+              }}
+            >
+              {isLoading ? (
+                <>
+                  <div style={spinnerStyle}></div>
+                  Creating account...
+                </>
+              ) : (
+                <>
+                  Create Account
+                  <span>→</span>
+                </>
+              )}
+            </button>
+          </form>
+
+          <div style={footerStyle}>
+            <p style={footerTextStyle}>
+              Already have an account?{' '}
+              <Link 
+                to="/login" 
+                style={linkStyle}
+                onMouseEnter={(e) => e.target.style.color = '#b91c1c'}
+                onMouseLeave={(e) => e.target.style.color = '#dc2626'}
+              >
+                Sign in
+              </Link>
+            </p>
           </div>
-
-          <Button
-            type="submit"
-            size="lg"
-            disabled={isLoading || !firstName || !lastName || !email || !password || !confirmPassword || !income || !expenditures}
-            style={{ marginTop: '0.5rem' }}
-          >
-            {isLoading ? '⏳ Creating Account...' : '🎉 Create Account'}
-          </Button>
-        </form>
-
-        <div style={footerStyle}>
-          <p>
-            Already have an account?{' '}
-            <Link to="/login" style={linkStyle}>
-              Sign in here
-            </Link>
-          </p>
-        </div>
-
-        {/* Financial Information Note */}
-        <div style={{
-          marginTop: '1rem',
-          padding: '1rem',
-          backgroundColor: darkMode ? '#374151' : '#f0f9ff',
-          borderRadius: '0.5rem',
-          fontSize: '0.875rem',
-          color: darkMode ? '#cbd5e1' : '#0369a1',
-          border: darkMode ? '1px solid #4b5563' : '1px solid #bae6fd'
-        }}>
-          <p style={{ fontWeight: '600', marginBottom: '0.5rem' }}>💡 Financial Information:</p>
-          <ul style={{ paddingLeft: '1rem', margin: 0 }}>
-            <li>Enter your monthly income and expenditures</li>
-            <li>This helps us provide personalized financial insights</li>
-            <li>All amounts must be greater than $0.00</li>
-          </ul>
-        </div>
-
-        {/* Password Requirements */}
-        <div style={{
-          marginTop: '1rem',
-          padding: '1rem',
-          backgroundColor: darkMode ? '#374151' : '#f8fafc',
-          borderRadius: '0.5rem',
-          fontSize: '0.875rem',
-          color: darkMode ? '#cbd5e1' : '#64748b'
-        }}>
-          <p style={{ fontWeight: '600', marginBottom: '0.5rem' }}>Password Requirements:</p>
-          <ul style={{ paddingLeft: '1rem', margin: 0 }}>
-            <li>At least 8 characters long</li>
-            <li>Contains uppercase and lowercase letters</li>
-            <li>Contains at least one number</li>
-          </ul>
-        </div>
-
-        {/* Terms and Privacy */}
-        <div style={{
-          marginTop: '1rem',
-          padding: '0.75rem',
-          fontSize: '0.75rem',
-          color: darkMode ? '#9ca3af' : '#6b7280',
-          textAlign: 'center',
-          lineHeight: '1.4'
-        }}>
-          By creating an account, you agree to our{' '}
-          <a href="#" style={linkStyle}>Terms of Service</a> and{' '}
-          <a href="#" style={linkStyle}>Privacy Policy</a>
         </div>
       </div>
     </div>
