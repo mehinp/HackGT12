@@ -201,29 +201,6 @@ metron-finance/
 
 ---
 
-### Example Request
-```http
-GET /purchase/my-purchases
-Headers:
-  X-User-Id: 42
-Response
-
-json
-Copy code
-{
-  "userId": 42,
-  "purchaseCount": 3,
-  "purchases": [
-    {
-      "id": 101,
-      "amount": 19.99,
-      "category": "Dining",
-      "merchant": "Olive Garden",
-      "purchaseTime": "2025-09-27T19:30:08"
-    }
-  ]
-}
-```
 Enjoy and remember to be wise with your money!
 
 Transform your financial future with Metron Finance – where smart money management meets social motivation! 🚀💰
